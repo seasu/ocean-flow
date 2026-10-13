@@ -113,7 +113,8 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #radar.show{display:flex}
 #radar header{width:min(520px,100%);display:flex;justify-content:space-between;align-items:center;gap:8px}
 #radar header b{display:block;font-size:17px;font-weight:900;letter-spacing:.08em}
-#radar header small{color:var(--cyan);font-size:12px}
+#radar header small{display:block;color:var(--cyan);font-size:12px}
+#radar header small.trail{color:var(--gold)}
 #rClose{background:rgba(255,255,255,.1);border-radius:999px;padding:8px 14px;font-weight:900;font-size:13px}
 #rcv{width:min(360px,calc(100vw - 32px),48vh);aspect-ratio:1;max-width:100%;flex:none;touch-action:manipulation}
 #enc{display:none;width:min(520px,100%);align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(180deg,#ffe28a,#ffb627);color:#3a2300;
@@ -160,7 +161,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #ending.show{opacity:1;pointer-events:auto}
 #ending h2{margin:0;font-size:clamp(26px,7vw,40px);letter-spacing:.2em}
 #ending .logo{font-size:clamp(36px,11vw,64px);font-weight:900;letter-spacing:.15em}
-#stats{color:var(--gold);font-size:14px}
+#stats{color:var(--gold);font-size:14px;white-space:pre-line;line-height:1.7}
 @media (max-height:480px){.quest{width:220px;font-size:12px}#mini{width:84px;height:84px}#mute{top:calc(100px + var(--st))}.hint{display:none}}
 </style>
 </head>
@@ -186,7 +187,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 <div id="card"><div class="row"><b></b><small></small><i>介紹 ▴</i></div><p></p><div class="ph"></div><div class="cr"></div><em></em></div>
 <div id="dex"><h3>台灣之美 圖鑑</h3><ul id="dexList"></ul><small>點一下關閉</small></div>
 <div id="radar">
-  <header><div><b>現世・靈脈雷達</b><small id="gstat"></small></div><button id="rClose">回到靈界 ✕</button></header>
+  <header><div><b>現世・靈脈雷達</b><small class="trail">文化徑 × 山林徑・走一條路，認識台北這座城</small><small id="gstat"></small></div><button id="rClose">回到靈界 ✕</button></header>
   <canvas id="rcv"></canvas>
   <div id="enc"><span></span><button>進入機緣</button></div>
   <ul id="rlist"></ul>

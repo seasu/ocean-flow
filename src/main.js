@@ -138,15 +138,15 @@ function hud() {
     hudKey = key;
     $('#lv').textContent = 'Lv.' + lv;
     $('#dexBtn').textContent = `📖 台灣之美 ${found}/${SPOTS.length}`;
-    $('#dexList').innerHTML = '<li class="sec">第一階・台北四獸山</li>'
-      + S1.map(n => n.awake ? `<li><b>${n.icon} ${n.name}</b><small>台北四獸山・信義區</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>四獸山</small></li>`).join('')
-      + (visited.size ? '<li class="sec">現世機緣</li>' + REAL.filter(x => visited.has(x.id)).map(x => `<li><b>${x.name}</b><small>${x.sub}</small><p>${x.text}</p></li>`).join('') : '')
+    $('#dexList').innerHTML = '<li class="sec">山林徑・台北四獸山</li>'
+      + S1.map(n => n.awake ? `<li><b>${n.icon} ${n.name}</b><small>山林徑・台北四獸山</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>四獸山</small></li>`).join('')
+      + (visited.size ? '<li class="sec">文化徑・現世機緣</li>' + REAL.filter(x => visited.has(x.id)).map(x => `<li><b>${x.name}</b><small>${x.sub}</small><p>${x.text}</p></li>`).join('') : '')
       + '<li class="sec">台灣之美</li>'
       + SPOTS.map(sp => sp.found ? `<li><b>${sp.name}</b><small>${sp.area}</small><p>${sp.text}</p></li>` : `<li class="lock"><b>？？？</b><small>${sp.area.split('・')[0]}</small></li>`).join('');
     $('#qi').textContent = `靈光 ${avail()}`;
     $('#qibar').style.width = Math.min(100, avail() / COST * 100) + '%';
     if (!G.gateOpen) {
-      $('#qtitle').textContent = `第一階・喚醒四獸山（${G.awakened}/4）`;
+      $('#qtitle').textContent = `第一階・山林徑：喚醒四獸山（${G.awakened}/4）`;
       $('#qchips').innerHTML = S1.map(n => `<span class="${n.awake ? 'done' : ''}">${n.icon}${n.awake ? '✓' : ''}</span>`).join('');
       $('#qlist').innerHTML = S1.map(n => `<li class="${n.awake ? 'done' : ''}"><span>${n.awake ? '✓' : n.icon}</span>${n.name}<small>${n.awake ? '已甦醒' : G.geo ? n.real + '（或到島上 101 東邊）' : n.hint}</small></li>`).join('')
         + `<li class="note">每座需要 ${COST} 點靈光・第二階：城之回聲、海之流痕、山之鐘聲（尚未開放）</li>`;
@@ -199,7 +199,8 @@ const GEO_LINES = [
   '你也聽見了嗎？這座城市底下，有一陣不存在的鐘聲。',
   '山有脈，海有流，人亦有自己的道。靈脈就藏在我們身邊的街道裡。',
   '打開「現世」雷達，走到附近的地點。靠近時，手機會感應到機緣。',
-  '第一步是喚醒守護台北的四獸山。虎在善導寺、豹在濟南教會、獅在台灣文學基地、象在華山1914。',
+  '在城裡走一段文化徑，就能喚醒山林徑上的守護獸。山與城，本來就連在一起。',
+  '虎在善導寺、豹在濟南教會、獅在台灣文學基地、象在華山1914。',
   '走人行道、注意來車喔。到了地點，牠們就會現身。',
   '四獸都醒來之後回到這裡，打開起源之門。走出去，遇見你的機緣。',
 ];
@@ -265,7 +266,7 @@ function awaken(n) {
   n.awake = true; n.flash = 1; G.spent += COST; G.awakened++;
   sfx.bell(n.bell || 196);
   pop(`${n.icon} ${n.name}甦醒了`, 'gold');
-  setTimeout(() => showCard(n.name, '台北四獸山・信義區', n.info + (G.awakened === 1 ? '\n\n' + SHOUSHAN : ''), `第一階・四獸山 ${G.awakened}/4`, n.id), 1300);
+  setTimeout(() => showCard(n.name, '山林徑・台北四獸山', n.info + (G.awakened === 1 ? '\n\n' + SHOUSHAN : ''), `第一階・四獸山 ${G.awakened}/4`, n.id), 1300);
   burst(n.pos[0], n.pos[1] + 1.5, n.pos[2], [1, 0.85, 0.45], 70, 8);
   buildVein(n);
   G.spiritTarget = G.awakened / 4 * 0.8;
@@ -537,7 +538,7 @@ $('#dex').addEventListener('pointerdown', e => { e.preventDefault(); $('#dex').c
 function ending() {
   G.state = 'ending'; G.spiritTarget = 1; setSpirit(1); sfx.gate();
   const s = Math.round(G.playT), mm = String(Math.floor(s / 60)).padStart(2, '0'), ss = String(s % 60).padStart(2, '0');
-  $('#stats').textContent = `第一階完成・四獸山 4/4　用時 ${mm}:${ss}　靈光 ${G.collected}/${motes.length}　台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}`;
+  $('#stats').textContent = `走一條路，認識台北這座城。\n第一階完成・四獸山 4/4　用時 ${mm}:${ss}　靈光 ${G.collected}/${motes.length}　台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}`;
   setTimeout(() => $('#ending').classList.add('show'), 600);
   $('#hud').classList.remove('play');
 }
