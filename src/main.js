@@ -631,7 +631,7 @@ $('#dexBtn').addEventListener('pointerdown', e => { e.preventDefault(); $('#card
 $('#dex').addEventListener('pointerdown', e => { e.preventDefault(); $('#dex').classList.remove('show'); });
 
 function ending() {
-  G.state = 'ending'; G.spiritTarget = 1; setSpirit(1); sfx.gate();
+  G.state = 'ending'; G.spiritTarget = 1; setSpirit(1); sfx.gate(); sfx.ending();
   const s = Math.round(G.playT), mm = String(Math.floor(s / 60)).padStart(2, '0'), ss = String(s % 60).padStart(2, '0');
   $('#stats').textContent = t('stats', { time: `${mm}:${ss}`, qi: G.collected, qim: motes.length, b: SPOTS.filter(s => s.found).length, bm: SPOTS.length });
   setTimeout(() => $('#ending').classList.add('show'), 600);
