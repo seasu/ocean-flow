@@ -17,7 +17,9 @@ export const PLACES = {
   sea: [Math.round(curX(36)) - 2, 36],     // 龜山島
   lake: [62, 65],                          // 日月潭
   shenmu: [62, 86],                        // 阿里山神木
-  gorge: 60,                               // 太魯閣峽谷所在的 z
+  gorge: 60,
+  // 四獸山：在台北 101 東南側（位置關係依真實地形簡化）
+  tiger: [84, 31], leopard: [86, 38], lion: [83, 44], elephant: [77, 49],                               // 太魯閣峽谷所在的 z
   peak: [68, 72],
 };
 
@@ -72,6 +74,17 @@ export function makeWorld(seed = 7) {
       if (d < 3 || head) { land[i] = 1; H[i] = head ? (z === sz - 3 ? 4 : 3) : d < 1.2 ? 5 : d < 2.2 ? 4 : 3; K[i] = d < 2.2 && !head ? T.FOREST : T.ROCK; lock[i] = 1; }
     }
   }
+  // 2b. 四獸山：101 東側的四座小山
+  const BEASTS = ['tiger', 'leopard', 'lion', 'elephant'];
+  for (const k of BEASTS) {
+    const [bx, bz] = PLACES[k];
+    for (let z = bz - 6; z <= bz + 6; z++) for (let x = bx - 6; x <= bx + 6; x++) {
+      const d = Math.hypot(x - bx, z - bz), i = id(x, z);
+      if (d > 6 || Math.abs(x - curX(z)) < CURRENT.half + 3) continue;
+      if (!land[i]) { land[i] = 1; H[i] = 3; }
+      H[i] = Math.max(H[i], Math.floor(4 + 7 * Math.exp(-((d / 3.2) ** 2))));
+    }
+  }
   // 3. 城市區先整平
   const inCity = (x, z) => x >= 49 && x <= 75 && z >= 26 && z <= 47;
   for (let z = 0; z < N; z++) for (let x = 0; x < N; x++) if (inCity(x, z)) { const i = id(x, z); land[i] = 1; H[i] = 4; }
@@ -100,6 +113,7 @@ export function makeWorld(seed = 7) {
   flatten(...PLACES.spawn, 4, T.PARK);
   flatten(...PLACES.gate, 5, T.STONE);
   flatten(...PLACES.peak, 2, T.STONE);
+  for (const k of BEASTS) flatten(...PLACES[k], 1, T.STONE);
   relax();
 
   // 5. 地表種類
@@ -170,7 +184,7 @@ export function makeWorld(seed = 7) {
   for (let z = 2; z < N - 2; z++) for (let x = 2; x < N - 2; x++) {
     const k = K[id(x, z)];
     if ((k === T.FOREST && TR() < 0.07) || (k === T.GRASS && TR() < 0.015) || (k === T.PARK && TR() < 0.05)) {
-      if (Math.hypot(x - PLACES.gate[0], z - PLACES.gate[1]) < 7 || Math.hypot(x - PLACES.shenmu[0], z - PLACES.shenmu[1]) < 4 || Math.hypot(x - tip[0], z - tip[1]) < 4 || Math.hypot(x - PLACES.spawn[0], z - PLACES.spawn[1]) < 9) continue;
+      if (Math.hypot(x - PLACES.gate[0], z - PLACES.gate[1]) < 7 || Math.hypot(x - PLACES.shenmu[0], z - PLACES.shenmu[1]) < 4 || Math.hypot(x - tip[0], z - tip[1]) < 4 || ['tiger', 'leopard', 'lion', 'elephant'].some(k => Math.hypot(x - PLACES[k][0], z - PLACES[k][1]) < 6) || Math.hypot(x - PLACES.spawn[0], z - PLACES.spawn[1]) < 9) continue;
       trees.push([x, z, H[id(x, z)], k === T.FOREST ? 1 : 0]);
     }
   }
@@ -305,6 +319,31 @@ export function floatMesh() {
     b.box(ix - 1.6, iy + 2.4, iz - 1.6, 3.8, 0.4, 3.8, hex('#2f4f6f')); b.box(ix - 0.9, iy + 2.8, iz - 0.9, 2.4, 0.5, 2.4, hex('#2f4f6f'));
     b.box(ix + 0.1, iy + 3.3, iz + 0.1, 0.4, 0.5, 0.4, hex('#ffd98a'), 1);
   }
+  return b;
+}
+
+// 四獸山的方塊神獸雕像（朝 -z 也就是北方）
+export function beastMesh(kind) {
+  const b = new Builder(), C = c => hex(c);
+  const body = { tiger: '#e8923a', leopard: '#e9c25a', lion: '#d9a35f', elephant: '#9aa3ad' }[kind];
+  const dark = { tiger: '#2a1f18', leopard: '#5a3d1e', lion: '#8a4f22', elephant: '#7d8590' }[kind];
+  const big = kind === 'elephant' ? 1.25 : 1;
+  const k = big;
+  b.box(-0.5 * k, 0.6 * k, -0.9 * k, 1.0 * k, 0.8 * k, 1.8 * k, C(body));                      // 身體
+  for (const [x, z] of [[-0.45, -0.75], [0.15, -0.75], [-0.45, 0.45], [0.15, 0.45]]) b.box(x * k, 0, z * k, 0.3 * k, 0.65 * k, 0.3 * k, C(body));
+  b.box(-0.4 * k, 1.0 * k, -1.5 * k, 0.8 * k, 0.75 * k, 0.75 * k, C(body));                    // 頭
+  b.box(-0.25 * k, 1.12 * k, -1.52 * k, 0.12 * k, 0.12 * k, 0.02, C('#1a1a1a'));
+  b.box(0.13 * k, 1.12 * k, -1.52 * k, 0.12 * k, 0.12 * k, 0.02, C('#1a1a1a'));
+  if (kind === 'tiger') for (let i = 0; i < 4; i++) b.box(-0.52, 0.75 + (i % 2) * 0.2, -0.7 + i * 0.4, 1.04, 0.12, 0.14, C(dark));
+  if (kind === 'leopard') for (const [x, y, z] of [[-0.52, 1.1, -0.5], [-0.52, 0.85, 0.1], [0.42, 1.0, -0.2], [0.42, 0.8, 0.5], [-0.2, 1.41, 0.3], [0.1, 1.41, -0.4]]) b.box(x, y, z, 0.12, 0.14, 0.14, C(dark));
+  if (kind === 'lion') { b.box(-0.6, 0.85, -1.35, 1.2, 1.1, 0.4, C(dark)); b.box(-0.08, 0.9, 0.85, 0.16, 0.16, 0.5, C(dark)); }
+  if (kind === 'elephant') {
+    b.box(-0.12 * k, 0.35 * k, -1.85 * k, 0.24 * k, 0.75 * k, 0.24 * k, C(body));                // 象鼻
+    b.box(-0.75 * k, 0.95 * k, -1.35 * k, 0.3 * k, 0.65 * k, 0.1 * k, C(dark)); b.box(0.45 * k, 0.95 * k, -1.35 * k, 0.3 * k, 0.65 * k, 0.1 * k, C(dark));
+    b.box(-0.3 * k, 0.5 * k, -1.75 * k, 0.08, 0.08, 0.3, C('#f4f1e8')); b.box(0.22 * k, 0.5 * k, -1.75 * k, 0.08, 0.08, 0.3, C('#f4f1e8'));
+  }
+  if (kind !== 'lion' && kind !== 'elephant') b.box(-0.07, 1.05, 0.85, 0.14, 0.14, 0.6, C(body));
+  if (kind === 'tiger' || kind === 'leopard') { b.box(-0.38, 1.75, -1.3, 0.16, 0.16, 0.12, C(body)); b.box(0.22, 1.75, -1.3, 0.16, 0.16, 0.12, C(body)); }
   return b;
 }
 

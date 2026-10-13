@@ -1,7 +1,7 @@
 // 《洋流：起源》mobile web prototype：主迴圈、操作、任務流程
 import { M, clamp, lerp, rng, hex, mixColor, smooth } from './math.js';
 import { Renderer, Builder } from './gl.js';
-import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, bellMesh, N, WATER, T, PLACES, CURRENT, curX } from './world.js';
+import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, bellMesh, beastMesh, N, WATER, T, PLACES, CURRENT, curX } from './world.js';
 import { drawAvatar, BLUE, ORANGE } from './avatar.js';
 import { initAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
 import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
@@ -22,12 +22,26 @@ const bell = r.mesh(bellMesh());
 const ground = (x, z) => world.height(x, z);
 const at = ([x, z]) => [x + 0.5, ground(x + 0.5, z + 0.5), z + 0.5];
 
+// 第一階：台北四獸山（虎、豹、獅、象）；第二階的三處靈脈先放在島上預告
+const SHOUSHAN = '四獸山位在台北市信義區東南，屬於南港山系。四座小山因為外形像虎、豹、獅、象而得名，步道彼此相連。';
 const NODES = [
-  { id: 'city', name: '城之回聲', icon: '🏙', hint: '台北城裡的廣場', real: '現世：華山1914', pos: at(PLACES.city), col: hex('#8fe9ff') },
-  { id: 'sea', name: '海之流痕', icon: '🌊', hint: '東北外海的龜山島・乘黑潮北上', real: '現世：台北車站', pos: at(PLACES.sea), col: hex('#6fd2ff') },
-  { id: 'peak', name: '山之鐘聲', icon: '⛰', hint: '玉山主峰', real: '現世：善導寺', pos: at(PLACES.peak), col: hex('#ffe08a') },
+  { id: 'tiger', stage: 1, name: '虎山', icon: '🐯', hint: '101 東北邊的山', real: '現世：善導寺', pos: at(PLACES.tiger), col: hex('#ffb35c'), bell: 196,
+    info: '四獸山最北的一座。虎山自然步道沿著溪谷走，林蔭濃密，是觀察青蛙、蝴蝶等生態的好地方。' },
+  { id: 'leopard', stage: 1, name: '豹山', icon: '🐆', hint: '虎山南邊的山', real: '現世：濟南教會', pos: at(PLACES.leopard), col: hex('#ffd76a'), bell: 220,
+    info: '四獸山裡比較少人知道、也比較安靜的一座，山徑和虎山、獅山相連，適合慢慢走。' },
+  { id: 'lion', stage: 1, name: '獅山', icon: '🦁', hint: '豹山西南邊的山', real: '現世：台灣文學基地', pos: at(PLACES.lion), col: hex('#ffc58a'), bell: 174.6,
+    info: '山形像一頭伏臥的獅子。走在步道上，可以從樹梢間望見信義區的城市天際線。' },
+  { id: 'elephant', stage: 1, name: '象山', icon: '🐘', hint: '最靠近 101 的山', real: '現世：華山1914', pos: at(PLACES.elephant), col: hex('#cfe3ff'), bell: 146.8,
+    info: '海拔 183 公尺，是看台北 101 和城市夜景最熱門的步道。山頂有幾塊大石頭，很多人坐在上面等夕陽。' },
+  { id: 'city', stage: 2, name: '城之回聲', icon: '🏙', pos: at(PLACES.city), col: hex('#8fa4b5') },
+  { id: 'sea', stage: 2, name: '海之流痕', icon: '🌊', pos: at(PLACES.sea), col: hex('#8fa4b5') },
+  { id: 'peak', stage: 2, name: '山之鐘聲', icon: '⛰', pos: at(PLACES.peak), col: hex('#8fa4b5') },
 ];
-for (const n of NODES) { n.mesh = r.mesh(nodeMesh(n.id)); n.awake = false; n.charge = 0; n.vein = null; n.flash = 0; }
+const S1 = NODES.filter(n => n.stage === 1);
+for (const n of NODES) {
+  n.mesh = r.mesh(nodeMesh(n.id)); n.awake = false; n.charge = 0; n.vein = null; n.flash = 0;
+  if (n.stage === 1) { n.beast = r.mesh(beastMesh(n.id)); n.face = Math.atan2(56 - n.pos[0], 56 - n.pos[2]) + Math.PI; }
+}
 const GATE = at(PLACES.gate);
 
 // 靈光：散在城市、洋流上、山坡與各地
@@ -128,10 +142,10 @@ function hud() {
     $('#qi').textContent = `靈光 ${avail()}`;
     $('#qibar').style.width = Math.min(100, avail() / COST * 100) + '%';
     if (!G.gateOpen) {
-      $('#qtitle').textContent = `喚醒三處靈脈（${G.awakened}/3）`;
-      $('#qchips').innerHTML = NODES.map(n => `<span class="${n.awake ? 'done' : ''}">${n.icon}${n.awake ? '✓' : ''}</span>`).join('');
-      $('#qlist').innerHTML = NODES.map(n => `<li class="${n.awake ? 'done' : ''}"><span>${n.awake ? '✓' : n.icon}</span>${n.name}<small>${n.awake ? '已啟流' : G.geo ? n.real + '（或在島上找）' : n.hint}</small></li>`).join('')
-        + `<li class="note">每處需要 ${COST} 點靈光・點此收合</li>`;
+      $('#qtitle').textContent = `第一階・喚醒四獸山（${G.awakened}/4）`;
+      $('#qchips').innerHTML = S1.map(n => `<span class="${n.awake ? 'done' : ''}">${n.icon}${n.awake ? '✓' : ''}</span>`).join('');
+      $('#qlist').innerHTML = S1.map(n => `<li class="${n.awake ? 'done' : ''}"><span>${n.awake ? '✓' : n.icon}</span>${n.name}<small>${n.awake ? '已甦醒' : G.geo ? n.real + '（或到島上 101 東邊）' : n.hint}</small></li>`).join('')
+        + `<li class="note">每座需要 ${COST} 點靈光・第二階：城之回聲、海之流痕、山之鐘聲（尚未開放）</li>`;
     } else {
       $('#qtitle').textContent = '前往山門';
       $('#qchips').innerHTML = '<span class="done">⛩</span>';
@@ -160,7 +174,7 @@ function drawMini() {
   const s = mini.width = mini.height = Math.round(mini.clientWidth * Math.min(devicePixelRatio, 2)), k = s / N;
   mg.imageSmoothingEnabled = false; mg.drawImage(base, 0, 0, s, s);
   const dot = (x, z, col, rad) => { mg.fillStyle = col; mg.beginPath(); mg.arc(x * k, z * k, rad * k, 0, 7); mg.fill(); };
-  for (const n of NODES) dot(n.pos[0], n.pos[2], n.awake ? '#ffcf5a' : `rgba(111,227,255,${0.6 + 0.4 * Math.sin(G.t * 4)})`, 3.2);
+  for (const n of NODES) dot(n.pos[0], n.pos[2], n.awake ? '#ffcf5a' : n.stage === 2 ? 'rgba(150,165,180,.7)' : `rgba(255,190,110,${0.6 + 0.4 * Math.sin(G.t * 4)})`, n.stage === 2 ? 2.2 : 3.2);
   dot(GATE[0], GATE[2], G.gateOpen ? '#ffcf5a' : '#b9483c', 3.2);
   for (const sp of SPOTS) if (sp.r) { mg.strokeStyle = '#fff'; mg.lineWidth = k * 0.8; mg.beginPath(); mg.arc((sp.pos[0] + 0.5) * k, (sp.pos[1] + 0.5) * k, 2 * k, 0, 7); sp.found ? (mg.fillStyle = '#fff', mg.fill()) : mg.stroke(); }
   mg.save(); mg.translate(P.x * k, P.z * k); mg.rotate(-P.yaw);
@@ -173,7 +187,7 @@ const LINES = [
   '你也聽見了嗎？山裡，有一陣不存在的鐘聲。',
   '山有脈，海有流，人亦有自己的道。這座島上，有三處靈脈還在沉睡。',
   '收集發光的「靈光」，按「感知」就能看見平常看不見的東西。',
-  '台北的城中、東北外海的龜山島、最高的玉山，把它們一一喚醒。',
+  '第一步，先去台北 101 東邊，喚醒守護城市的四獸山：虎山、豹山、獅山、象山。',
   '路上也去看看這座島：日月潭、阿里山、太魯閣、墾丁……每一處都會收進你的圖鑑。',
   '我在西邊的山門等你。走出去，遇見你的機緣。',
 ];
@@ -181,8 +195,9 @@ const GEO_LINES = [
   '你也聽見了嗎？這座城市底下，有一陣不存在的鐘聲。',
   '山有脈，海有流，人亦有自己的道。靈脈就藏在我們身邊的街道裡。',
   '打開「現世」雷達，走到附近的地點。靠近時，手機會感應到機緣。',
-  '善導寺、華山1914、台北車站，三處靈脈等你喚醒。記得走人行道、注意來車。',
-  '都喚醒之後回到這裡，打開起源之門。走出去，遇見你的機緣。',
+  '第一步是喚醒守護台北的四獸山。虎在善導寺、豹在濟南教會、獅在台灣文學基地、象在華山1914。',
+  '走人行道、注意來車喔。到了地點，牠們就會現身。',
+  '四獸都醒來之後回到這裡，打開起源之門。走出去，遇見你的機緣。',
 ];
 let talk = null;
 function say(lines, done, who = '阿汐') {
@@ -204,8 +219,8 @@ function start(mode) {
   if (G.geo) geo.start();
   say(G.geo ? GEO_LINES : LINES, () => {
     G.state = 'play'; $('#hud').classList.add('play'); XI.wave = false;
-    if (G.geo) { pop('新任務：在現世找到三處靈脈', 'gold'); openRadar(); }
-    else pop('新任務：喚醒三處靈脈', 'gold');
+    if (G.geo) { pop('第一階：喚醒四獸山', 'gold'); openRadar(); }
+    else pop('第一階：喚醒四獸山', 'gold');
   });
   try { if (matchMedia('(pointer: coarse)').matches && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => { }); } catch { }
 }
@@ -218,7 +233,7 @@ const DIRS = ['北', '東北', '東', '東南', '南', '西南', '西', '西北'
 function doSense() {
   if (G.state !== 'play' || G.senseCd > 0) return;
   G.sense = 6; G.senseCd = 9; G.pulse = [P.x, P.z, 0, 1]; sfx.sense();
-  const left = NODES.filter(n => !n.awake);
+  const left = S1.filter(n => !n.awake);
   const target = left.length ? left.sort((a, b) => Math.hypot(a.pos[0] - P.x, a.pos[2] - P.z) - Math.hypot(b.pos[0] - P.x, b.pos[2] - P.z))[0] : { name: '山門', pos: GATE };
   const dx = target.pos[0] - P.x, dz = target.pos[2] - P.z;
   const ang = Math.atan2(dx, -dz), dir = DIRS[(Math.round(ang / (Math.PI / 4)) + 8) % 8];
@@ -244,15 +259,16 @@ function buildVein(n) {
 
 function awaken(n) {
   n.awake = true; n.flash = 1; G.spent += COST; G.awakened++;
-  sfx.bell(n.id === 'peak' ? 130.8 : n.id === 'sea' ? 174.6 : 196);
-  pop(`啟流！${n.name}`, 'gold');
+  sfx.bell(n.bell || 196);
+  pop(`${n.icon} ${n.name}甦醒了`, 'gold');
+  setTimeout(() => showCard(n.name, '台北四獸山・信義區', n.info + (G.awakened === 1 ? '\n\n' + SHOUSHAN : ''), `第一階・四獸山 ${G.awakened}/4`), 1300);
   burst(n.pos[0], n.pos[1] + 1.5, n.pos[2], [1, 0.85, 0.45], 70, 8);
   buildVein(n);
-  G.spiritTarget = G.awakened / 3 * 0.8;
+  G.spiritTarget = G.awakened / 4 * 0.8;
   setSpirit(G.spiritTarget);
   try { navigator.vibrate && navigator.vibrate([40, 60, 80]); } catch { }
-  if (G.awakened === 3) setTimeout(openGate, 2200);
-  else setTimeout(() => toast(`靈脈甦醒，世界多了一層。還有 ${3 - G.awakened} 處`), 1400);
+  if (G.awakened === 4) setTimeout(openGate, 4000);
+  else setTimeout(() => toast(`四獸山還有 ${4 - G.awakened} 座在沉睡`), 1400);
 }
 
 function openGate() {
@@ -333,6 +349,7 @@ function updateGame(dt) {
     n.flash = Math.max(0, n.flash - dt * 0.6);
     if (n.awake) continue;
     const d = Math.hypot(n.pos[0] - P.x, n.pos[2] - P.z);
+    if (n.stage === 2) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; toast(`${n.name}要到第二階才會甦醒，先去喚醒四獸山吧`); } continue; }
     if (d < 2.6 && Math.abs(P.y - n.pos[1]) < 3) {
       if (avail() >= COST) {
         n.charge += dt / 1.6; charging = n;
@@ -388,7 +405,7 @@ function renderList() {
   const items = REAL.map(s => ({ s, d: meters(geo.pos, s) })).sort((a, b) => a.d - b.d);
   $('#rlist').innerHTML = items.map(({ s, d }) => {
     const done = visited.has(s.id), node = s.node ? NODES.find(n => n.id === s.node) : null;
-    const tag = s.id === 'venue' ? (G.gateOpen ? '可以開門了' : '起點與終點') : node ? (done || node.awake ? '靈脈已甦醒' : '靈脈') : done ? '已結緣' : '機緣';
+    const tag = s.id === 'venue' ? (G.gateOpen ? '可以開門了' : '起點與終點') : node ? (done || node.awake ? `${node.icon} ${node.name}・已甦醒` : `${node.icon} ${node.name}`) : done ? '已結緣' : '機緣';
     return `<li data-id="${s.id}" class="${done ? 'done' : ''} ${d <= s.r ? 'near' : ''} ${node ? 'key' : ''}"><div><b>${s.name}</b><small>${s.sub}</small></div>`
       + `<span><em>${tag}</em>${fmt(d)}・${dirName(geo.pos, s)}方</span>`
       + (calib ? `<button data-cal="${s.id}">設為目前位置</button>` : '') + `</li>`;
@@ -441,7 +458,7 @@ function drawRadar() {
     g.beginPath(); g.arc(x, y, s.r * sc, 0, 7); g.fill(); g.globalAlpha = 1;
     g.beginPath(); g.arc(x, y, (s.node || s.id === 'venue' ? 6 : 4.5) * d, 0, 7); g.fill();
     if (done) { g.strokeStyle = '#ffcf5a'; g.lineWidth = 2 * d; g.stroke(); }
-    g.fillStyle = '#eef3f8'; g.font = `${(s.node ? 12 : 11) * d}px sans-serif`; g.fillText(s.name, x, y - 9 * d);
+    g.fillStyle = '#eef3f8'; g.font = `${(s.node ? 12 : 11) * d}px sans-serif`; g.fillText((s.node ? NODES.find(n => n.id === s.node).icon + ' ' : '') + s.name, x, y - 9 * d);
   }
   // 玩家
   if (geo.acc && geo.acc < 300) { g.fillStyle = 'rgba(88,176,234,.18)'; g.beginPath(); g.arc(c, c, geo.acc * sc, 0, 7); g.fill(); }
@@ -462,26 +479,26 @@ function drawRadar() {
 function encounter(s) {
   closeRadar();
   if (s.id === 'venue') {
-    const left = NODES.filter(n => !n.awake).map(n => REAL.find(r => r.node === n.id).name);
+    const left = S1.filter(n => !n.awake).map(n => `${n.name}（${REAL.find(r => r.node === n.id).name}）`);
     if (G.gateOpen) {
       P.x = GATE[0] + 0.5; P.z = GATE[2] - 4; P.y = P.ry = footGround(P.x, P.z); cam.yaw = 0; cam.tx = P.x; cam.tz = P.z;
       G.state = 'talk'; say(['起源之門就在你面前。', '走過去吧。這裡，是起源。'], () => { G.state = 'play'; });
     } else {
-      G.state = 'talk'; say(['這裡是起點，也是終點。', `還有 ${left.length} 處靈脈在沉睡：${left.join('、')}。`, '打開「現世」雷達，沿著人行道走過去吧。'], () => { G.state = 'play'; });
+      G.state = 'talk'; say(['這裡是起點，也是終點。', `四獸山還有 ${left.length} 座在沉睡：${left.join('、')}。`, '打開「現世」雷達，沿著人行道走過去吧。'], () => { G.state = 'play'; });
     }
     return;
   }
   visited.add(s.id);
   const node = s.node && NODES.find(n => n.id === s.node);
   if (node) {
-    P.x = node.pos[0]; P.z = node.pos[2] - 4; P.y = P.ry = footGround(P.x, P.z) + 0.2; P.vy = 0; P.swim = false;
-    cam.yaw = 0; cam.tx = P.x; cam.tz = P.z; cam.ty = P.y + 1.6;
+    P.x = node.pos[0]; P.z = node.pos[2] + 4; P.y = P.ry = footGround(P.x, P.z) + 0.2; P.vy = 0; P.swim = false;
+    cam.yaw = Math.PI; cam.tx = P.x; cam.tz = P.z; cam.ty = P.y + 1.6;
     G.state = 'talk';
     say(s.story, () => {
       G.state = 'play';
       if (!node.awake) { G.bonus += COST; awaken(node); }
       else G.bonus += 1;
-      setTimeout(() => showCard(s.name, '現世機緣・' + s.sub, s.text, node.awake ? `${node.name}・靈脈甦醒` : ''), 900);
+      if (node.awake) setTimeout(() => showCard(s.name, '現世機緣・' + s.sub, s.text, `已和${node.name}結緣`), 900);
     });
   } else {
     G.bonus += 2; sfx.pick(); setTimeout(() => sfx.pick(), 150);
@@ -496,7 +513,7 @@ $('#dex').addEventListener('pointerdown', e => { e.preventDefault(); $('#dex').c
 function ending() {
   G.state = 'ending'; G.spiritTarget = 1; setSpirit(1); sfx.gate();
   const s = Math.round(G.playT), mm = String(Math.floor(s / 60)).padStart(2, '0'), ss = String(s % 60).padStart(2, '0');
-  $('#stats').textContent = `用時 ${mm}:${ss}　靈光 ${G.collected}/${motes.length}　台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}`;
+  $('#stats').textContent = `第一階完成・四獸山 4/4　用時 ${mm}:${ss}　靈光 ${G.collected}/${motes.length}　台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}`;
   setTimeout(() => $('#ending').classList.add('show'), 600);
   $('#hud').classList.remove('play');
 }
@@ -561,8 +578,9 @@ function frame(dt) {
   { const m = M.ident(); M.translate(m, GATE[0], GATE[1], GATE[2]); r.draw(gateM, m, [1, 1, 1], G.gateOpen ? 0.15 + 0.1 * Math.sin(G.t * 3) : 0); }
   for (const n of NODES) {
     const m = M.ident(); M.translate(m, n.pos[0], n.pos[1], n.pos[2]); r.draw(n.mesh, m);
+    if (n.beast) { const mb = M.ident(); M.translate(mb, n.pos[0], n.pos[1] + 1.3, n.pos[2]); M.rotY(mb, n.face); r.draw(n.beast, mb, [1, 1, 1], n.awake ? 0.15 + 0.1 * Math.sin(G.t * 3) : 0); }
     // 核心：旋轉的發光方塊
-    const lift = n.awake ? 2.2 + Math.sin(G.t * 2) * 0.2 : 1.9 + Math.sin(G.t * 1.5) * 0.12;
+    const lift = (n.beast ? 1.6 : 0) + (n.awake ? 2.2 + Math.sin(G.t * 2) * 0.2 : 1.9 + Math.sin(G.t * 1.5) * 0.12);
     const col = n.awake ? C.gold : n.col, sz = n.id === 'peak' ? 0 : 0.7 + n.charge * 0.4;
     if (sz) { const mc = M.ident(); M.translate(mc, n.pos[0], n.pos[1] + lift, n.pos[2]); M.rotY(mc, G.t * (n.awake ? 2 : 0.8)); M.rotX(mc, 0.6); M.rotZ(mc, 0.6); M.scale(mc, sz, sz, sz); r.draw(r.cube, mc, col, n.awake ? 1 : 0.6 + n.charge * 0.4); }
     if (n.id === 'peak') {
@@ -597,7 +615,7 @@ function frame(dt) {
     r.box(m.x, y, m.z, 0.8, 0.8, 0.8, [0.4, 0.85, 1], 1, vis * 0.25, -G.t + m.ph);
   }
   for (const n of NODES) {
-    const bright = n.awake ? 0.22 : 0.1 + (G.sense > 0 ? 0.25 : 0) + n.charge * 0.3;
+    const bright = n.stage === 2 ? 0.05 : n.awake ? 0.22 : 0.1 + (G.sense > 0 ? 0.25 : 0) + n.charge * 0.3;
     r.box(n.pos[0], n.pos[1] + 40, n.pos[2], 0.6, 80, 0.6, n.awake ? C.gold : n.col, 1, bright);
     r.box(n.pos[0], n.pos[1] + 40, n.pos[2], 1.6, 80, 1.6, n.awake ? C.gold : n.col, 1, bright * 0.25);
     if (n.flash > 0) r.box(n.pos[0], n.pos[1] + 2, n.pos[2], 6 * (2 - n.flash), 0.2, 6 * (2 - n.flash), C.gold, 1, n.flash);
