@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>洋流：起源</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;900&family=Noto+Sans+JP:wght@500;900&display=swap">
 <style>
 /* 遊戲畫面固定深色主題 */
 :root{--bg:#0a1018;--ink:#eef3f8;--dim:#9fb0c2;--panel:rgba(10,18,30,.72);--gold:#ffcf5a;--cyan:#6fe3ff;--green:#7ee08a;
@@ -164,52 +164,58 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #ending .logo{font-size:clamp(36px,11vw,64px);font-weight:900;letter-spacing:.15em}
 #stats{color:var(--gold);font-size:14px;white-space:pre-line;line-height:1.7}
 @media (max-height:480px){.quest{width:220px;font-size:12px}#mini{width:84px;height:84px}#mute{top:calc(100px + var(--st))}.hint{display:none}}
+:root:lang(ja){--sans:"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,sans-serif}
+.langs{display:flex;gap:6px;justify-content:center;margin:4px 0}
+.langs button{font-size:13px;font-weight:900;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.1);color:var(--dim)}
+.langs button.on{background:rgba(255,207,90,.2);color:var(--gold)}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
 <div id="hud">
-  <div class="plate"><span class="lv" id="lv">Lv.1</span>旅人・阿流</div>
+  <div class="plate"><span class="lv" id="lv">Lv.1</span><span data-i18n="traveler">旅人・阿流</span></div>
   <div class="qi playonly"><span class="bar"><i id="qibar"></i></span><span id="qi">靈光 0</span></div>
-  <button class="playonly" id="radarBtn">📍 現世</button>
+  <button class="playonly" id="radarBtn" data-i18n="radar">📍 現世</button>
   <button class="playonly" id="dexBtn">📖 台灣之美 0/8</button>
-  <div class="quest playonly" id="quest"><b>主線任務 <em>▾</em></b><div id="qtitle"></div><div id="qchips"></div><ul id="qlist"></ul></div>
+  <div class="quest playonly" id="quest"><b><span data-i18n="quest">主線任務</span> <em>▾</em></b><div id="qtitle"></div><div id="qchips"></div><ul id="qlist"></ul></div>
   <canvas id="mini"></canvas>
-  <button id="mute" aria-label="靜音">🔊</button>
+  <button id="mute" aria-label="靜音" data-i18n-label="mute">🔊</button>
   <div id="pop"></div>
   <div id="toast"></div>
-  <div id="prog"><span>啟流中</span></div>
-  <div id="tag">阿汐</div>
+  <div id="prog"><span data-i18n="charging">啟流中</span></div>
+  <div id="tag" data-i18n="xi">阿汐</div>
   <div id="stick"><i></i></div>
-  <button class="btn playonly" id="btnSense">感知</button>
-  <button class="btn playonly" id="btnJump">跳</button>
-  <div class="hint playonly">左邊拖曳：移動<br>右邊拖曳：轉視角</div>
+  <button class="btn playonly" id="btnSense" data-i18n="sense">感知</button>
+  <button class="btn playonly" id="btnJump" data-i18n="jump">跳</button>
+  <div class="hint playonly" data-i18n="hint">左邊拖曳：移動<br>右邊拖曳：轉視角</div>
 </div>
-<div id="card"><div class="row"><b></b><small></small><i>介紹 ▴</i></div><p></p><div class="ph"></div><div class="cr"></div><em></em></div>
-<div id="dex"><h3>台灣之美 圖鑑</h3><ul id="dexList"></ul><small>點一下關閉</small></div>
+<div id="card"><div class="row"><b></b><small></small><i data-i18n="more">介紹 ▴</i></div><p></p><div class="ph"></div><div class="cr"></div><em></em></div>
+<div id="dex"><h3 data-i18n="dexTitle">台灣之美 圖鑑</h3><ul id="dexList"></ul><small data-i18n="tapClose">點一下關閉</small></div>
 <div id="radar">
-  <header><div><b>現世・靈脈雷達</b><small class="trail">文化徑 × 山林徑・走一條路，認識台北這座城</small><small id="gstat"></small></div><button id="rClose">回到靈界 ✕</button></header>
+  <header><div><b data-i18n="radarTitle">現世・靈脈雷達</b><small class="trail" data-i18n="trail">文化徑 × 山林徑・走一條路，認識台北這座城</small><small id="gstat"></small></div><button id="rClose" data-i18n="backSpirit">回到靈界 ✕</button></header>
   <canvas id="rcv"></canvas>
-  <div id="enc"><span></span><button>進入機緣</button></div>
+  <div id="enc"><span></span><button data-i18n="enter">進入機緣</button></div>
   <ul id="rlist"></ul>
-  <footer><label><input type="checkbox" id="simT"> 模擬定位：點雷達或清單就走過去（展示用）</label>
-  <small>請走人行道、注意來車，過馬路時不要看手機。</small><pre id="calOut"></pre></footer>
+  <footer><label><input type="checkbox" id="simT"> <span data-i18n="simLabel">模擬定位：點雷達或清單就走過去（展示用）</span></label>
+  <small data-i18n="safety">請走人行道、注意來車，過馬路時不要看手機。</small><pre id="calOut"></pre></footer>
 </div>
-<div id="dialog"><b>阿汐</b><p></p><small>點一下繼續 ▸</small></div>
+<div id="dialog"><b data-i18n="xi">阿汐</b><p></p><small data-i18n="tapNext">點一下繼續 ▸</small></div>
 <div class="screen" id="title">
   <div class="en">OCEAN FLOW · ORIGIN</div>
   <h1>洋流</h1>
-  <div class="tag">山有脈，海有流，人亦有自己的道。<br>走遍一座方塊台灣：台北、龜山島、日月潭、玉山、墾丁。</div>
-  <button class="start">走出去・現地探索</button>
-  <button class="alt">先在島上逛逛</button>
-  <div class="how">現地探索會使用定位，從黑客松會場（北平東路30號）出發<br>沒有定位時會自動改用模擬定位・建議開聲音<br>電腦：WASD 移動、空白鍵跳、E 感知</div>
+  <div class="tag" data-i18n="tagline">山有脈，海有流，人亦有自己的道。<br>走遍一座方塊台灣：台北、龜山島、日月潭、玉山、墾丁。</div>
+  <button class="start" data-i18n="startGeo">走出去・現地探索</button>
+  <button class="alt" data-i18n="startIsland">先在島上逛逛</button>
+  <div class="langs"></div>
+  <div class="how" data-i18n="how">現地探索會使用定位，從黑客松會場（北平東路30號）出發<br>沒有定位時會自動改用模擬定位・建議開聲音<br>電腦：WASD 移動、空白鍵跳、E 感知</div>
 </div>
 <div class="screen" id="ending">
-  <h2>城市本身，也存在流。</h2>
-  <div class="logo">洋流：起源</div>
-  <div class="tag">走出去，遇見你的機緣。</div>
+  <h2 data-i18n="endTitle">城市本身，也存在流。</h2>
+  <div class="logo" data-i18n="title">洋流：起源</div>
+  <div class="tag" data-i18n="endTag">走出去，遇見你的機緣。</div>
   <div id="stats"></div>
-  <button class="start" id="again">再走一次</button>
+  <div class="langs"></div>
+  <button class="start" id="again" data-i18n="again">再走一次</button>
 </div>
 <script type="module" src="src/main.js"></script>
 <script>

@@ -39,6 +39,8 @@ if (process.env.DEBUG) {
   await writeFile('data/debug.json', JSON.stringify({ near, sample }, null, 2));
 }
 
+// 網址最後的數字是景點代碼，各語系相同
+const urlId = u => (String(u || '').match(/(\d+)\/?$/) || [])[1] || null;
 const pick = keys => {
   for (const k of keys) {
     const hits = all.filter(a => (a.name || '').includes(k));
@@ -65,8 +67,37 @@ for (const [id, keys] of Object.entries(WANT)) {
       images.push({ file, subject: im.subject || '', src: im.src });
     } catch (e) { console.warn('photo', im.src, e.message); }
   }
-  spots[id] = { name: a.name, introduction: (a.introduction || '').trim(), address: a.address || '', url: a.url || '', modified: a.modified || '', images };
+  spots[id] = { tid: a.id, url_id: urlId(a.url), lat: +a.nlat || null, lng: +a.elong || null, name: a.name, introduction: (a.introduction || '').trim(), address: a.address || '', url: a.url || '', modified: a.modified || '', images, i18n: {} };
   console.log(id, '→', a.name, images.length, '張照片');
+}
+
+// 英文、日文版：同一個景點 id 在各語系 API 都一樣，抓到就存進 i18n
+for (const lang of ['en', 'ja']) {
+  const byId = new Map(), list = [];
+  try {
+    for (let page = 1; page < 60; page++) {
+      const j = await getJSON(`https://www.travel.taipei/open-api/${lang}/Attractions/All?page=${page}`);
+      if (!j.data || !j.data.length) break;
+      for (const a of j.data) { byId.set(a.id, a); list.push(a); }
+      if (list.length >= (j.total || Infinity)) break;
+    }
+  } catch (e) { console.warn(lang, e.message); }
+  console.log(lang, 'attractions', byId.size);
+  for (const [id, sp] of Object.entries(spots)) {
+    // 各語系的 id 不一定相同：依序用 id、網址代碼、座標（50 公尺內最近的一筆）比對
+    let a = byId.get(sp.tid);
+    if (!a && sp.url_id) a = list.find(x => urlId(x.url) === sp.url_id);
+    if (!a && sp.lat) {
+      let best = null, bd = 50;
+      for (const x of list) {
+        const dy = (+x.nlat - sp.lat) * 110540, dx = (+x.elong - sp.lng) * 101000, d = Math.hypot(dx, dy);
+        if (d < bd) { bd = d; best = x; }
+      }
+      a = best;
+    }
+    if (a) spots[id].i18n[lang] = { name: a.name, introduction: (a.introduction || '').trim(), url: a.url || '' };
+    console.log(lang, id, a ? '→ ' + a.name : '沒有這個語系的資料');
+  }
 }
 
 await writeFile('data/taipei-travel.json', JSON.stringify({

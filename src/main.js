@@ -5,12 +5,15 @@ import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, bellM
 import { drawAvatar, BLUE, ORANGE } from './avatar.js';
 import { initAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
 import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
+import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
+
+applyStatic();
 
 const $ = s => document.querySelector(s);
 const params = new URLSearchParams(location.search);
 const canvas = $('#c');
 let r;
-try { r = new Renderer(canvas); } catch (e) { $('#title .start').textContent = '此裝置無法執行 WebGL'; throw e; }
+try { r = new Renderer(canvas); } catch (e) { $('#title .start').textContent = t('noGL'); throw e; }
 
 // ---------- 世界 ----------
 const world = makeWorld(7);
@@ -23,21 +26,39 @@ const ground = (x, z) => world.height(x, z);
 const at = ([x, z]) => [x + 0.5, ground(x + 0.5, z + 0.5), z + 0.5];
 
 // 第一階：四獸靈門（象→虎→豹→獅，依序開啟）；第二階的三處靈脈先放在島上預告
-const SHOUSHAN = '四獸山位在台北市信義區東南，屬於南港山系。四座小山因為外形像象、虎、豹、獅而得名，步道彼此相連，就在城市邊上。';
+const SHOUSHAN = t('shoushan');
 const NODES = [
-  { id: 'elephant', stage: 1, name: '象門', hill: '象山', seal: '第一印', virtue: '穩定・記憶・承載', icon: '🐘', hint: '最靠近 101 的山', real: '現世：華山1914', pos: at(PLACES.elephant), col: hex('#cfe3ff'), bell: 146.8,
-    info: '海拔 183 公尺，是看台北 101 和城市夜景最熱門的步道。山頂有幾塊大石頭，很多人坐在上面等夕陽。' },
-  { id: 'tiger', stage: 1, name: '虎門', hill: '虎山', seal: '第二印', virtue: '行動・勇氣・爆發', icon: '🐯', hint: '101 東北邊的山', real: '現世：台灣文學基地', pos: at(PLACES.tiger), col: hex('#ffb35c'), bell: 196,
-    info: '四獸山最北的一座。虎山自然步道沿著溪谷走，林蔭濃密，是觀察青蛙、蝴蝶等生態的好地方。' },
-  { id: 'leopard', stage: 1, name: '豹門', hill: '豹山', seal: '第三印', virtue: '敏捷・感知・身法', icon: '🐆', hint: '虎山南邊的山', real: '現世：濟南教會', pos: at(PLACES.leopard), col: hex('#ffd76a'), bell: 220,
-    info: '四獸山裡比較少人知道、也比較安靜的一座，山徑和虎山、獅山相連，適合慢慢走。' },
-  { id: 'lion', stage: 1, name: '獅門', hill: '獅山', seal: '第四印', virtue: '威勢・領導・氣運', icon: '🦁', hint: '豹山西南邊的山', real: '現世：善導寺', pos: at(PLACES.lion), col: hex('#ffc58a'), bell: 174.6,
-    info: '山形像一頭伏臥的獅子。走在步道上，可以從樹梢間望見信義區的城市天際線。' },
-  { id: 'city', stage: 2, name: '城之回聲', icon: '🏙', pos: at(PLACES.city), col: hex('#8fa4b5') },
-  { id: 'sea', stage: 2, name: '海之流痕', icon: '🌊', pos: at(PLACES.sea), col: hex('#8fa4b5') },
-  { id: 'peak', stage: 2, name: '山之鐘聲', icon: '⛰', pos: at(PLACES.peak), col: hex('#8fa4b5') },
+  { id: 'elephant', stage: 1, name: '象門', hill: '象山', seal: '第一印', virtue: '穩定・記憶・承載', icon: '🐘', hint: '最靠近 101 的山', pos: at(PLACES.elephant), col: hex('#cfe3ff'), bell: 146.8,
+    info: '海拔 183 公尺，是看台北 101 和城市夜景最熱門的步道。山頂有幾塊大石頭，很多人坐在上面等夕陽。',
+    en: { name: 'Elephant Gate', hill: 'Elephant Mountain', seal: 'First Seal', virtue: 'Stability · Memory · Bearing', hint: 'The hill closest to 101',
+      info: 'At 183 m, its trail is the most popular spot for views of Taipei 101 and the city at night. Big boulders sit on the summit, where many people wait for the sunset.' },
+    ja: { name: '象門', hill: '象山', seal: '第一の印', virtue: '安定・記憶・支え', hint: '101 にいちばん近い山',
+      info: '標高 183 m。台北101と夜景を眺める一番人気の遊歩道です。山頂の大きな岩に座って夕日を待つ人がたくさんいます。' } },
+  { id: 'tiger', stage: 1, name: '虎門', hill: '虎山', seal: '第二印', virtue: '行動・勇氣・爆發', icon: '🐯', hint: '101 東北邊的山', pos: at(PLACES.tiger), col: hex('#ffb35c'), bell: 196,
+    info: '四獸山最北的一座。虎山自然步道沿著溪谷走，林蔭濃密，是觀察青蛙、蝴蝶等生態的好地方。',
+    en: { name: 'Tiger Gate', hill: 'Tiger Mountain', seal: 'Second Seal', virtue: 'Action · Courage · Power', hint: 'The hill northeast of 101',
+      info: 'The northernmost of the four. The Tiger Mountain nature trail follows a shady stream valley, a great place to spot frogs and butterflies.' },
+    ja: { name: '虎門', hill: '虎山', seal: '第二の印', virtue: '行動・勇気・爆発', hint: '101 の北東の山',
+      info: '四獣山でいちばん北の山。虎山自然遊歩道は渓谷沿いの木陰の道で、カエルや蝶など生き物の観察にぴったりです。' } },
+  { id: 'leopard', stage: 1, name: '豹門', hill: '豹山', seal: '第三印', virtue: '敏捷・感知・身法', icon: '🐆', hint: '虎山南邊的山', pos: at(PLACES.leopard), col: hex('#ffd76a'), bell: 220,
+    info: '四獸山裡比較少人知道、也比較安靜的一座，山徑和虎山、獅山相連，適合慢慢走。',
+    en: { name: 'Leopard Gate', hill: 'Leopard Mountain', seal: 'Third Seal', virtue: 'Agility · Perception · Movement', hint: 'The hill south of Tiger Mountain',
+      info: 'The quietest and least-known of the four. Its paths connect to Tiger and Lion Mountains and are best walked slowly.' },
+    ja: { name: '豹門', hill: '豹山', seal: '第三の印', virtue: '敏捷・感知・身のこなし', hint: '虎山の南の山',
+      info: '四獣山の中であまり知られていない、静かな山。虎山・獅山へ道がつながっていて、ゆっくり歩くのに向いています。' } },
+  { id: 'lion', stage: 1, name: '獅門', hill: '獅山', seal: '第四印', virtue: '威勢・領導・氣運', icon: '🦁', hint: '豹山西南邊的山', pos: at(PLACES.lion), col: hex('#ffc58a'), bell: 174.6,
+    info: '山形像一頭伏臥的獅子。走在步道上，可以從樹梢間望見信義區的城市天際線。',
+    en: { name: 'Lion Gate', hill: 'Lion Mountain', seal: 'Fourth Seal', virtue: 'Presence · Leadership · Fortune', hint: 'The hill southwest of Leopard Mountain',
+      info: 'Shaped like a lion lying down. From the trail you can see the Xinyi skyline through the treetops.' },
+    ja: { name: '獅門', hill: '獅山', seal: '第四の印', virtue: '威厳・統率・気運', hint: '豹山の南西の山',
+      info: '伏せた獅子のような山の形。遊歩道からは木々の間に信義区のスカイラインが見えます。' } },
+  { id: 'city', stage: 2, name: '城之回聲', en: { name: 'Echo of the City' }, ja: { name: '街のこだま' }, icon: '🏙', pos: at(PLACES.city), col: hex('#8fa4b5') },
+  { id: 'sea', stage: 2, name: '海之流痕', en: { name: 'Trace of the Sea' }, ja: { name: '海の流れ痕' }, icon: '🌊', pos: at(PLACES.sea), col: hex('#8fa4b5') },
+  { id: 'peak', stage: 2, name: '山之鐘聲', en: { name: 'Bell of the Mountain' }, ja: { name: '山の鐘の音' }, icon: '⛰', pos: at(PLACES.peak), col: hex('#8fa4b5') },
 ];
+localize(NODES);
 const S1 = NODES.filter(n => n.stage === 1);
+const placeOf = n => REAL.find(r => r.node === n.id).name;
 const nextGate = () => S1.find(n => !n.awake);
 for (const n of NODES) {
   n.mesh = r.mesh(nodeMesh(n.id)); n.awake = false; n.charge = 0; n.vein = null; n.flash = 0;
@@ -67,15 +88,32 @@ const COST = 3;
 
 // 台灣之美：走近就會收進圖鑑（內容為真實地景的簡介）
 const SPOTS = [
-  { id: '101', name: '台北 101', area: '台北・Taipei 101', pos: [67, 30], r: 8, text: '高 508 公尺，2004 年完工，曾是世界最高的大樓。外型取自節節高升的竹子，每年跨年的煙火是台北的招牌畫面。' },
-  { id: 'turtle', name: '龜山島', area: '宜蘭外海・Guishan Island', pos: PLACES.sea, r: 7, text: '宜蘭外海的火山島，遠看像一隻浮在海上的烏龜。對宜蘭人來說，看到龜山島就是回到家了。' },
-  { id: 'kuroshio', name: '黑潮', area: '台灣東部海域・Kuroshio Current', pos: [curX(64), 64], r: 0, text: '流經台灣東岸、一路往北的強勁暖流，海水深藍近黑而得名。它帶來溫暖的海水和豐富的魚群，也是鯨豚出沒的海路。' },
-  { id: 'taroko', name: '太魯閣峽谷', area: '花蓮・Taroko Gorge', pos: world.gorge, r: 5, text: '立霧溪花了千萬年，切穿堅硬的大理石山壁，刻出深邃的峽谷。抬頭只看得見一線天。' },
-  { id: 'sunmoon', name: '日月潭', area: '南投・Sun Moon Lake', pos: PLACES.lake, r: 8, text: '台灣最大的湖泊，湖面一邊像日輪、一邊像月鉤。湖中的拉魯島是邵族祖靈的聖地。' },
-  { id: 'yushan', name: '玉山', area: '南投・嘉義・高雄・Yushan', pos: PLACES.peak, r: 5, text: '海拔 3,952 公尺，台灣最高峰，也是東北亞第一高峰。冬天山頂偶爾積雪，遠看如白玉。' },
-  { id: 'alishan', name: '阿里山神木', area: '嘉義・Alishan', pos: PLACES.shenmu, r: 6, text: '阿里山以千年紅檜巨木、雲海、日出和森林小火車聞名。站在神木下，人顯得好小。' },
-  { id: 'kenting', name: '鵝鑾鼻燈塔', area: '屏東墾丁・Eluanbi Lighthouse', pos: world.tip, r: 6, text: '位在台灣南端的白色燈塔，1883 年點亮，被稱為「東亞之光」。往南望去，就是巴士海峽。' },
+  { id: '101', name: '台北 101', area: '台北・Taipei 101', pos: [67, 30], r: 8, text: '高 508 公尺，2004 年完工，曾是世界最高的大樓。外型取自節節高升的竹子，每年跨年的煙火是台北的招牌畫面。',
+    en: { name: "Taipei 101", area: "Taipei", text: "At 508 m, it was finished in 2004 and was once the world's tallest building. Its shape echoes rising bamboo, and its New Year's Eve fireworks are Taipei's signature scene." },
+    ja: { name: "台北101", area: "台北", text: "高さ 508 m、2004 年完成。かつて世界一高いビルでした。伸びていく竹をかたどった姿で、年越しの花火は台北を代表する光景です。" } },
+  { id: 'turtle', name: '龜山島', area: '宜蘭外海・Guishan Island', pos: PLACES.sea, r: 7, text: '宜蘭外海的火山島，遠看像一隻浮在海上的烏龜。對宜蘭人來說，看到龜山島就是回到家了。',
+    en: { name: "Guishan Island", area: "Off Yilan", text: "A volcanic island off the Yilan coast that looks like a turtle floating on the sea. For people from Yilan, seeing it means you're home." },
+    ja: { name: "亀山島", area: "宜蘭沖", text: "宜蘭の沖に浮かぶ火山島で、遠くから見ると海に浮かぶ亀のよう。宜蘭の人にとって、亀山島が見えたら「家に帰ってきた」合図です。" } },
+  { id: 'kuroshio', name: '黑潮', area: '台灣東部海域・Kuroshio Current', pos: [curX(64), 64], r: 0, text: '流經台灣東岸、一路往北的強勁暖流，海水深藍近黑而得名。它帶來溫暖的海水和豐富的魚群，也是鯨豚出沒的海路。',
+    en: { name: "Kuroshio Current", area: "Waters east of Taiwan", text: "A strong warm current flowing north along Taiwan's east coast, named for its deep blue, almost black water. It brings warm seas, rich fish and whales and dolphins." },
+    ja: { name: "黒潮", area: "台湾東部の海域", text: "台湾の東海岸を北へ流れる強い暖流。黒に近い深い藍色からその名が付きました。温かい海水と豊かな魚、そしてクジラやイルカを運んできます。" } },
+  { id: 'taroko', name: '太魯閣峽谷', area: '花蓮・Taroko Gorge', pos: world.gorge, r: 5, text: '立霧溪花了千萬年，切穿堅硬的大理石山壁，刻出深邃的峽谷。抬頭只看得見一線天。',
+    en: { name: "Taroko Gorge", area: "Hualien", text: "Over millions of years the Liwu River cut through hard marble cliffs to carve this deep gorge. Look up and you see only a sliver of sky." },
+    ja: { name: "太魯閣峡谷", area: "花蓮", text: "立霧渓が何百万年もかけて固い大理石の岩壁を削り、深い峡谷を刻みました。見上げると空は細い一本の線だけ。" } },
+  { id: 'sunmoon', name: '日月潭', area: '南投・Sun Moon Lake', pos: PLACES.lake, r: 8, text: '台灣最大的湖泊，湖面一邊像日輪、一邊像月鉤。湖中的拉魯島是邵族祖靈的聖地。',
+    en: { name: "Sun Moon Lake", area: "Nantou", text: "Taiwan's largest lake: one side looks like the sun, the other like a crescent moon. Lalu Island in the lake is sacred to the Thao people's ancestors." },
+    ja: { name: "日月潭", area: "南投", text: "台湾最大の湖。湖の片側は太陽、もう片側は三日月の形に見えます。湖に浮かぶラル島はサオ族の祖霊の聖地です。" } },
+  { id: 'yushan', name: '玉山', area: '南投・嘉義・高雄・Yushan', pos: PLACES.peak, r: 5, text: '海拔 3,952 公尺，台灣最高峰，也是東北亞第一高峰。冬天山頂偶爾積雪，遠看如白玉。',
+    en: { name: "Yushan (Jade Mountain)", area: "Nantou \u00b7 Chiayi \u00b7 Kaohsiung", text: "At 3,952 m, Taiwan's highest peak and the highest in Northeast Asia. In winter the summit sometimes turns white with snow, like jade." },
+    ja: { name: "玉山", area: "南投・嘉義・高雄", text: "標高 3,952 m、台湾最高峰で北東アジアでもいちばん高い山。冬は山頂に雪が積もり、白い玉のように見えることも。" } },
+  { id: 'alishan', name: '阿里山神木', area: '嘉義・Alishan', pos: PLACES.shenmu, r: 6, text: '阿里山以千年紅檜巨木、雲海、日出和森林小火車聞名。站在神木下，人顯得好小。',
+    en: { name: "Alishan Sacred Tree", area: "Chiayi", text: "Alishan is famous for thousand-year-old red cypress giants, seas of clouds, sunrises and its forest railway. Under the sacred tree, people look tiny." },
+    ja: { name: "阿里山の神木", area: "嘉義", text: "阿里山は樹齢千年のベニヒの巨木、雲海、日の出、森林鉄道で有名です。神木の下に立つと、人はとても小さく見えます。" } },
+  { id: 'kenting', name: '鵝鑾鼻燈塔', area: '屏東墾丁・Eluanbi Lighthouse', pos: world.tip, r: 6, text: '位在台灣南端的白色燈塔，1883 年點亮，被稱為「東亞之光」。往南望去，就是巴士海峽。',
+    en: { name: "Eluanbi Lighthouse", area: "Kenting, Pingtung", text: "A white lighthouse at Taiwan's southern tip, first lit in 1883 and called the \"Light of East Asia.\" Look south and you see the Bashi Channel." },
+    ja: { name: "鵝鑾鼻灯台", area: "屏東・墾丁", text: "台湾最南端の白い灯台。1883 年に点灯し「東アジアの光」と呼ばれます。南を見れば、そこはバシー海峡です。" } },
 ];
+localize(SPOTS);
 for (const sp of SPOTS) sp.found = false;
 
 
@@ -138,23 +176,23 @@ function hud() {
   if (key !== hudKey) {
     hudKey = key;
     $('#lv').textContent = 'Lv.' + lv;
-    $('#dexBtn').textContent = `📖 台灣之美 ${found}/${SPOTS.length}`;
-    $('#dexList').innerHTML = '<li class="sec">山林徑・四獸靈門</li>'
-      + S1.map(n => n.awake ? `<li><b>${n.icon} ${n.name}・${n.hill}</b><small>${n.seal}・${n.virtue}</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`).join('')
-      + (visited.size ? '<li class="sec">文化徑・現世機緣</li>' + REAL.filter(x => visited.has(x.id)).map(x => `<li><b>${x.name}</b><small>${x.sub}</small><p>${x.text}</p></li>`).join('') : '')
-      + '<li class="sec">台灣之美</li>'
-      + SPOTS.map(sp => sp.found ? `<li><b>${sp.name}</b><small>${sp.area}</small><p>${sp.text}</p></li>` : `<li class="lock"><b>？？？</b><small>${sp.area.split('・')[0]}</small></li>`).join('');
-    $('#qi').textContent = `靈光 ${avail()}`;
+    $('#dexBtn').textContent = t('dexBtn', { n: found, m: SPOTS.length });
+    $('#dexList').innerHTML = `<li class="sec">${t('secMountain')}</li>`
+      + S1.map(n => n.awake ? `<li><b>${n.icon} ${n.name}${t('sep')}${n.hill}</b><small>${n.seal}${t('sep')}${n.virtue}</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`).join('')
+      + (visited.size ? `<li class="sec">${t('secCulture')}</li>` + REAL.filter(x => visited.has(x.id)).map(x => `<li><b>${x.name}</b><small>${x.sub}</small><p>${x.text}</p></li>`).join('') : '')
+      + `<li class="sec">${t('beauty')}</li>`
+      + SPOTS.map(sp => sp.found ? `<li><b>${sp.name}</b><small>${sp.area}</small><p>${sp.text}</p></li>` : `<li class="lock"><b>？？？</b><small>${sp.area.split(/・|, | · /)[0]}</small></li>`).join('');
+    $('#qi').textContent = t('qi', { n: avail() });
     $('#qibar').style.width = Math.min(100, avail() / COST * 100) + '%';
     if (!G.gateOpen) {
-      $('#qtitle').textContent = `第一階・山林徑：四獸靈門（${G.awakened}/4）`;
+      $('#qtitle').textContent = t('questTitle', { n: G.awakened });
       $('#qchips').innerHTML = S1.map(n => `<span class="${n.awake ? 'done' : ''}">${n.icon}${n.awake ? '✓' : ''}</span>`).join('');
-      $('#qlist').innerHTML = S1.map(n => `<li class="${n.awake ? 'done' : n === nextGate() ? '' : 'wait'}"><span>${n.awake ? '✓' : n.icon}</span>${n.seal}・${n.name}<small>${n.awake ? n.virtue : n !== nextGate() ? '等前一印開啟' : G.geo ? n.real + '（或到島上 101 東邊的' + n.hill + '）' : n.hint + '・' + n.hill}</small></li>`).join('')
-        + `<li class="note">依序 象→虎→豹→獅，每印需要 ${COST} 點靈光・四獸共鳴後開啟台北靈門・第二階：城之回聲、海之流痕、山之鐘聲（尚未開放）</li>`;
+      $('#qlist').innerHTML = S1.map(n => `<li class="${n.awake ? 'done' : n === nextGate() ? '' : 'wait'}"><span>${n.awake ? '✓' : n.icon}</span>${n.seal}${t('sep')}${n.name}<small>${n.awake ? n.virtue : n !== nextGate() ? t('waitPrev') : G.geo ? t('questGeo', { place: placeOf(n), hill: n.hill }) : n.hint + t('sep') + n.hill}</small></li>`).join('')
+        + `<li class="note">${t('questNote', { cost: COST })}</li>`;
     } else {
-      $('#qtitle').textContent = '四獸共鳴・前往台北靈門';
+      $('#qtitle').textContent = t('questDone');
       $('#qchips').innerHTML = '<span class="done">⛩</span>';
-      $('#qlist').innerHTML = (G.geo ? `<li><span>⛩</span>回到會場<small>台北靈門在起點等你</small></li>` : '') + `<li><span>⛩</span>島上西側平原的紅色牌樓<small>阿汐在那裡等你</small></li>`;
+      $('#qlist').innerHTML = (G.geo ? `<li><span>⛩</span>${t('backVenue')}<small>${t('gateWaits')}</small></li>` : '') + `<li><span>⛩</span>${t('islandGate')}<small>${t('xiWaits')}</small></li>`;
     }
   }
   const sb = $('#btnSense');
@@ -188,26 +226,66 @@ function drawMini() {
 }
 
 // ---------- 劇情對話 ----------
-const LINES = [
-  '你也聽見了嗎？山裡，有一陣不存在的鐘聲。',
-  '山有脈，海有流，人亦有自己的道。城市邊上，有四座守門的山還在沉睡。',
-  '收集發光的「靈光」，按「感知」就能看見平常看不見的東西。',
-  '台北 101 東邊的四獸山，是城市之流和山之流交會的四道靈門。',
-  '依序開啟：象門、虎門、豹門、獅門。四印齊了，四獸共鳴，台北靈門就會打開。',
-  '路上也去看看這座島：日月潭、阿里山、太魯閣、墾丁……每一處都會收進你的圖鑑。',
-  '我在西邊的台北靈門等你。走出去，遇見你的機緣。',
-];
-const GEO_LINES = [
-  '你也聽見了嗎？這座城市底下，有一陣不存在的鐘聲。',
-  '山有脈，海有流，人亦有自己的道。靈脈就藏在我們身邊的街道裡。',
-  '打開「現世」雷達，走到附近的地點。靠近時，手機會感應到機緣。',
-  '四獸山是城市之流和山之流交會的四道靈門。走一段文化徑，就能開啟山林徑上的靈門。',
-  '依序走：象門在華山1914，虎門在台灣文學基地，豹門在濟南教會，獅門在善導寺。',
-  '走人行道、注意來車喔。到了地點，牠們就會現身。',
-  '四印齊了，四獸共鳴，就回到這裡打開台北靈門。走出去，遇見你的機緣。',
-];
+const LINES = {
+  zh: [
+    '你也聽見了嗎？山裡，有一陣不存在的鐘聲。',
+    '山有脈，海有流，人亦有自己的道。城市邊上，有四座守門的山還在沉睡。',
+    '收集發光的「靈光」，按「感知」就能看見平常看不見的東西。',
+    '台北 101 東邊的四獸山，是城市之流和山之流交會的四道靈門。',
+    '依序開啟：象門、虎門、豹門、獅門。四印齊了，四獸共鳴，台北靈門就會打開。',
+    '路上也去看看這座島：日月潭、阿里山、太魯閣、墾丁……每一處都會收進你的圖鑑。',
+    '我在西邊的台北靈門等你。走出去，遇見你的機緣。',
+  ],
+  en: [
+    'Did you hear it too? A bell that doesn\'t exist, ringing in the mountains.',
+    'Mountains have veins, the sea has currents, and people have their own way. At the edge of the city, four guardian mountains are still asleep.',
+    'Collect the glowing Spirit Light. Press "Sense" to see what is usually hidden.',
+    'East of Taipei 101, the Four Beasts Mountains are four spirit gates where the flow of the city meets the flow of the mountains.',
+    'Open them in order: Elephant, Tiger, Leopard, Lion. With all four seals, the beasts resonate and the Taipei Spirit Gate opens.',
+    'Along the way, see the island too: Sun Moon Lake, Alishan, Taroko, Kenting… each goes into your field guide.',
+    'I\'ll wait for you at the Taipei Spirit Gate in the west. Go out and meet your encounters.',
+  ],
+  ja: [
+    'あなたにも聞こえた？山の奥で、存在しないはずの鐘が鳴っている。',
+    '山に脈あり、海に流れあり、人にもまた道あり。街のはずれで、四つの守りの山がまだ眠っている。',
+    '光る「霊光」を集めて。「感知」を押すと、ふだん見えないものが見えてくる。',
+    '台北101の東にある四獣山は、街の流れと山の流れが交わる四つの霊門。',
+    '順番に開こう：象門、虎門、豹門、獅門。四つの印がそろえば四獣が共鳴し、台北霊門が開く。',
+    '途中で島もめぐってみて：日月潭、阿里山、太魯閣、墾丁……どこも図鑑に載っていくよ。',
+    '西の台北霊門で待ってる。外へ出て、あなたの縁に出会おう。',
+  ],
+}[lang];
+const GEO_LINES = {
+  zh: [
+    '你也聽見了嗎？這座城市底下，有一陣不存在的鐘聲。',
+    '山有脈，海有流，人亦有自己的道。靈脈就藏在我們身邊的街道裡。',
+    '打開「現世」雷達，走到附近的地點。靠近時，手機會感應到機緣。',
+    '四獸山是城市之流和山之流交會的四道靈門。走一段文化徑，就能開啟山林徑上的靈門。',
+    '依序走：象門在華山1914，虎門在台灣文學基地，豹門在濟南教會，獅門在善導寺。',
+    '走人行道、注意來車喔。到了地點，牠們就會現身。',
+    '四印齊了，四獸共鳴，就回到這裡打開台北靈門。走出去，遇見你的機緣。',
+  ],
+  en: [
+    'Did you hear it too? A bell that doesn\'t exist, ringing beneath this city.',
+    'Mountains have veins, the sea has currents, and people have their own way. Spirit veins hide in the streets around us.',
+    'Open the "Real World" radar and walk to nearby places. When you get close, your phone senses an encounter.',
+    'The Four Beasts Mountains are four spirit gates where the city\'s flow meets the mountains\'. Walk a Culture Trail to open the gates on the Mountain Trail.',
+    'In order: the Elephant Gate is at Huashan 1914, the Tiger Gate at the Taiwan Literature Base, the Leopard Gate at Jinan Church, and the Lion Gate at Shandao Temple.',
+    'Stay on the sidewalk and watch for cars. When you arrive, the beasts will appear.',
+    'With all four seals, the beasts resonate. Then come back here to open the Taipei Spirit Gate. Go out and meet your encounters.',
+  ],
+  ja: [
+    'あなたにも聞こえた？この街の下で、存在しないはずの鐘が鳴っている。',
+    '山に脈あり、海に流れあり、人にもまた道あり。霊脈はわたしたちのすぐそばの街に隠れている。',
+    '「現世」レーダーを開いて、近くの場所へ歩いてみて。近づくと、スマホが縁を感じ取る。',
+    '四獣山は、街の流れと山の流れが交わる四つの霊門。文化の道を歩けば、山林の道の霊門が開く。',
+    '順番に：象門は華山1914、虎門は台湾文学基地、豹門は済南教会、獅門は善導寺。',
+    '歩道を歩いて、車に気をつけてね。着いたら、獣たちが姿を現すよ。',
+    '四つの印がそろったら四獣が共鳴する。ここに戻って台北霊門を開こう。外へ出て、あなたの縁に出会おう。',
+  ],
+}[lang];
 let talk = null;
-function say(lines, done, who = '阿汐') {
+function say(lines, done, who = t('xi')) {
   talk = { lines, i: 0, done }; $('#dialog b').textContent = who; $('#dialog p').textContent = lines[0]; $('#dialog').classList.add('show');
 }
 function nextLine() {
@@ -226,7 +304,7 @@ function start(mode) {
   if (G.geo) geo.start();
   say(G.geo ? GEO_LINES : LINES, () => {
     G.state = 'play'; $('#hud').classList.add('play'); XI.wave = false;
-    pop('第一印：象門', 'gold');
+    pop(t('firstSeal'), 'gold');
     if (G.geo) openRadar();
   });
   try { if (matchMedia('(pointer: coarse)').matches && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => { }); } catch { }
@@ -236,14 +314,13 @@ $('#title .alt').addEventListener('click', () => start('island'));
 $('#again').addEventListener('click', () => location.reload());
 
 // ---------- 玩法 ----------
-const DIRS = ['北', '東北', '東', '東南', '南', '西南', '西', '西北'];
 function doSense() {
   if (G.state !== 'play' || G.senseCd > 0) return;
   G.sense = 6; G.senseCd = 9; G.pulse = [P.x, P.z, 0, 1]; sfx.sense();
-  const target = nextGate() || { name: '台北靈門', pos: GATE };
+  const target = nextGate() || { name: t('gateName'), pos: GATE };
   const dx = target.pos[0] - P.x, dz = target.pos[2] - P.z;
   const ang = Math.atan2(dx, -dz), dir = DIRS[(Math.round(ang / (Math.PI / 4)) + 8) % 8];
-  toast(`感知：${target.name} 在${dir}方 ${Math.round(Math.hypot(dx, dz))} 步`);
+  toast(t('senseToast', { name: target.name, dir, n: Math.round(Math.hypot(dx, dz)) }));
 }
 
 function burst(x, y, z, col, n = 40, sp = 6) {
@@ -266,20 +343,20 @@ function buildVein(n) {
 function awaken(n) {
   n.awake = true; n.flash = 1; G.spent += COST; G.awakened++;
   sfx.bell(n.bell || 196);
-  pop(`${n.seal}・${n.icon} ${n.name}開啟`, 'gold');
-  setTimeout(() => showCard(`${n.name}・${n.hill}`, `山林徑・${n.seal}・${n.virtue}`, n.info + (G.awakened === 1 ? '\n\n' + SHOUSHAN : ''), `四獸靈門 ${G.awakened}/4・${n.virtue}`, n.id), 1300);
+  pop(t('gateOpened', { seal: n.seal, icon: n.icon, name: n.name }), 'gold');
+  setTimeout(() => showCard(n.name + t('sep') + n.hill, t('cardSub', { seal: n.seal, virtue: n.virtue }), n.info + (G.awakened === 1 ? '\n\n' + SHOUSHAN : ''), t('cardEm', { n: G.awakened, virtue: n.virtue }), n.id), 1300);
   burst(n.pos[0], n.pos[1] + 1.5, n.pos[2], [1, 0.85, 0.45], 70, 8);
   buildVein(n);
   G.spiritTarget = G.awakened / 4 * 0.8;
   setSpirit(G.spiritTarget);
   try { navigator.vibrate && navigator.vibrate([40, 60, 80]); } catch { }
   if (G.awakened === 4) setTimeout(resonance, 3600);
-  else { const nx = nextGate(); setTimeout(() => toast(`下一印：${nx.icon} ${nx.name}（${G.geo ? nx.real.replace('現世：', '') : nx.hill}）`), 1400); }
+  else { const nx = nextGate(); setTimeout(() => toast(t('nextSeal', { icon: nx.icon, name: nx.name, where: G.geo ? placeOf(nx) : nx.hill })), 1400); }
 }
 
 // 四獸共鳴：四座靈門的光同時升起，台北靈門隨後開啟
 function resonance() {
-  pop('四獸共鳴', 'gold'); sfx.bell(146.8); setTimeout(() => sfx.bell(196), 220); setTimeout(() => sfx.bell(220), 440); setTimeout(() => sfx.bell(174.6), 660);
+  pop(t('resonance'), 'gold'); sfx.bell(146.8); setTimeout(() => sfx.bell(196), 220); setTimeout(() => sfx.bell(220), 440); setTimeout(() => sfx.bell(174.6), 660);
   for (const n of S1) { n.flash = 1; burst(n.pos[0], n.pos[1] + 2, n.pos[2], [1, 0.85, 0.45], 50, 9); }
   try { navigator.vibrate && navigator.vibrate([60, 60, 60, 60, 160]); } catch { }
   setTimeout(openGate, 2600);
@@ -287,10 +364,10 @@ function resonance() {
 
 function openGate() {
   G.gateOpen = true; G.gateT = 0; sfx.gate();
-  pop('台北靈門已開啟', 'gold');
+  pop(t('gateOpen'), 'gold');
   XI.x = GATE[0] + 2.2; XI.z = GATE[2] - 2; XI.yaw = Math.PI; XI.wave = true;
   burst(GATE[0], GATE[1] + 3, GATE[2], [1, 0.9, 0.5], 90, 10);
-  setTimeout(() => toast(G.geo ? '阿汐：「城市本身，也存在流。回到起點打開台北靈門吧。」' : '阿汐：「城市本身，也存在流。我在台北靈門等你。」'), 1500);
+  setTimeout(() => toast(G.geo ? t('xiGeo') : t('xiIsland')), 1500);
 }
 
 function blocked(x, z, y, step) {
@@ -353,8 +430,8 @@ function updateGame(dt) {
     if (Math.hypot(m.x - P.x, m.z - P.z) < 1.4 && Math.abs(P.y + 0.9 - m.y) < 2) {
       m.taken = true; G.collected++; sfx.pick();
       burst(m.x, m.y, m.z, [0.6, 0.95, 1], 16, 3);
-      if (G.collected % 5 === 0) pop(`升級！Lv.${1 + G.collected / 5}　感知力提升`, 'gold');
-      else toast(`＋1 靈光（可用 ${avail()}）`);
+      if (G.collected % 5 === 0) pop(t('levelUp', { lv: 1 + G.collected / 5 }), 'gold');
+      else toast(t('plusOne', { n: avail() }));
     }
   }
   // 靈脈節點
@@ -363,13 +440,13 @@ function updateGame(dt) {
     n.flash = Math.max(0, n.flash - dt * 0.6);
     if (n.awake) continue;
     const d = Math.hypot(n.pos[0] - P.x, n.pos[2] - P.z);
-    if (n.stage === 2) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; toast(`${n.name}要到第二階才會甦醒，先開啟四獸靈門吧`); } continue; }
-    if (n !== nextGate()) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); const nx = nextGate(); toast(`${n.name}還沒回應。靈門要依序開啟，先去${nx.name}（${nx.hill}）`); } continue; }
+    if (n.stage === 2) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; toast(t('stage2', { name: n.name })); } continue; }
+    if (n !== nextGate()) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); const nx = nextGate(); toast(t('outOfOrder', { name: n.name, next: nx.name, hill: nx.hill })); } continue; }
     if (d < 2.6 && Math.abs(P.y - n.pos[1]) < 3) {
       if (avail() >= COST) {
         n.charge += dt / 1.6; charging = n;
         if (n.charge >= 1) awaken(n);
-      } else if (G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); toast(`靈光不足：喚醒需要 ${COST} 點（目前 ${avail()}）。按「感知」找找看`); }
+      } else if (G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); toast(t('notEnough', { cost: COST, n: avail() })); }
     } else n.charge = Math.max(0, n.charge - dt);
   }
   const pr = $('#prog');
@@ -393,7 +470,7 @@ function updateGame(dt) {
 
 function discover(sp) {
   sp.found = true; G.bonus = (G.bonus || 0) + 1; sfx.pick(); setTimeout(() => sfx.pick(), 120);
-  showCard(sp.name, sp.area, sp.text, `發現台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}・＋1 靈光`, sp.id);
+  showCard(sp.name, sp.area, sp.text, t('discovered', { n: SPOTS.filter(s => s.found).length, m: SPOTS.length }), sp.id);
 }
 // 臺北旅遊網 Open API 的介紹與照片（由 tools/fetch-taipei-travel.mjs 產生；沒有檔案時就只用遊戲內文字）
 let TT = null;
@@ -403,15 +480,17 @@ function showCard(title, sub, text, em, key) {
   // 低調的小卡：預設只顯示一行，點開才看介紹與照片；沒點開就自己淡出
   const c = $('#card'), d = key && TT?.spots?.[key];
   c.querySelector('b').textContent = '📍 ' + title; c.querySelector('small').textContent = sub; c.querySelector('em').textContent = em;
-  c.querySelector('p').textContent = d?.introduction ? clip(d.introduction.replace(/\s*\n\s*/g, ''), 90) : text;
+  const intro = lang === 'zh' ? d?.introduction : d?.i18n?.[lang]?.introduction;
+  c.querySelector('p').textContent = intro ? clip(intro.replace(/\s*\n\s*/g, lang === 'en' ? ' ' : ''), lang === 'en' ? 200 : 90) : text;
   const ph = c.querySelector('.ph'), cr = c.querySelector('.cr');
   ph.replaceChildren(...(d?.images || []).map(im => { const i = document.createElement('img'); i.src = im.file; i.alt = im.subject || d.name; i.loading = 'lazy'; i.onerror = () => i.remove(); return i; }));
   cr.replaceChildren();
   if (d) {
-    const a = document.createElement('a'); a.href = d.url || TT.sourceUrl; a.target = '_blank'; a.rel = 'noopener';
-    a.textContent = `臺北旅遊網・${d.name}`; cr.append('介紹與照片：', a, '（臺北市政府觀光傳播局）');
+    const dl = (lang !== 'zh' && d.i18n?.[lang]) || d;
+    const a = document.createElement('a'); a.href = dl.url || d.url || TT.sourceUrl; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = t('creditLink', { name: dl.name || d.name }); cr.append(t('creditPre'), a, t('creditPost'));
   }
-  c.classList.remove('open'); c.querySelector('i').textContent = '介紹 ▴'; c.classList.add('show');
+  c.classList.remove('open'); c.querySelector('i').textContent = t('more'); c.classList.add('show');
   clearTimeout(showCard.t); showCard.t = setTimeout(() => { if (!c.classList.contains('open')) c.classList.remove('show'); }, 12000);
 }
 
@@ -429,24 +508,24 @@ $('#enc button').addEventListener('click', () => encSpot && encounter(encSpot));
 function inRange() {
   return REAL.map(s => ({ s, d: meters(geo.pos, s) })).filter(o => o.d <= o.s.r && (!visited.has(o.s.id) || o.s.id === 'venue')).sort((a, b) => a.d - b.d)[0]?.s || null;
 }
-function fmt(d) { return d < 1000 ? Math.round(d) + ' 公尺' : (d / 1000).toFixed(1) + ' 公里'; }
+function fmt(d) { return d < 1000 ? t('meters', { n: Math.round(d) }) : t('km', { n: (d / 1000).toFixed(1) }); }
 function renderList() {
   const items = REAL.map(s => ({ s, d: meters(geo.pos, s) })).sort((a, b) => a.d - b.d);
   $('#rlist').innerHTML = items.map(({ s, d }) => {
     const done = visited.has(s.id), node = s.node ? NODES.find(n => n.id === s.node) : null;
-    const tag = s.id === 'venue' ? (G.gateOpen ? '可以開門了' : '起點與終點') : node ? (node.awake ? `${node.icon} ${node.name}・已開啟` : node === nextGate() ? `${node.seal}・${node.icon} ${node.name}` : `${node.seal}・${node.name}`) : done ? '已結緣' : '機緣';
+    const tag = s.id === 'venue' ? (G.gateOpen ? t('canOpen') : t('startEnd')) : node ? (node.awake ? t('opened', { icon: node.icon, name: node.name }) : node === nextGate() ? `${node.seal}${t('sep')}${node.icon} ${node.name}` : node.seal + t('sep') + node.name) : done ? t('bound') : t('chance');
     return `<li data-id="${s.id}" class="${done ? 'done' : ''} ${d <= s.r ? 'near' : ''} ${node ? 'key' : ''}"><div><b>${s.name}</b><small>${s.sub}</small></div>`
-      + `<span><em>${tag}</em>${fmt(d)}・${dirName(geo.pos, s)}方</span>`
-      + (calib ? `<button data-cal="${s.id}">設為目前位置</button>` : '') + `</li>`;
+      + `<span><em>${tag}</em>${t('distDir', { d: fmt(d), dir: dirName(geo.pos, s) })}</span>`
+      + (calib ? `<button data-cal="${s.id}">${t('setHere')}</button>` : '') + `</li>`;
   }).join('');
   if (calib) $('#calOut').textContent = JSON.stringify(Object.fromEntries(REAL.map(s => [s.id, [+s.lat.toFixed(6), +s.lng.toFixed(6)]])));
 }
 $('#rlist').addEventListener('click', e => {
   const cal = e.target.closest('[data-cal]');
-  if (cal) { const s = REAL.find(x => x.id === cal.dataset.cal), p = geo.real || geo.pos; s.lat = p.lat; s.lng = p.lng; saveSpot(s); renderList(); toast(`已把「${s.name}」設在目前位置`); return; }
+  if (cal) { const s = REAL.find(x => x.id === cal.dataset.cal), p = geo.real || geo.pos; s.lat = p.lat; s.lng = p.lng; saveSpot(s); renderList(); toast(t('setDone', { name: s.name })); return; }
   const li = e.target.closest('li'); if (!li) return;
   const s = REAL.find(x => x.id === li.dataset.id);
-  if (geo.sim) geo.walkTo(s); else toast(`${s.name} 在${dirName(geo.pos, s)}方 ${fmt(meters(geo.pos, s))}，請沿人行道走過去`);
+  if (geo.sim) geo.walkTo(s); else toast(t('walkThere', { name: s.name, dir: dirName(geo.pos, s), d: fmt(meters(geo.pos, s)) }));
 });
 rcv.addEventListener('click', e => {
   if (!geo.sim) return;
@@ -478,7 +557,7 @@ function drawRadar() {
   // 掃描線
   const a = G.t * 1.6; const grd = g.createConicGradient ? g.createConicGradient(a, c, c) : null;
   if (grd) { grd.addColorStop(0, 'rgba(111,227,255,.22)'); grd.addColorStop(0.12, 'rgba(111,227,255,0)'); grd.addColorStop(1, 'rgba(111,227,255,0)'); g.fillStyle = grd; g.beginPath(); g.arc(c, c, c - 2, 0, 7); g.fill(); }
-  g.fillStyle = '#ffcf5a'; g.font = `900 ${12 * d}px sans-serif`; g.textAlign = 'center'; g.fillText('北', c, 14 * d);
+  g.fillStyle = '#ffcf5a'; g.font = `900 ${12 * d}px sans-serif`; g.textAlign = 'center'; g.fillText(t('north'), c, 14 * d);
   for (const s of REAL) {
     const [ox, oy] = offset(geo.pos, s), x = c + ox * sc, y = c - oy * sc, near = meters(geo.pos, s) <= s.r;
     const done = visited.has(s.id) || (s.node && NODES.find(n => n.id === s.node).awake);
@@ -493,14 +572,14 @@ function drawRadar() {
   if (geo.acc && geo.acc < 300) { g.fillStyle = 'rgba(88,176,234,.18)'; g.beginPath(); g.arc(c, c, geo.acc * sc, 0, 7); g.fill(); }
   g.fillStyle = '#58b0ea'; g.strokeStyle = '#fff'; g.lineWidth = 2 * d; g.beginPath(); g.arc(c, c, 7 * d, 0, 7); g.fill(); g.stroke();
   // 狀態列與機緣按鈕
-  $('#gstat').textContent = geo.sim ? `模擬定位${geo.error ? '・' + geo.error : ''}` : `GPS ±${Math.round(geo.acc || 0)} 公尺`;
+  $('#gstat').textContent = geo.sim ? t('simStat', { err: geo.error ? t('sep') + geo.error : '' }) : t('gpsStat', { n: Math.round(geo.acc || 0) });
   $('#simT').checked = geo.sim;
   const s = inRange(); encSpot = s;
   const enc = $('#enc');
   if (s) {
     enc.classList.add('show');
-    enc.querySelector('span').textContent = s.id === 'venue' ? (G.gateOpen ? '台北靈門感應到你了' : '你在起點：台北靈門') : `感應到機緣：${s.name}`;
-    enc.querySelector('button').textContent = s.id === 'venue' ? (G.gateOpen ? '打開台北靈門' : '聽阿汐說') : '進入機緣';
+    enc.querySelector('span').textContent = s.id === 'venue' ? (G.gateOpen ? t('venueSensed') : t('venueStart')) : t('encSensed', { name: s.name });
+    enc.querySelector('button').textContent = s.id === 'venue' ? (G.gateOpen ? t('openGateBtn') : t('hearXi')) : t('enter');
   } else enc.classList.remove('show');
   if (G.t - listT > 0.5) { listT = G.t; renderList(); }
 }
@@ -508,12 +587,12 @@ function drawRadar() {
 function encounter(s) {
   closeRadar();
   if (s.id === 'venue') {
-    const left = S1.filter(n => !n.awake).map(n => `${n.name}（${REAL.find(r => r.node === n.id).name}）`);
+    const left = S1.filter(n => !n.awake).map(n => `${n.name} (${placeOf(n)})`);
     if (G.gateOpen) {
       P.x = GATE[0] + 0.5; P.z = GATE[2] - 4; P.y = P.ry = footGround(P.x, P.z); cam.yaw = 0; cam.tx = P.x; cam.tz = P.z;
-      G.state = 'talk'; say(['四獸共鳴，台北靈門就在你面前。', '城市本身，也存在流。走過去吧。'], () => { G.state = 'play'; });
+      G.state = 'talk'; say(t('venueOpen'), () => { G.state = 'play'; });
     } else {
-      G.state = 'talk'; say(['這裡是起點，也是終點。', `四獸靈門還有 ${left.length} 道沒開：${left.join('、')}。`, nextGate() ? `下一印是${nextGate().name}，要依序開喔。` : '四獸正在共鳴，等一下。', '打開「現世」雷達，沿著人行道走過去吧。'], () => { G.state = 'play'; });
+      G.state = 'talk'; say([t('venueIntro'), t('venueLeft', { n: left.length, list: left.join(t('list')) }), nextGate() ? t('venueNext', { name: nextGate().name }) : t('venueWait'), t('venueGo')], () => { G.state = 'play'; });
     }
     return;
   }
@@ -526,26 +605,26 @@ function encounter(s) {
     const nx = nextGate();
     if (!node.awake && node !== nx) {
       G.bonus += 1;
-      say([`${node.icon} ${node.name}的影子一閃就不見了。`, `靈門要依序開啟。先去${nx.name}：${REAL.find(r => r.node === nx.id).name}。`], () => { G.state = 'play'; setTimeout(() => showCard(s.name, '現世機緣・' + s.sub, s.text, `${node.seal}・等前一印開啟`, s.id), 400); });
+      say([t('shadow', { icon: node.icon, name: node.name }), t('goFirst', { next: nx.name, place: placeOf(nx) })], () => { G.state = 'play'; setTimeout(() => showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('sealWait', { seal: node.seal }), s.id), 400); });
       return;
     }
     say(s.story, () => {
       G.state = 'play';
       if (!node.awake) { G.bonus += COST; awaken(node); }
       else G.bonus += 1;
-      if (node.awake) setTimeout(() => showCard(s.name, '現世機緣・' + s.sub, s.text, `已和${node.name}結緣`, s.id), 900);
+      if (node.awake) setTimeout(() => showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('boundWith', { name: node.name }), s.id), 900);
     });
   } else {
     G.bonus += 2; sfx.pick(); setTimeout(() => sfx.pick(), 150);
     burst(P.x, P.y + 1.5, P.z, [1, 0.9, 0.5], 40, 5);
-    showCard(s.name, '現世機緣・' + s.sub, s.text, `結下機緣・＋2 靈光（${visited.size} 處）`, s.id);
+    showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('chanceBonus', { n: visited.size }), s.id);
   }
 }
 $('#card').addEventListener('pointerdown', e => {
   if (e.target.closest('a, .ph')) return;
   e.preventDefault(); e.stopPropagation();
   const c = e.currentTarget;
-  if (c.classList.toggle('open')) c.querySelector('i').textContent = '收起 ✕';
+  if (c.classList.toggle('open')) c.querySelector('i').textContent = t('less');
   else { c.classList.remove('show'); }
 });
 $('#dexBtn').addEventListener('pointerdown', e => { e.preventDefault(); $('#card').classList.remove('show'); $('#dex').classList.toggle('show'); });
@@ -554,7 +633,7 @@ $('#dex').addEventListener('pointerdown', e => { e.preventDefault(); $('#dex').c
 function ending() {
   G.state = 'ending'; G.spiritTarget = 1; setSpirit(1); sfx.gate();
   const s = Math.round(G.playT), mm = String(Math.floor(s / 60)).padStart(2, '0'), ss = String(s % 60).padStart(2, '0');
-  $('#stats').textContent = `走一條路，認識台北這座城。\n四獸共鳴・台北靈門開啟　象・虎・豹・獅 4/4\n用時 ${mm}:${ss}　靈光 ${G.collected}/${motes.length}　台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}`;
+  $('#stats').textContent = t('stats', { time: `${mm}:${ss}`, qi: G.collected, qim: motes.length, b: SPOTS.filter(s => s.found).length, bm: SPOTS.length });
   setTimeout(() => $('#ending').classList.add('show'), 600);
   $('#hud').classList.remove('play');
 }
