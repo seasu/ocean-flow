@@ -2,7 +2,7 @@
   "source": "臺北旅遊網 Open API（臺北市政府觀光傳播局）",
   "sourceUrl": "https://www.travel.taipei/open-api",
   "license": "依臺北市政府資料開放授權條款使用，需標示出處；使用前請再確認最新條款",
-  "fetchedAt": "2026-10-13T17:21:16.061Z",
+  "fetchedAt": "2026-10-13T17:22:08.625Z",
   "spots": {
     "101": {
       "name": "台北101",
