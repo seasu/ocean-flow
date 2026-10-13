@@ -31,6 +31,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 .qi{position:absolute;left:calc(12px + var(--sl));top:calc(46px + var(--st));display:flex;gap:6px;align-items:center;font-size:12px;color:var(--cyan);text-shadow:0 1px 0 #000}
 .qi .bar{width:84px;height:8px;background:rgba(0,0,0,.45);border-radius:8px;overflow:hidden}
 .qi .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#5cc8ff,#ffcf5a);transition:width .3s}
+#radarBtn{position:absolute;right:calc(56px + var(--sr));top:calc(122px + var(--st));pointer-events:auto;background:linear-gradient(180deg,#bff4ff,#56c8f0);color:#06263f;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:900;box-shadow:0 3px 0 #2f7fb5}
 #dexBtn{position:absolute;left:calc(12px + var(--sl));top:calc(68px + var(--st));pointer-events:auto;background:var(--panel);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:900;color:#fff4c8}
 .quest{position:absolute;left:calc(12px + var(--sl));top:calc(100px + var(--st));width:min(250px,58vw);background:var(--panel);border:1px solid rgba(255,255,255,.1);
   border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.45;pointer-events:auto}
@@ -97,6 +98,35 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #dex li.lock{opacity:.5}
 #dex > small{margin-top:10px;color:var(--dim)}
 
+/* 現世雷達 */
+#radar{position:fixed;inset:0;z-index:4;background:#07111d;color:var(--ink);display:none;flex-direction:column;align-items:center;gap:10px;
+  padding:calc(12px + var(--st)) 16px calc(16px + var(--sb));overflow:auto;font-weight:500}
+#radar.show{display:flex}
+#radar header{width:min(520px,100%);display:flex;justify-content:space-between;align-items:center;gap:8px}
+#radar header b{display:block;font-size:17px;font-weight:900;letter-spacing:.08em}
+#radar header small{color:var(--cyan);font-size:12px}
+#rClose{background:rgba(255,255,255,.1);border-radius:999px;padding:8px 14px;font-weight:900;font-size:13px}
+#rcv{width:min(360px,calc(100vw - 32px),48vh);aspect-ratio:1;max-width:100%;flex:none;touch-action:manipulation}
+#enc{display:none;width:min(520px,100%);align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(180deg,#ffe28a,#ffb627);color:#3a2300;
+  border-radius:12px;padding:10px 12px;font-weight:900;box-shadow:0 4px 0 #b9771a;animation:glow 1.2s ease-in-out infinite alternate}
+#enc.show{display:flex}
+#enc button{background:#3a2300;color:#ffe28a;border-radius:10px;padding:8px 14px;font-weight:900;white-space:nowrap}
+@keyframes glow{to{box-shadow:0 4px 0 #b9771a,0 0 22px rgba(255,207,90,.7)}}
+#rlist{list-style:none;margin:0;padding:0;width:min(520px,100%);display:grid;gap:6px}
+#rlist li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:rgba(255,255,255,.06);border-radius:10px;padding:8px 12px;cursor:pointer}
+#rlist li > div{min-width:0}
+#rlist li b{font-size:15px}#rlist li small{display:block;color:var(--dim);font-size:11px}
+#rlist li span{text-align:right;font-size:12px;color:#cfe0ee;white-space:nowrap}
+#rlist li em{display:block;font-style:normal;font-size:11px;color:var(--dim)}
+#rlist li.key em{color:var(--cyan)}#rlist li.done em{color:var(--gold)}
+#rlist li.near{outline:2px solid var(--gold)}
+#rlist li button{background:var(--gold);color:#3a2300;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:900}
+#radar footer{width:min(520px,100%);display:grid;gap:6px;font-size:12px;color:var(--dim)}
+#radar footer label{display:flex;gap:6px;align-items:center;color:var(--ink)}
+#radar footer small{color:#ffb4a0}
+#calOut{white-space:pre-wrap;word-break:break-all;font-size:10px;margin:0;user-select:text;-webkit-user-select:text}
+.screen .alt{font-size:15px;font-weight:900;padding:10px 26px;border-radius:12px;background:rgba(255,255,255,.12);color:var(--ink)}
+
 /* 對話框 */
 #dialog{position:fixed;left:50%;bottom:calc(18px + var(--sb));transform:translate(-50%,20px);width:min(560px,calc(100vw - 24px));background:rgba(10,18,30,.88);
   border:2px solid rgba(255,176,46,.6);border-radius:14px;padding:12px 16px 10px;opacity:0;pointer-events:none;transition:.3s}
@@ -130,6 +160,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 <div id="hud">
   <div class="plate"><span class="lv" id="lv">Lv.1</span>旅人・阿流</div>
   <div class="qi playonly"><span class="bar"><i id="qibar"></i></span><span id="qi">靈光 0</span></div>
+  <button class="playonly" id="radarBtn">📍 現世</button>
   <button class="playonly" id="dexBtn">📖 台灣之美 0/8</button>
   <div class="quest playonly" id="quest"><b>主線任務 <em>▾</em></b><div id="qtitle"></div><div id="qchips"></div><ul id="qlist"></ul></div>
   <canvas id="mini"></canvas>
@@ -145,13 +176,22 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 </div>
 <div id="card"><small></small><b></b><p></p><em></em></div>
 <div id="dex"><h3>台灣之美 圖鑑</h3><ul id="dexList"></ul><small>點一下關閉</small></div>
+<div id="radar">
+  <header><div><b>現世・靈脈雷達</b><small id="gstat"></small></div><button id="rClose">回到靈界 ✕</button></header>
+  <canvas id="rcv"></canvas>
+  <div id="enc"><span></span><button>進入機緣</button></div>
+  <ul id="rlist"></ul>
+  <footer><label><input type="checkbox" id="simT"> 模擬定位：點雷達或清單就走過去（展示用）</label>
+  <small>請走人行道、注意來車，過馬路時不要看手機。</small><pre id="calOut"></pre></footer>
+</div>
 <div id="dialog"><b>阿汐</b><p></p><small>點一下繼續 ▸</small></div>
 <div class="screen" id="title">
   <div class="en">OCEAN FLOW · ORIGIN</div>
   <h1>洋流</h1>
   <div class="tag">山有脈，海有流，人亦有自己的道。<br>走遍一座方塊台灣：台北、龜山島、日月潭、玉山、墾丁。</div>
-  <button class="start">走出去</button>
-  <div class="how">Mobile Web Prototype v0.1・建議開聲音<br>電腦：WASD 移動、空白鍵跳、E 感知</div>
+  <button class="start">走出去・現地探索</button>
+  <button class="alt">先在島上逛逛</button>
+  <div class="how">現地探索會使用定位，從黑客松會場（北平東路30號）出發<br>沒有定位時會自動改用模擬定位・建議開聲音<br>電腦：WASD 移動、空白鍵跳、E 感知</div>
 </div>
 <div class="screen" id="ending">
   <h2>這裡，是起源。</h2>

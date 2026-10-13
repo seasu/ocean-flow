@@ -4,6 +4,7 @@ import { Renderer, Builder } from './gl.js';
 import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, bellMesh, N, WATER, T, PLACES, CURRENT, curX } from './world.js';
 import { drawAvatar, BLUE, ORANGE } from './avatar.js';
 import { initAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
+import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
 
 const $ = s => document.querySelector(s);
 const params = new URLSearchParams(location.search);
@@ -22,9 +23,9 @@ const ground = (x, z) => world.height(x, z);
 const at = ([x, z]) => [x + 0.5, ground(x + 0.5, z + 0.5), z + 0.5];
 
 const NODES = [
-  { id: 'city', name: '城之回聲', icon: '🏙', hint: '台北城裡的廣場', pos: at(PLACES.city), col: hex('#8fe9ff') },
-  { id: 'sea', name: '海之流痕', icon: '🌊', hint: '東北外海的龜山島・乘黑潮北上', pos: at(PLACES.sea), col: hex('#6fd2ff') },
-  { id: 'peak', name: '山之鐘聲', icon: '⛰', hint: '玉山主峰', pos: at(PLACES.peak), col: hex('#ffe08a') },
+  { id: 'city', name: '城之回聲', icon: '🏙', hint: '台北城裡的廣場', real: '現世：華山1914', pos: at(PLACES.city), col: hex('#8fe9ff') },
+  { id: 'sea', name: '海之流痕', icon: '🌊', hint: '東北外海的龜山島・乘黑潮北上', real: '現世：台北車站', pos: at(PLACES.sea), col: hex('#6fd2ff') },
+  { id: 'peak', name: '山之鐘聲', icon: '⛰', hint: '玉山主峰', real: '現世：善導寺', pos: at(PLACES.peak), col: hex('#ffe08a') },
 ];
 for (const n of NODES) { n.mesh = r.mesh(nodeMesh(n.id)); n.awake = false; n.charge = 0; n.vein = null; n.flash = 0; }
 const GATE = at(PLACES.gate);
@@ -106,7 +107,7 @@ const hold = (el, on, off) => {
 hold($('#btnJump'), () => { input.jump = true; }, () => { input.jump = false; });
 hold($('#btnSense'), () => doSense());
 hold($('#mute'), () => { setMuted(!muted); $('#mute').textContent = muted ? '🔇' : '🔊'; });
-addEventListener('keydown', e => { input.keys[e.code] = true; if (e.code === 'Space') input.jump = true; if (e.code === 'KeyE' || e.code === 'KeyQ') doSense(); if ((e.code === 'Enter' || e.code === 'Space') && G.state === 'intro') nextLine(); });
+addEventListener('keydown', e => { input.keys[e.code] = true; if (e.code === 'Space') input.jump = true; if (e.code === 'KeyE' || e.code === 'KeyQ') doSense(); if ((e.code === 'Enter' || e.code === 'Space') && talk) nextLine(); });
 addEventListener('keyup', e => { input.keys[e.code] = false; if (e.code === 'Space') input.jump = false; });
 document.addEventListener('gesturestart', e => e.preventDefault());
 
@@ -118,7 +119,7 @@ let hudKey = '';
 function hud() {
   const lv = 1 + Math.floor(G.collected / 5);
   const found = SPOTS.filter(sp => sp.found).length;
-  const key = [G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, lv, found].join();
+  const key = [G.geo, G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, lv, found].join();
   if (key !== hudKey) {
     hudKey = key;
     $('#lv').textContent = 'Lv.' + lv;
@@ -129,7 +130,7 @@ function hud() {
     if (!G.gateOpen) {
       $('#qtitle').textContent = `喚醒三處靈脈（${G.awakened}/3）`;
       $('#qchips').innerHTML = NODES.map(n => `<span class="${n.awake ? 'done' : ''}">${n.icon}${n.awake ? '✓' : ''}</span>`).join('');
-      $('#qlist').innerHTML = NODES.map(n => `<li class="${n.awake ? 'done' : ''}"><span>${n.awake ? '✓' : n.icon}</span>${n.name}<small>${n.awake ? '已啟流' : n.hint}</small></li>`).join('')
+      $('#qlist').innerHTML = NODES.map(n => `<li class="${n.awake ? 'done' : ''}"><span>${n.awake ? '✓' : n.icon}</span>${n.name}<small>${n.awake ? '已啟流' : G.geo ? n.real + '（或在島上找）' : n.hint}</small></li>`).join('')
         + `<li class="note">每處需要 ${COST} 點靈光・點此收合</li>`;
     } else {
       $('#qtitle').textContent = '前往山門';
@@ -176,29 +177,40 @@ const LINES = [
   '路上也去看看這座島：日月潭、阿里山、太魯閣、墾丁……每一處都會收進你的圖鑑。',
   '我在西邊的山門等你。走出去，遇見你的機緣。',
 ];
-let line = 0;
-function showLine() { $('#dialog p').textContent = LINES[line]; }
+const GEO_LINES = [
+  '你也聽見了嗎？這座城市底下，有一陣不存在的鐘聲。',
+  '山有脈，海有流，人亦有自己的道。靈脈就藏在我們身邊的街道裡。',
+  '打開「現世」雷達，走到附近的地點。靠近時，手機會感應到機緣。',
+  '善導寺、華山1914、台北車站，三處靈脈等你喚醒。記得走人行道、注意來車。',
+  '都喚醒之後回到這裡，打開起源之門。走出去，遇見你的機緣。',
+];
+let talk = null;
+function say(lines, done, who = '阿汐') {
+  talk = { lines, i: 0, done }; $('#dialog b').textContent = who; $('#dialog p').textContent = lines[0]; $('#dialog').classList.add('show');
+}
 function nextLine() {
-  if (G.state !== 'intro') return;
-  line++;
-  if (line >= LINES.length) {
-    $('#dialog').classList.remove('show'); G.state = 'play'; $('#hud').classList.add('play');
-    XI.wave = false;
-    pop('新任務：喚醒三處靈脈', 'gold');
-    return;
-  }
-  showLine();
+  if (!talk) return;
+  talk.i++;
+  if (talk.i >= talk.lines.length) { const d = talk.done; talk = null; $('#dialog').classList.remove('show'); d && d(); return; }
+  $('#dialog p').textContent = talk.lines[talk.i];
 }
 $('#dialog').addEventListener('pointerdown', e => { e.preventDefault(); nextLine(); });
 
-function start() {
+function start(mode) {
   initAudio();
   $('#title').classList.add('hide');
-  G.state = 'intro'; line = 0; showLine(); $('#dialog').classList.add('show'); $('#hud').classList.add('on');
+  G.state = 'intro'; G.geo = mode === 'geo'; $('#hud').classList.add('on');
   cam.yaw = 0; cam.tx = P.x; cam.ty = P.y + 1.5; cam.tz = P.z;
+  if (G.geo) geo.start();
+  say(G.geo ? GEO_LINES : LINES, () => {
+    G.state = 'play'; $('#hud').classList.add('play'); XI.wave = false;
+    if (G.geo) { pop('新任務：在現世找到三處靈脈', 'gold'); openRadar(); }
+    else pop('新任務：喚醒三處靈脈', 'gold');
+  });
   try { if (matchMedia('(pointer: coarse)').matches && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => { }); } catch { }
 }
-$('#title .start').addEventListener('click', start);
+$('#title .start').addEventListener('click', () => start('geo'));
+$('#title .alt').addEventListener('click', () => start('island'));
 $('#again').addEventListener('click', () => location.reload());
 
 // ---------- 玩法 ----------
@@ -248,7 +260,7 @@ function openGate() {
   pop('山門已開啟', 'gold');
   XI.x = GATE[0] + 2.2; XI.z = GATE[2] - 2; XI.yaw = Math.PI; XI.wave = true;
   burst(GATE[0], GATE[1] + 3, GATE[2], [1, 0.9, 0.5], 90, 10);
-  setTimeout(() => toast('阿汐：「我在山門等你。」'), 1500);
+  setTimeout(() => toast(G.geo ? '阿汐：「回到起源之門（黑客松會場），或到島上西邊的山門找我。」' : '阿汐：「我在山門等你。」'), 1500);
 }
 
 function blocked(x, z, y, step) {
@@ -349,10 +361,133 @@ function updateGame(dt) {
 
 function discover(sp) {
   sp.found = true; G.bonus = (G.bonus || 0) + 1; sfx.pick(); setTimeout(() => sfx.pick(), 120);
+  showCard(sp.name, sp.area, sp.text, `發現台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}・＋1 靈光`);
+}
+function showCard(title, sub, text, em) {
   const c = $('#card');
-  c.querySelector('b').textContent = sp.name; c.querySelector('small').textContent = sp.area; c.querySelector('p').textContent = sp.text;
-  c.querySelector('em').textContent = `發現台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}・＋1 靈光`;
-  c.classList.add('show'); clearTimeout(discover.t); discover.t = setTimeout(() => c.classList.remove('show'), 8000);
+  c.querySelector('b').textContent = title; c.querySelector('small').textContent = sub; c.querySelector('p').textContent = text; c.querySelector('em').textContent = em;
+  c.classList.add('show'); clearTimeout(showCard.t); showCard.t = setTimeout(() => c.classList.remove('show'), 9000);
+}
+
+// ---------- 現世雷達：真實地點觸發機緣事件 ----------
+const visited = new Set();
+const radar = $('#radar'), rcv = $('#rcv'), rg = rcv.getContext('2d');
+const calib = params.has('calib');
+let radarOpen = false, encSpot = null;
+function openRadar() { if (G.state !== 'play' && G.state !== 'ending') return; radarOpen = true; radar.classList.add('show'); geo.start(); renderList(); }
+function closeRadar() { radarOpen = false; radar.classList.remove('show'); }
+$('#radarBtn').addEventListener('pointerdown', e => { e.preventDefault(); openRadar(); });
+$('#rClose').addEventListener('click', closeRadar);
+$('#simT').addEventListener('change', e => geo.setSim(e.target.checked));
+$('#enc button').addEventListener('click', () => encSpot && encounter(encSpot));
+function inRange() {
+  return REAL.map(s => ({ s, d: meters(geo.pos, s) })).filter(o => o.d <= o.s.r && (!visited.has(o.s.id) || o.s.id === 'venue')).sort((a, b) => a.d - b.d)[0]?.s || null;
+}
+function fmt(d) { return d < 1000 ? Math.round(d) + ' 公尺' : (d / 1000).toFixed(1) + ' 公里'; }
+function renderList() {
+  const items = REAL.map(s => ({ s, d: meters(geo.pos, s) })).sort((a, b) => a.d - b.d);
+  $('#rlist').innerHTML = items.map(({ s, d }) => {
+    const done = visited.has(s.id), node = s.node ? NODES.find(n => n.id === s.node) : null;
+    const tag = s.id === 'venue' ? (G.gateOpen ? '可以開門了' : '起點與終點') : node ? (done || node.awake ? '靈脈已甦醒' : '靈脈') : done ? '已結緣' : '機緣';
+    return `<li data-id="${s.id}" class="${done ? 'done' : ''} ${d <= s.r ? 'near' : ''} ${node ? 'key' : ''}"><div><b>${s.name}</b><small>${s.sub}</small></div>`
+      + `<span><em>${tag}</em>${fmt(d)}・${dirName(geo.pos, s)}方</span>`
+      + (calib ? `<button data-cal="${s.id}">設為目前位置</button>` : '') + `</li>`;
+  }).join('');
+  if (calib) $('#calOut').textContent = JSON.stringify(Object.fromEntries(REAL.map(s => [s.id, [+s.lat.toFixed(6), +s.lng.toFixed(6)]])));
+}
+$('#rlist').addEventListener('click', e => {
+  const cal = e.target.closest('[data-cal]');
+  if (cal) { const s = REAL.find(x => x.id === cal.dataset.cal), p = geo.real || geo.pos; s.lat = p.lat; s.lng = p.lng; saveSpot(s); renderList(); toast(`已把「${s.name}」設在目前位置`); return; }
+  const li = e.target.closest('li'); if (!li) return;
+  const s = REAL.find(x => x.id === li.dataset.id);
+  if (geo.sim) geo.walkTo(s); else toast(`${s.name} 在${dirName(geo.pos, s)}方 ${fmt(meters(geo.pos, s))}，請沿人行道走過去`);
+});
+rcv.addEventListener('click', e => {
+  if (!geo.sim) return;
+  const rect = rcv.getBoundingClientRect(), x = e.clientX - rect.left - rect.width / 2, y = e.clientY - rect.top - rect.height / 2;
+  const sc = drawRadar.scale; if (!sc) return;
+  const hit = REAL.find(s => { const [ox, oy] = offset(geo.pos, s); return Math.hypot(ox * sc - x, -oy * sc - y) < 22; });
+  if (hit) return geo.walkTo(hit);
+  const lat = geo.pos.lat - y / sc / 110540, lng = geo.pos.lng + x / sc / (Math.cos(geo.pos.lat * Math.PI / 180) * 111320);
+  geo.walkTo({ lat, lng });
+});
+let lastNear = null, listT = 0;
+geo.on(() => {
+  const s = inRange();
+  if (s && s !== lastNear) { sfx.sense(); try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch { } }
+  lastNear = s;
+});
+function drawRadar() {
+  const css = rcv.clientWidth, d = Math.min(devicePixelRatio || 1, 2), W = Math.round(css * d);
+  if (rcv.width !== W) { rcv.width = rcv.height = W; }
+  const g = rg, c = W / 2;
+  g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, W);
+  const far = Math.max(...REAL.map(s => meters(geo.pos, s)));
+  const range = Math.min(1500, Math.max(250, far * 1.08));
+  const sc = (c - 18 * d) / range; drawRadar.scale = sc / d;
+  g.fillStyle = '#0b1a2c'; g.beginPath(); g.arc(c, c, c - 2, 0, 7); g.fill();
+  const step = range > 900 ? 500 : range > 400 ? 200 : 100;
+  g.strokeStyle = 'rgba(111,227,255,.18)'; g.lineWidth = d; g.fillStyle = 'rgba(159,176,194,.8)'; g.font = `${10 * d}px sans-serif`; g.textAlign = 'left';
+  for (let m = step; m < range; m += step) { g.beginPath(); g.arc(c, c, m * sc, 0, 7); g.stroke(); g.fillText(m + 'm', c + 3 * d, c - m * sc - 3 * d); }
+  // 掃描線
+  const a = G.t * 1.6; const grd = g.createConicGradient ? g.createConicGradient(a, c, c) : null;
+  if (grd) { grd.addColorStop(0, 'rgba(111,227,255,.22)'); grd.addColorStop(0.12, 'rgba(111,227,255,0)'); grd.addColorStop(1, 'rgba(111,227,255,0)'); g.fillStyle = grd; g.beginPath(); g.arc(c, c, c - 2, 0, 7); g.fill(); }
+  g.fillStyle = '#ffcf5a'; g.font = `900 ${12 * d}px sans-serif`; g.textAlign = 'center'; g.fillText('北', c, 14 * d);
+  for (const s of REAL) {
+    const [ox, oy] = offset(geo.pos, s), x = c + ox * sc, y = c - oy * sc, near = meters(geo.pos, s) <= s.r;
+    const done = visited.has(s.id) || (s.node && NODES.find(n => n.id === s.node).awake);
+    g.globalAlpha = near ? 0.35 + 0.25 * Math.sin(G.t * 6) : 0.18;
+    g.fillStyle = s.id === 'venue' ? '#ffcf5a' : s.node ? '#6fe3ff' : '#ffffff';
+    g.beginPath(); g.arc(x, y, s.r * sc, 0, 7); g.fill(); g.globalAlpha = 1;
+    g.beginPath(); g.arc(x, y, (s.node || s.id === 'venue' ? 6 : 4.5) * d, 0, 7); g.fill();
+    if (done) { g.strokeStyle = '#ffcf5a'; g.lineWidth = 2 * d; g.stroke(); }
+    g.fillStyle = '#eef3f8'; g.font = `${(s.node ? 12 : 11) * d}px sans-serif`; g.fillText(s.name, x, y - 9 * d);
+  }
+  // 玩家
+  if (geo.acc && geo.acc < 300) { g.fillStyle = 'rgba(88,176,234,.18)'; g.beginPath(); g.arc(c, c, geo.acc * sc, 0, 7); g.fill(); }
+  g.fillStyle = '#58b0ea'; g.strokeStyle = '#fff'; g.lineWidth = 2 * d; g.beginPath(); g.arc(c, c, 7 * d, 0, 7); g.fill(); g.stroke();
+  // 狀態列與機緣按鈕
+  $('#gstat').textContent = geo.sim ? `模擬定位${geo.error ? '・' + geo.error : ''}` : `GPS ±${Math.round(geo.acc || 0)} 公尺`;
+  $('#simT').checked = geo.sim;
+  const s = inRange(); encSpot = s;
+  const enc = $('#enc');
+  if (s) {
+    enc.classList.add('show');
+    enc.querySelector('span').textContent = s.id === 'venue' ? (G.gateOpen ? '起源之門感應到你了' : '你在起點：起源之門') : `感應到機緣：${s.name}`;
+    enc.querySelector('button').textContent = s.id === 'venue' ? (G.gateOpen ? '打開起源之門' : '聽阿汐說') : '進入機緣';
+  } else enc.classList.remove('show');
+  if (G.t - listT > 0.5) { listT = G.t; renderList(); }
+}
+
+function encounter(s) {
+  closeRadar();
+  if (s.id === 'venue') {
+    const left = NODES.filter(n => !n.awake).map(n => REAL.find(r => r.node === n.id).name);
+    if (G.gateOpen) {
+      P.x = GATE[0] + 0.5; P.z = GATE[2] - 4; P.y = P.ry = footGround(P.x, P.z); cam.yaw = 0; cam.tx = P.x; cam.tz = P.z;
+      G.state = 'talk'; say(['起源之門就在你面前。', '走過去吧。這裡，是起源。'], () => { G.state = 'play'; });
+    } else {
+      G.state = 'talk'; say(['這裡是起點，也是終點。', `還有 ${left.length} 處靈脈在沉睡：${left.join('、')}。`, '打開「現世」雷達，沿著人行道走過去吧。'], () => { G.state = 'play'; });
+    }
+    return;
+  }
+  visited.add(s.id);
+  const node = s.node && NODES.find(n => n.id === s.node);
+  if (node) {
+    P.x = node.pos[0]; P.z = node.pos[2] - 4; P.y = P.ry = footGround(P.x, P.z) + 0.2; P.vy = 0; P.swim = false;
+    cam.yaw = 0; cam.tx = P.x; cam.tz = P.z; cam.ty = P.y + 1.6;
+    G.state = 'talk';
+    say(s.story, () => {
+      G.state = 'play';
+      if (!node.awake) { G.bonus += COST; awaken(node); }
+      else G.bonus += 1;
+      setTimeout(() => showCard(s.name, '現世機緣・' + s.sub, s.text, node.awake ? `${node.name}・靈脈甦醒` : ''), 900);
+    });
+  } else {
+    G.bonus += 2; sfx.pick(); setTimeout(() => sfx.pick(), 150);
+    burst(P.x, P.y + 1.5, P.z, [1, 0.9, 0.5], 40, 5);
+    showCard(s.name, '現世機緣・' + s.sub, s.text, `結下機緣・＋2 靈光（${visited.size} 處）`);
+  }
 }
 $('#card').addEventListener('pointerdown', e => { e.preventDefault(); e.currentTarget.classList.remove('show'); });
 $('#dexBtn').addEventListener('pointerdown', e => { e.preventDefault(); $('#card').classList.remove('show'); $('#dex').classList.toggle('show'); });
@@ -387,7 +522,7 @@ function frame(dt) {
     const k = 1 - Math.exp(-dt * 10);
     cam.tx = lerp(cam.tx, P.x, k); cam.ty = lerp(cam.ty, P.ry + 1.6, k); cam.tz = lerp(cam.tz, P.z, k);
     let dist = (portrait ? 11 : 9) * (G.state === 'ending' ? 1.6 : 1);
-    if (G.state === 'intro') dist = 7;
+    if (talk) dist = 7;
     target = [cam.tx, cam.ty, cam.tz];
     // 鏡頭被地形或大樓擋住時：先試著抬高，仍擋住再拉近
     const reach = pitch => {
@@ -496,13 +631,14 @@ function loop(now) {
   G.particles = G.particles.filter(p => p.life > 0);
   frame(dt);
   if (G.state !== 'title') { hud(); drawMini(); }
+  if (radarOpen) drawRadar();
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
 
 // 測試用：?play 跳過片頭，?awake=n 直接喚醒 n 處，?at=sea|peak|city|gate 傳送
-if (params.has('play') || params.has('at') || params.has('awake')) {
-  start(); line = LINES.length - 1; nextLine();
+if (params.has('play') || params.has('at') || params.has('awake') || params.has('geo')) {
+  start(params.has('geo') ? 'geo' : 'island'); while (talk) nextLine();
   const a = +params.get('awake') || 0; G.collected = COST * a;
   for (let i = 0; i < a; i++) awaken(NODES[i]);
   const to = params.get('at');
@@ -510,4 +646,4 @@ if (params.has('play') || params.has('at') || params.has('awake')) {
   if (params.has('yaw')) cam.yaw = +params.get('yaw');
   if (params.has('pitch')) cam.pitch = +params.get('pitch');
 }
-window.__game = { G, P, cam, NODES, motes, input, awaken, doSense, SPOTS };
+window.__game = { G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
