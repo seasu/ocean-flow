@@ -22,22 +22,23 @@ const bell = r.mesh(bellMesh());
 const ground = (x, z) => world.height(x, z);
 const at = ([x, z]) => [x + 0.5, ground(x + 0.5, z + 0.5), z + 0.5];
 
-// 第一階：台北四獸山（虎、豹、獅、象）；第二階的三處靈脈先放在島上預告
-const SHOUSHAN = '四獸山位在台北市信義區東南，屬於南港山系。四座小山因為外形像虎、豹、獅、象而得名，步道彼此相連。';
+// 第一階：四獸靈門（象→虎→豹→獅，依序開啟）；第二階的三處靈脈先放在島上預告
+const SHOUSHAN = '四獸山位在台北市信義區東南，屬於南港山系。四座小山因為外形像象、虎、豹、獅而得名，步道彼此相連，就在城市邊上。';
 const NODES = [
-  { id: 'tiger', stage: 1, name: '虎山', icon: '🐯', hint: '101 東北邊的山', real: '現世：善導寺', pos: at(PLACES.tiger), col: hex('#ffb35c'), bell: 196,
-    info: '四獸山最北的一座。虎山自然步道沿著溪谷走，林蔭濃密，是觀察青蛙、蝴蝶等生態的好地方。' },
-  { id: 'leopard', stage: 1, name: '豹山', icon: '🐆', hint: '虎山南邊的山', real: '現世：濟南教會', pos: at(PLACES.leopard), col: hex('#ffd76a'), bell: 220,
-    info: '四獸山裡比較少人知道、也比較安靜的一座，山徑和虎山、獅山相連，適合慢慢走。' },
-  { id: 'lion', stage: 1, name: '獅山', icon: '🦁', hint: '豹山西南邊的山', real: '現世：台灣文學基地', pos: at(PLACES.lion), col: hex('#ffc58a'), bell: 174.6,
-    info: '山形像一頭伏臥的獅子。走在步道上，可以從樹梢間望見信義區的城市天際線。' },
-  { id: 'elephant', stage: 1, name: '象山', icon: '🐘', hint: '最靠近 101 的山', real: '現世：華山1914', pos: at(PLACES.elephant), col: hex('#cfe3ff'), bell: 146.8,
+  { id: 'elephant', stage: 1, name: '象門', hill: '象山', seal: '第一印', virtue: '穩定・記憶・承載', icon: '🐘', hint: '最靠近 101 的山', real: '現世：華山1914', pos: at(PLACES.elephant), col: hex('#cfe3ff'), bell: 146.8,
     info: '海拔 183 公尺，是看台北 101 和城市夜景最熱門的步道。山頂有幾塊大石頭，很多人坐在上面等夕陽。' },
+  { id: 'tiger', stage: 1, name: '虎門', hill: '虎山', seal: '第二印', virtue: '行動・勇氣・爆發', icon: '🐯', hint: '101 東北邊的山', real: '現世：台灣文學基地', pos: at(PLACES.tiger), col: hex('#ffb35c'), bell: 196,
+    info: '四獸山最北的一座。虎山自然步道沿著溪谷走，林蔭濃密，是觀察青蛙、蝴蝶等生態的好地方。' },
+  { id: 'leopard', stage: 1, name: '豹門', hill: '豹山', seal: '第三印', virtue: '敏捷・感知・身法', icon: '🐆', hint: '虎山南邊的山', real: '現世：濟南教會', pos: at(PLACES.leopard), col: hex('#ffd76a'), bell: 220,
+    info: '四獸山裡比較少人知道、也比較安靜的一座，山徑和虎山、獅山相連，適合慢慢走。' },
+  { id: 'lion', stage: 1, name: '獅門', hill: '獅山', seal: '第四印', virtue: '威勢・領導・氣運', icon: '🦁', hint: '豹山西南邊的山', real: '現世：善導寺', pos: at(PLACES.lion), col: hex('#ffc58a'), bell: 174.6,
+    info: '山形像一頭伏臥的獅子。走在步道上，可以從樹梢間望見信義區的城市天際線。' },
   { id: 'city', stage: 2, name: '城之回聲', icon: '🏙', pos: at(PLACES.city), col: hex('#8fa4b5') },
   { id: 'sea', stage: 2, name: '海之流痕', icon: '🌊', pos: at(PLACES.sea), col: hex('#8fa4b5') },
   { id: 'peak', stage: 2, name: '山之鐘聲', icon: '⛰', pos: at(PLACES.peak), col: hex('#8fa4b5') },
 ];
 const S1 = NODES.filter(n => n.stage === 1);
+const nextGate = () => S1.find(n => !n.awake);
 for (const n of NODES) {
   n.mesh = r.mesh(nodeMesh(n.id)); n.awake = false; n.charge = 0; n.vein = null; n.flash = 0;
   if (n.stage === 1) { n.beast = r.mesh(beastMesh(n.id)); n.face = Math.atan2(56 - n.pos[0], 56 - n.pos[2]) + Math.PI; }
@@ -138,22 +139,22 @@ function hud() {
     hudKey = key;
     $('#lv').textContent = 'Lv.' + lv;
     $('#dexBtn').textContent = `📖 台灣之美 ${found}/${SPOTS.length}`;
-    $('#dexList').innerHTML = '<li class="sec">山林徑・台北四獸山</li>'
-      + S1.map(n => n.awake ? `<li><b>${n.icon} ${n.name}</b><small>山林徑・台北四獸山</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>四獸山</small></li>`).join('')
+    $('#dexList').innerHTML = '<li class="sec">山林徑・四獸靈門</li>'
+      + S1.map(n => n.awake ? `<li><b>${n.icon} ${n.name}・${n.hill}</b><small>${n.seal}・${n.virtue}</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`).join('')
       + (visited.size ? '<li class="sec">文化徑・現世機緣</li>' + REAL.filter(x => visited.has(x.id)).map(x => `<li><b>${x.name}</b><small>${x.sub}</small><p>${x.text}</p></li>`).join('') : '')
       + '<li class="sec">台灣之美</li>'
       + SPOTS.map(sp => sp.found ? `<li><b>${sp.name}</b><small>${sp.area}</small><p>${sp.text}</p></li>` : `<li class="lock"><b>？？？</b><small>${sp.area.split('・')[0]}</small></li>`).join('');
     $('#qi').textContent = `靈光 ${avail()}`;
     $('#qibar').style.width = Math.min(100, avail() / COST * 100) + '%';
     if (!G.gateOpen) {
-      $('#qtitle').textContent = `第一階・山林徑：喚醒四獸山（${G.awakened}/4）`;
+      $('#qtitle').textContent = `第一階・山林徑：四獸靈門（${G.awakened}/4）`;
       $('#qchips').innerHTML = S1.map(n => `<span class="${n.awake ? 'done' : ''}">${n.icon}${n.awake ? '✓' : ''}</span>`).join('');
-      $('#qlist').innerHTML = S1.map(n => `<li class="${n.awake ? 'done' : ''}"><span>${n.awake ? '✓' : n.icon}</span>${n.name}<small>${n.awake ? '已甦醒' : G.geo ? n.real + '（或到島上 101 東邊）' : n.hint}</small></li>`).join('')
-        + `<li class="note">每座需要 ${COST} 點靈光・第二階：城之回聲、海之流痕、山之鐘聲（尚未開放）</li>`;
+      $('#qlist').innerHTML = S1.map(n => `<li class="${n.awake ? 'done' : n === nextGate() ? '' : 'wait'}"><span>${n.awake ? '✓' : n.icon}</span>${n.seal}・${n.name}<small>${n.awake ? n.virtue : n !== nextGate() ? '等前一印開啟' : G.geo ? n.real + '（或到島上 101 東邊的' + n.hill + '）' : n.hint + '・' + n.hill}</small></li>`).join('')
+        + `<li class="note">依序 象→虎→豹→獅，每印需要 ${COST} 點靈光・四獸共鳴後開啟台北靈門・第二階：城之回聲、海之流痕、山之鐘聲（尚未開放）</li>`;
     } else {
-      $('#qtitle').textContent = '前往山門';
+      $('#qtitle').textContent = '四獸共鳴・前往台北靈門';
       $('#qchips').innerHTML = '<span class="done">⛩</span>';
-      $('#qlist').innerHTML = `<li><span>⛩</span>西側平原的紅色牌樓<small>阿汐在那裡等你</small></li>`;
+      $('#qlist').innerHTML = (G.geo ? `<li><span>⛩</span>回到會場<small>台北靈門在起點等你</small></li>` : '') + `<li><span>⛩</span>島上西側平原的紅色牌樓<small>阿汐在那裡等你</small></li>`;
     }
   }
   const sb = $('#btnSense');
@@ -189,20 +190,21 @@ function drawMini() {
 // ---------- 劇情對話 ----------
 const LINES = [
   '你也聽見了嗎？山裡，有一陣不存在的鐘聲。',
-  '山有脈，海有流，人亦有自己的道。這座島上，有三處靈脈還在沉睡。',
+  '山有脈，海有流，人亦有自己的道。城市邊上，有四座守門的山還在沉睡。',
   '收集發光的「靈光」，按「感知」就能看見平常看不見的東西。',
-  '第一步，先去台北 101 東邊，喚醒守護城市的四獸山：虎山、豹山、獅山、象山。',
+  '台北 101 東邊的四獸山，是城市之流和山之流交會的四道靈門。',
+  '依序開啟：象門、虎門、豹門、獅門。四印齊了，四獸共鳴，台北靈門就會打開。',
   '路上也去看看這座島：日月潭、阿里山、太魯閣、墾丁……每一處都會收進你的圖鑑。',
-  '我在西邊的山門等你。走出去，遇見你的機緣。',
+  '我在西邊的台北靈門等你。走出去，遇見你的機緣。',
 ];
 const GEO_LINES = [
   '你也聽見了嗎？這座城市底下，有一陣不存在的鐘聲。',
   '山有脈，海有流，人亦有自己的道。靈脈就藏在我們身邊的街道裡。',
   '打開「現世」雷達，走到附近的地點。靠近時，手機會感應到機緣。',
-  '在城裡走一段文化徑，就能喚醒山林徑上的守護獸。山與城，本來就連在一起。',
-  '虎在善導寺、豹在濟南教會、獅在台灣文學基地、象在華山1914。',
+  '四獸山是城市之流和山之流交會的四道靈門。走一段文化徑，就能開啟山林徑上的靈門。',
+  '依序走：象門在華山1914，虎門在台灣文學基地，豹門在濟南教會，獅門在善導寺。',
   '走人行道、注意來車喔。到了地點，牠們就會現身。',
-  '四獸都醒來之後回到這裡，打開起源之門。走出去，遇見你的機緣。',
+  '四印齊了，四獸共鳴，就回到這裡打開台北靈門。走出去，遇見你的機緣。',
 ];
 let talk = null;
 function say(lines, done, who = '阿汐') {
@@ -224,8 +226,8 @@ function start(mode) {
   if (G.geo) geo.start();
   say(G.geo ? GEO_LINES : LINES, () => {
     G.state = 'play'; $('#hud').classList.add('play'); XI.wave = false;
-    if (G.geo) { pop('第一階：喚醒四獸山', 'gold'); openRadar(); }
-    else pop('第一階：喚醒四獸山', 'gold');
+    pop('第一印：象門', 'gold');
+    if (G.geo) openRadar();
   });
   try { if (matchMedia('(pointer: coarse)').matches && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => { }); } catch { }
 }
@@ -238,8 +240,7 @@ const DIRS = ['北', '東北', '東', '東南', '南', '西南', '西', '西北'
 function doSense() {
   if (G.state !== 'play' || G.senseCd > 0) return;
   G.sense = 6; G.senseCd = 9; G.pulse = [P.x, P.z, 0, 1]; sfx.sense();
-  const left = S1.filter(n => !n.awake);
-  const target = left.length ? left.sort((a, b) => Math.hypot(a.pos[0] - P.x, a.pos[2] - P.z) - Math.hypot(b.pos[0] - P.x, b.pos[2] - P.z))[0] : { name: '山門', pos: GATE };
+  const target = nextGate() || { name: '台北靈門', pos: GATE };
   const dx = target.pos[0] - P.x, dz = target.pos[2] - P.z;
   const ang = Math.atan2(dx, -dz), dir = DIRS[(Math.round(ang / (Math.PI / 4)) + 8) % 8];
   toast(`感知：${target.name} 在${dir}方 ${Math.round(Math.hypot(dx, dz))} 步`);
@@ -265,23 +266,31 @@ function buildVein(n) {
 function awaken(n) {
   n.awake = true; n.flash = 1; G.spent += COST; G.awakened++;
   sfx.bell(n.bell || 196);
-  pop(`${n.icon} ${n.name}甦醒了`, 'gold');
-  setTimeout(() => showCard(n.name, '山林徑・台北四獸山', n.info + (G.awakened === 1 ? '\n\n' + SHOUSHAN : ''), `第一階・四獸山 ${G.awakened}/4`, n.id), 1300);
+  pop(`${n.seal}・${n.icon} ${n.name}開啟`, 'gold');
+  setTimeout(() => showCard(`${n.name}・${n.hill}`, `山林徑・${n.seal}・${n.virtue}`, n.info + (G.awakened === 1 ? '\n\n' + SHOUSHAN : ''), `四獸靈門 ${G.awakened}/4・${n.virtue}`, n.id), 1300);
   burst(n.pos[0], n.pos[1] + 1.5, n.pos[2], [1, 0.85, 0.45], 70, 8);
   buildVein(n);
   G.spiritTarget = G.awakened / 4 * 0.8;
   setSpirit(G.spiritTarget);
   try { navigator.vibrate && navigator.vibrate([40, 60, 80]); } catch { }
-  if (G.awakened === 4) setTimeout(openGate, 4000);
-  else setTimeout(() => toast(`四獸山還有 ${4 - G.awakened} 座在沉睡`), 1400);
+  if (G.awakened === 4) setTimeout(resonance, 3600);
+  else { const nx = nextGate(); setTimeout(() => toast(`下一印：${nx.icon} ${nx.name}（${G.geo ? nx.real.replace('現世：', '') : nx.hill}）`), 1400); }
+}
+
+// 四獸共鳴：四座靈門的光同時升起，台北靈門隨後開啟
+function resonance() {
+  pop('四獸共鳴', 'gold'); sfx.bell(146.8); setTimeout(() => sfx.bell(196), 220); setTimeout(() => sfx.bell(220), 440); setTimeout(() => sfx.bell(174.6), 660);
+  for (const n of S1) { n.flash = 1; burst(n.pos[0], n.pos[1] + 2, n.pos[2], [1, 0.85, 0.45], 50, 9); }
+  try { navigator.vibrate && navigator.vibrate([60, 60, 60, 60, 160]); } catch { }
+  setTimeout(openGate, 2600);
 }
 
 function openGate() {
   G.gateOpen = true; G.gateT = 0; sfx.gate();
-  pop('山門已開啟', 'gold');
+  pop('台北靈門已開啟', 'gold');
   XI.x = GATE[0] + 2.2; XI.z = GATE[2] - 2; XI.yaw = Math.PI; XI.wave = true;
   burst(GATE[0], GATE[1] + 3, GATE[2], [1, 0.9, 0.5], 90, 10);
-  setTimeout(() => toast(G.geo ? '阿汐：「回到起源之門（黑客松會場），或到島上西邊的山門找我。」' : '阿汐：「我在山門等你。」'), 1500);
+  setTimeout(() => toast(G.geo ? '阿汐：「城市本身，也存在流。回到起點打開台北靈門吧。」' : '阿汐：「城市本身，也存在流。我在台北靈門等你。」'), 1500);
 }
 
 function blocked(x, z, y, step) {
@@ -354,7 +363,8 @@ function updateGame(dt) {
     n.flash = Math.max(0, n.flash - dt * 0.6);
     if (n.awake) continue;
     const d = Math.hypot(n.pos[0] - P.x, n.pos[2] - P.z);
-    if (n.stage === 2) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; toast(`${n.name}要到第二階才會甦醒，先去喚醒四獸山吧`); } continue; }
+    if (n.stage === 2) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; toast(`${n.name}要到第二階才會甦醒，先開啟四獸靈門吧`); } continue; }
+    if (n !== nextGate()) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); const nx = nextGate(); toast(`${n.name}還沒回應。靈門要依序開啟，先去${nx.name}（${nx.hill}）`); } continue; }
     if (d < 2.6 && Math.abs(P.y - n.pos[1]) < 3) {
       if (avail() >= COST) {
         n.charge += dt / 1.6; charging = n;
@@ -365,7 +375,7 @@ function updateGame(dt) {
   const pr = $('#prog');
   if (charging && !charging.awake) { pr.classList.add('show'); pr.style.setProperty('--p', (charging.charge * 100).toFixed(1) + '%'); }
   else pr.classList.remove('show');
-  // 山門
+  // 台北靈門
   if (G.gateOpen) {
     G.gateT += dt;
     if (Math.abs(P.x - GATE[0]) < 2.4 && Math.abs(P.z - GATE[2]) < 0.9 && G.state === 'play') ending();
@@ -424,7 +434,7 @@ function renderList() {
   const items = REAL.map(s => ({ s, d: meters(geo.pos, s) })).sort((a, b) => a.d - b.d);
   $('#rlist').innerHTML = items.map(({ s, d }) => {
     const done = visited.has(s.id), node = s.node ? NODES.find(n => n.id === s.node) : null;
-    const tag = s.id === 'venue' ? (G.gateOpen ? '可以開門了' : '起點與終點') : node ? (done || node.awake ? `${node.icon} ${node.name}・已甦醒` : `${node.icon} ${node.name}`) : done ? '已結緣' : '機緣';
+    const tag = s.id === 'venue' ? (G.gateOpen ? '可以開門了' : '起點與終點') : node ? (node.awake ? `${node.icon} ${node.name}・已開啟` : node === nextGate() ? `${node.seal}・${node.icon} ${node.name}` : `${node.seal}・${node.name}`) : done ? '已結緣' : '機緣';
     return `<li data-id="${s.id}" class="${done ? 'done' : ''} ${d <= s.r ? 'near' : ''} ${node ? 'key' : ''}"><div><b>${s.name}</b><small>${s.sub}</small></div>`
       + `<span><em>${tag}</em>${fmt(d)}・${dirName(geo.pos, s)}方</span>`
       + (calib ? `<button data-cal="${s.id}">設為目前位置</button>` : '') + `</li>`;
@@ -489,8 +499,8 @@ function drawRadar() {
   const enc = $('#enc');
   if (s) {
     enc.classList.add('show');
-    enc.querySelector('span').textContent = s.id === 'venue' ? (G.gateOpen ? '起源之門感應到你了' : '你在起點：起源之門') : `感應到機緣：${s.name}`;
-    enc.querySelector('button').textContent = s.id === 'venue' ? (G.gateOpen ? '打開起源之門' : '聽阿汐說') : '進入機緣';
+    enc.querySelector('span').textContent = s.id === 'venue' ? (G.gateOpen ? '台北靈門感應到你了' : '你在起點：台北靈門') : `感應到機緣：${s.name}`;
+    enc.querySelector('button').textContent = s.id === 'venue' ? (G.gateOpen ? '打開台北靈門' : '聽阿汐說') : '進入機緣';
   } else enc.classList.remove('show');
   if (G.t - listT > 0.5) { listT = G.t; renderList(); }
 }
@@ -501,9 +511,9 @@ function encounter(s) {
     const left = S1.filter(n => !n.awake).map(n => `${n.name}（${REAL.find(r => r.node === n.id).name}）`);
     if (G.gateOpen) {
       P.x = GATE[0] + 0.5; P.z = GATE[2] - 4; P.y = P.ry = footGround(P.x, P.z); cam.yaw = 0; cam.tx = P.x; cam.tz = P.z;
-      G.state = 'talk'; say(['起源之門就在你面前。', '走過去吧。這裡，是起源。'], () => { G.state = 'play'; });
+      G.state = 'talk'; say(['四獸共鳴，台北靈門就在你面前。', '城市本身，也存在流。走過去吧。'], () => { G.state = 'play'; });
     } else {
-      G.state = 'talk'; say(['這裡是起點，也是終點。', `四獸山還有 ${left.length} 座在沉睡：${left.join('、')}。`, '打開「現世」雷達，沿著人行道走過去吧。'], () => { G.state = 'play'; });
+      G.state = 'talk'; say(['這裡是起點，也是終點。', `四獸靈門還有 ${left.length} 道沒開：${left.join('、')}。`, nextGate() ? `下一印是${nextGate().name}，要依序開喔。` : '四獸正在共鳴，等一下。', '打開「現世」雷達，沿著人行道走過去吧。'], () => { G.state = 'play'; });
     }
     return;
   }
@@ -513,6 +523,12 @@ function encounter(s) {
     P.x = node.pos[0]; P.z = node.pos[2] + 4; P.y = P.ry = footGround(P.x, P.z) + 0.2; P.vy = 0; P.swim = false;
     cam.yaw = Math.PI; cam.tx = P.x; cam.tz = P.z; cam.ty = P.y + 1.6;
     G.state = 'talk';
+    const nx = nextGate();
+    if (!node.awake && node !== nx) {
+      G.bonus += 1;
+      say([`${node.icon} ${node.name}的影子一閃就不見了。`, `靈門要依序開啟。先去${nx.name}：${REAL.find(r => r.node === nx.id).name}。`], () => { G.state = 'play'; setTimeout(() => showCard(s.name, '現世機緣・' + s.sub, s.text, `${node.seal}・等前一印開啟`, s.id), 400); });
+      return;
+    }
     say(s.story, () => {
       G.state = 'play';
       if (!node.awake) { G.bonus += COST; awaken(node); }
@@ -538,7 +554,7 @@ $('#dex').addEventListener('pointerdown', e => { e.preventDefault(); $('#dex').c
 function ending() {
   G.state = 'ending'; G.spiritTarget = 1; setSpirit(1); sfx.gate();
   const s = Math.round(G.playT), mm = String(Math.floor(s / 60)).padStart(2, '0'), ss = String(s % 60).padStart(2, '0');
-  $('#stats').textContent = `走一條路，認識台北這座城。\n第一階完成・四獸山 4/4　用時 ${mm}:${ss}　靈光 ${G.collected}/${motes.length}　台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}`;
+  $('#stats').textContent = `走一條路，認識台北這座城。\n四獸共鳴・台北靈門開啟　象・虎・豹・獅 4/4\n用時 ${mm}:${ss}　靈光 ${G.collected}/${motes.length}　台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}`;
   setTimeout(() => $('#ending').classList.add('show'), 600);
   $('#hud').classList.remove('play');
 }
@@ -640,7 +656,7 @@ function frame(dt) {
     r.box(m.x, y, m.z, 0.8, 0.8, 0.8, [0.4, 0.85, 1], 1, vis * 0.25, -G.t + m.ph);
   }
   for (const n of NODES) {
-    const bright = n.stage === 2 ? 0.05 : n.awake ? 0.22 : 0.1 + (G.sense > 0 ? 0.25 : 0) + n.charge * 0.3;
+    const bright = n.stage === 2 ? 0.05 : n.awake ? 0.22 : n !== nextGate() ? 0.06 : 0.14 + (G.sense > 0 ? 0.25 : 0) + n.charge * 0.3;
     r.box(n.pos[0], n.pos[1] + 40, n.pos[2], 0.6, 80, 0.6, n.awake ? C.gold : n.col, 1, bright);
     r.box(n.pos[0], n.pos[1] + 40, n.pos[2], 1.6, 80, 1.6, n.awake ? C.gold : n.col, 1, bright * 0.25);
     if (n.flash > 0) r.box(n.pos[0], n.pos[1] + 2, n.pos[2], 6 * (2 - n.flash), 0.2, 6 * (2 - n.flash), C.gold, 1, n.flash);
