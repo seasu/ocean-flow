@@ -65,8 +65,27 @@ for (const [id, keys] of Object.entries(WANT)) {
       images.push({ file, subject: im.subject || '', src: im.src });
     } catch (e) { console.warn('photo', im.src, e.message); }
   }
-  spots[id] = { name: a.name, introduction: (a.introduction || '').trim(), address: a.address || '', url: a.url || '', modified: a.modified || '', images };
+  spots[id] = { tid: a.id, name: a.name, introduction: (a.introduction || '').trim(), address: a.address || '', url: a.url || '', modified: a.modified || '', images, i18n: {} };
   console.log(id, '→', a.name, images.length, '張照片');
+}
+
+// 英文、日文版：同一個景點 id 在各語系 API 都一樣，抓到就存進 i18n
+for (const lang of ['en', 'ja']) {
+  const byId = new Map();
+  try {
+    for (let page = 1; page < 60; page++) {
+      const j = await getJSON(`https://www.travel.taipei/open-api/${lang}/Attractions/All?page=${page}`);
+      if (!j.data || !j.data.length) break;
+      for (const a of j.data) byId.set(a.id, a);
+      if (byId.size >= (j.total || Infinity)) break;
+    }
+  } catch (e) { console.warn(lang, e.message); }
+  console.log(lang, 'attractions', byId.size);
+  for (const [id, sp] of Object.entries(spots)) {
+    const a = byId.get(sp.tid);
+    if (a) spots[id].i18n[lang] = { name: a.name, introduction: (a.introduction || '').trim(), url: a.url || '' };
+    console.log(lang, id, a ? '→ ' + a.name : '沒有這個語系的資料');
+  }
 }
 
 await writeFile('data/taipei-travel.json', JSON.stringify({
