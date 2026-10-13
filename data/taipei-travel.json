@@ -2,7 +2,7 @@
   "source": "臺北旅遊網 Open API（臺北市政府觀光傳播局）",
   "sourceUrl": "https://www.travel.taipei/open-api",
   "license": "依臺北市政府資料開放授權條款使用，需標示出處；使用前請再確認最新條款",
-  "fetchedAt": "2026-10-13T17:22:08.625Z",
+  "fetchedAt": "2026-10-13T17:23:00.777Z",
   "spots": {
     "101": {
       "name": "台北101",
@@ -10,15 +10,47 @@
       "address": "110 臺北市信義區信義路5段7號",
       "url": "https://www.travel.taipei/zh-tw/attraction/details/217",
       "modified": "2026-05-22 15:15:35 +08:00",
-      "images": []
+      "images": [
+        {
+          "file": "data/photos/101-1.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/573620"
+        },
+        {
+          "file": "data/photos/101-2.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/573621"
+        },
+        {
+          "file": "data/photos/101-3.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/573622"
+        }
+      ]
     },
     "elephant": {
-      "name": "象山公園",
-      "introduction": "象山公園前身為中強公園，因依傍象山而興闢，將其更名為「象山公園」，更符合地理環境特色及民眾期待。而公園中棲息著唯一以臺北命名的保育類動物「台北樹蛙」，如此珍貴的生態資源值得人們細心呵護，進而由其中學習與自然和諧共處。\r\n\r\n因此，公園中許多設施的設計均融入台北樹蛙的語彙或顏色，如鑲嵌於地面的樹蛙腳印，象徵自然生命的跳躍；公園內的園燈上也有樹蛙剪影和樹蔭相映成趣，座椅扶手的顏色、公共廁所的牆面、天花板等，均呼應象山公園特有之生態資源。\r\n\r\n\r\n公廁外牆特別邀請心靈畫家曾日昇老師透過花卉、綠草、樹蛙彩繪帶給大家無形的生命能量，彩繪緊鄰兒童遊戲場，讓遊玩中的兒童及休憩中的家長看到這些鮮豔的花朵，身心就會愉快放鬆。\r\n\r\n\r\n象山公園兒童遊戲場的設計，呼應當地特有的台北樹蛙資源，整體空間以「樹蛙歷險記」為設計概念，透過平面與中央地景丘的營造，象徵樹蛙於水中、陸地、樹上的三態生活。\r\n\r\n\r\n地景丘同時結合了攀岩、爬繩、滑梯、孔洞、階梯等多樣設施，讓孩童們自由的發揮，創造屬於自己的玩法。另外亦有攀爬網組，包含吊橋踏板、蜘蛛網狀及X形網組合，供大孩子們運用肌肉伸展體驗。遊戲場中有3種款式的鞦韆，可供6歲以上孩童使用的一般鞦韆、6歲以下幼童為主的包覆式鞦韆，以及國內首座雙人鞦韆，可供2名孩童或家長與孩子共乘使用，使家長與孩童享受親密互動。同時，屬於無障礙式的搖滾盤，設置於遊戲丘下方，孩子們或躺或坐，甚至站立其上，體驗搖晃或擺動的驚喜感。\r\n\r\n(文字資料部分來自臺北市工務局)",
-      "address": "110 臺北市信義區信義路5段150巷",
-      "url": "https://www.travel.taipei/zh-tw/attraction/details/380",
-      "modified": "2026-06-11 15:04:22 +08:00",
-      "images": []
+      "name": "南港山系_象山親山步道",
+      "introduction": "象山海拔183公尺，步道全長1450公尺，全程約需1小時40分。因外形似象頭而得名，位於臺北盆地東南方的信義區，與虎山地質相同主要由砂岩組成，因造山作用步道中可見黃褐色陡峭的岩壁與巨石，加上自然環境生物、鳥類種類繁多，使得整座山如同一座天然生態樂園般，成為民眾接近淺山、享受戶外綠林悠閒時光的好去處。\r\n\r\n象山擁有稜線、岩壁、山坡、山窪、山谷等各種不同微環境，因而孕育出數十種蕨類。蕨類在象山處處可見，有的附著在樹幹上，有的長在岩石、坡地上，有的密佈在潮濕的林下。其中金狗毛蕨族群龐大，數量居臺北市之冠，在過去醫藥不發達的年代，它可是民間用來止血的最佳良藥。\r\n\r\n另外在開闊、向陽且潮濕山窪區，還有自侏儸紀時期就存在的古老蕨類「筆筒樹」。筆筒樹群聚可是臺北市區最珍貴的生態特色，因為筆筒樹成群林立的現象，全世界只有臺灣北部才能看得到。\r\n\r\n象山位在四獸山步道系統中最高點，由於前方無屏障，登高遠望視野遼闊，不僅信義商圈一覽無遺－101金融大樓、世貿中心、華納威秀、新光三越等醒目建築歷歷可數，臺北盆地風光也盡收眼底。其尾稜延伸嵌入信義區中強公園，成為當地居民晨昏散步的最佳去處，也是近山民眾假日休閒、舒緩身心的綠色地帶。\r\n\r\n六巨石\r\n象山上巨石林立的奇特景象，又稱老萊峽。從這裡攀上巨石可以一覽繁華的信義商圈，是一處熱門的拍照景點，清晨上山可以欣賞臺北101大樓在晨曦中初醒的景象，黃昏更可欣賞信義區都會華廈，夕陽餘暉西下、華燈初上的夜晚景象，十分亮麗耀眼。\r\n\r\n逸賢亭（象山頂）\r\n位於逸賢亭象山頂、六角亭旁步道盡頭的平台，視野展望極佳，可以欣賞象山的全貌，尤其是象頭與象鼻頗具傳神。鼻樑處即為永春高中，長長的象鼻子則是稜線深入松山路與松德院區之間的平台。\r\n\r\n一線天\r\n象山親山步道近松德院區方向有處名為一線天駐腳點，因兩壁山脊線十分接近，巨崖岩壁突出遮天，山友自步道仰頭望天，只見崖壁縫隙間的天空又窄又細，因而稱為一線天。\r\n\r\n至於鳥瞰台北盆地的最佳位置，自然是位於稜線上、視野開闊的「超然亭」；有此「超然」名號，便是因為由此觀景居象山眾涼亭之冠。站立於超然亭的平台上，近可見山下的信義計畫區，放遠望去則是圓山、北投焚化爐、觀音山及大屯火山群各景點，不論是跨年或國慶日施放煙火，不少人還會特地來此觀賞花火綻放，足見其魅力所在。\r\n\r\n繞行到巨石公園階梯附近，有一塊碩大的巨石，上面有人為雕刻出來的石階，可拾級而上眺望臺北盆地。一路前行間，由左側山腰、山脊再下到右側山腰線，從不同角度俯瞰臺北盆地之美，象山迷人之處盡在其中。\r\n\r\n步道沿途都設有解說牌，引導親山訪客認識整個山頭的特色，所以這裡也是最受歡迎的自然教室。一路上不愁沒有生態導覽，只要「按圖索驥」，自己就是山林解說員。\r\n\r\n潮濕的環境中，蝸牛的族群也十分可觀，像是斯文豪氏大蝸牛、煙管蝸牛，幾乎在整個山區都看得到。這本是低海拔的原始闊葉林，生態豐富多元，綠意萬千的山林，還有更多的驚喜等待你自己慢慢去發掘呢！\r\n\r\n登上象山之後，如果你的體力充沛，或是想伸展筋骨，步道兩旁還有許多強體力及肺活量的體能設施，只見大夥在山頂的逸賢亭打個尖、做個操，還有精力無窮的小朋友穿梭其間，運動休閒一兼二顧，很適合全家來活動。",
+      "address": "110 臺北市信義區信義路五段150巷22弄",
+      "url": "https://www.travel.taipei/zh-tw/attraction/details/185",
+      "modified": "2026-05-22 16:02:22 +08:00",
+      "images": [
+        {
+          "file": "data/photos/elephant-1.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/222131"
+        },
+        {
+          "file": "data/photos/elephant-2.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/222132"
+        },
+        {
+          "file": "data/photos/elephant-3.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/222133"
+        }
+      ]
     },
     "tiger": {
       "name": "南港山系_虎山親山步道",
@@ -26,7 +58,23 @@
       "address": "110 臺北市信義區福德街251巷慈惠堂登山口或福德街221巷進入至真光禪寺登山口",
       "url": "https://www.travel.taipei/zh-tw/attraction/details/184",
       "modified": "2026-05-22 16:02:46 +08:00",
-      "images": []
+      "images": [
+        {
+          "file": "data/photos/tiger-1.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/64349"
+        },
+        {
+          "file": "data/photos/tiger-2.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/64350"
+        },
+        {
+          "file": "data/photos/tiger-3.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/64351"
+        }
+      ]
     },
     "huashan": {
       "name": "華山1914文化創意產業園區",
@@ -34,7 +82,23 @@
       "address": "100 臺北市中正區八德路一段1號",
       "url": "https://www.travel.taipei/zh-tw/attraction/details/1592",
       "modified": "2026-06-16 17:53:26 +08:00",
-      "images": []
+      "images": [
+        {
+          "file": "data/photos/huashan-1.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/325920"
+        },
+        {
+          "file": "data/photos/huashan-2.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/325921"
+        },
+        {
+          "file": "data/photos/huashan-3.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/325922"
+        }
+      ]
     },
     "qidong": {
       "name": "臺灣文學基地",
@@ -42,7 +106,23 @@
       "address": "100 臺北市中正區濟南路二段27號",
       "url": "https://www.travel.taipei/zh-tw/attraction/details/2216",
       "modified": "2026-06-25 11:34:58 +08:00",
-      "images": []
+      "images": [
+        {
+          "file": "data/photos/qidong-1.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/193197"
+        },
+        {
+          "file": "data/photos/qidong-2.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/193198"
+        },
+        {
+          "file": "data/photos/qidong-3.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/193199"
+        }
+      ]
     },
     "station": {
       "name": "臺鐵臺北車站",
@@ -50,7 +130,23 @@
       "address": "100 臺北市中正區北平西路3號B1",
       "url": "https://www.travel.taipei/zh-tw/attraction/details/1726",
       "modified": "2026-06-17 10:49:53 +08:00",
-      "images": []
+      "images": [
+        {
+          "file": "data/photos/station-1.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/573463"
+        },
+        {
+          "file": "data/photos/station-2.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/573464"
+        },
+        {
+          "file": "data/photos/station-3.jpg",
+          "subject": "",
+          "src": "https://www.travel.taipei/image/573465"
+        }
+      ]
     }
   }
 }
