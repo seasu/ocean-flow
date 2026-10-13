@@ -392,7 +392,7 @@ function showCard(title, sub, text, em, key) {
   // 低調的小卡：預設只顯示一行，點開才看介紹與照片；沒點開就自己淡出
   const c = $('#card'), d = key && TT?.spots?.[key];
   c.querySelector('b').textContent = '📍 ' + title; c.querySelector('small').textContent = sub; c.querySelector('em').textContent = em;
-  c.querySelector('p').textContent = d?.introduction ? text + '\n\n' + clip(d.introduction.replace(/\s*\n\s*/g, ''), 120) : text;
+  c.querySelector('p').textContent = d?.introduction ? clip(d.introduction.replace(/\s*\n\s*/g, ''), 90) : text;
   const ph = c.querySelector('.ph'), cr = c.querySelector('.cr');
   ph.replaceChildren(...(d?.images || []).map(im => { const i = document.createElement('img'); i.src = im.file; i.alt = im.subject || d.name; i.loading = 'lazy'; i.onerror = () => i.remove(); return i; }));
   cr.replaceChildren();
