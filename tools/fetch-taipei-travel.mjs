@@ -5,7 +5,7 @@ import { mkdir, writeFile, rm } from 'node:fs/promises';
 const API = 'https://www.travel.taipei/open-api/zh-tw/Attractions/All';
 // 遊戲裡的 id → 名稱關鍵字（依序比對，越前面越優先）
 const WANT = {
-  elephant: ['象山'], tiger: ['虎山'], leopard: ['豹山'], lion: ['獅山'], shoushan: ['四獸山'],
+  elephant: ['象山親山步道', '象山'], tiger: ['虎山親山步道', '虎山'], leopard: ['豹山'], lion: ['獅山'], shoushan: ['四獸山'],
   huashan: ['華山1914'], shandao: ['善導寺'], controlyuan: ['監察院'], jinan: ['濟南教會', '濟南基督長老教會'],
   qidong: ['臺灣文學基地', '台灣文學基地', '齊東詩舍'], guanghua: ['光華數位新天地', '光華商場'],
   station: ['臺北車站', '台北車站'], '101': ['臺北101', '台北101'],
@@ -56,8 +56,9 @@ for (const [id, keys] of Object.entries(WANT)) {
   const images = [];
   for (const im of (a.images || []).slice(0, MAX_PHOTOS)) {
     try {
-      const r = await fetch(im.src);
-      if (!r.ok) continue;
+      const r = await fetch(im.src, { headers: { 'user-agent': 'Mozilla/5.0 (ocean-flow prototype)', referer: 'https://www.travel.taipei/', accept: 'image/*' } });
+      if (!r.ok) { console.warn('photo', im.src, r.status); continue; }
+      if (!(r.headers.get('content-type') || '').startsWith('image/')) { console.warn('photo', im.src, r.headers.get('content-type')); continue; }
       const ext = (im.ext || '.jpg').replace(/[^.a-z]/gi, '') || '.jpg';
       const file = `data/photos/${id}-${images.length + 1}${ext}`;
       await writeFile(file, Buffer.from(await r.arrayBuffer()));
