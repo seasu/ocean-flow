@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a1018">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>洋流：起源</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;900&display=swap">
+<style>
+/* 遊戲畫面固定深色主題 */
+:root{--bg:#0a1018;--ink:#eef3f8;--dim:#9fb0c2;--panel:rgba(10,18,30,.72);--gold:#ffcf5a;--cyan:#6fe3ff;--green:#7ee08a;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
+#c{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;display:block;touch-action:none}
+button{font-family:inherit;color:inherit;border:0;cursor:pointer}
+
+/* HUD */
+#hud{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .6s;font-weight:900}
+#hud.on{opacity:1}
+#hud .playonly{opacity:0;transition:opacity .4s}
+#hud.play .playonly{opacity:1}
+.plate{position:absolute;left:calc(12px + var(--sl));top:calc(10px + var(--st));display:flex;gap:8px;align-items:center;background:var(--panel);
+  border-radius:10px;padding:6px 10px;font-size:14px}
+.lv{background:var(--gold);color:#2a1c00;border-radius:6px;padding:0 6px}
+.qi{position:absolute;left:calc(12px + var(--sl));top:calc(46px + var(--st));display:flex;gap:6px;align-items:center;font-size:12px;color:var(--cyan);text-shadow:0 1px 0 #000}
+.qi .bar{width:84px;height:8px;background:rgba(0,0,0,.45);border-radius:8px;overflow:hidden}
+.qi .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#5cc8ff,#ffcf5a);transition:width .3s}
+.quest{position:absolute;left:calc(12px + var(--sl));top:calc(70px + var(--st));width:min(250px,58vw);background:var(--panel);border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.45;pointer-events:auto}
+.quest b{display:block;color:var(--gold);font-size:11px;letter-spacing:.12em}
+.quest ul{list-style:none;margin:4px 0 0;padding:0}
+.quest li{display:grid;grid-template-columns:20px 1fr;column-gap:2px;margin-top:3px}
+.quest li small{grid-column:2;color:var(--dim);font-weight:500;font-size:11px}
+.quest li.done{color:var(--gold)}
+.quest li.note{display:block;color:var(--dim);font-weight:500;font-size:11px;margin-top:6px}
+.quest.min ul{display:none}
+.quest b em{font-style:normal;color:var(--dim)}
+#qchips{display:none;gap:8px;margin-top:2px;font-size:15px}
+#qchips span{opacity:.55}#qchips span.done{opacity:1;color:var(--gold)}
+.quest.min #qchips{display:flex}
+#mini{position:absolute;right:calc(12px + var(--sr));top:calc(10px + var(--st));width:104px;height:104px;border-radius:12px;border:2px solid rgba(255,255,255,.25);
+  background:#1c4678;image-rendering:pixelated}
+#mute{position:absolute;right:calc(12px + var(--sr));top:calc(122px + var(--st));width:36px;height:36px;border-radius:10px;background:var(--panel);font-size:16px;pointer-events:auto}
+#pop{position:absolute;left:50%;top:calc(22% + var(--st));transform:translateX(-50%) scale(.85);opacity:0;transition:opacity .25s,transform .25s;
+  background:linear-gradient(180deg,#e9f6ff,#9fdcff);color:#06263f;font-size:clamp(16px,4.6vw,24px);padding:8px 20px;border-radius:12px;
+  border:3px solid #fff;box-shadow:0 4px 0 #2f7fb5;white-space:nowrap}
+#pop.gold{background:linear-gradient(180deg,#ffe28a,#ffb627);color:#3a2300;box-shadow:0 4px 0 #b9771a;border-color:#fff4c8}
+#pop.cyan{background:linear-gradient(180deg,#bff4ff,#56c8f0)}
+#pop.show{opacity:1;transform:translateX(-50%) scale(1)}
+#toast{position:absolute;left:50%;bottom:calc(132px + var(--sb));transform:translateX(-50%);max-width:88vw;text-align:center;font-size:13px;
+  background:rgba(0,0,0,.5);padding:6px 12px;border-radius:999px;opacity:0;color:#dff7ff}
+#toast.show{animation:toast 3.2s ease forwards}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,8px)}8%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
+#prog{position:absolute;left:50%;top:58%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;opacity:0;transition:opacity .2s;
+  background:conic-gradient(var(--gold) var(--p,0%),rgba(0,0,0,.35) 0);display:grid;place-items:center}
+#prog::before{content:"";position:absolute;inset:7px;border-radius:50%;background:rgba(10,18,30,.8)}
+#prog span{position:relative;font-size:13px;color:var(--gold)}
+#prog.show{opacity:1}
+#tag{position:absolute;left:0;top:0;font-size:12px;background:rgba(232,100,28,.9);color:#fff;padding:2px 8px;border-radius:6px;opacity:0;white-space:nowrap}
+
+/* 觸控按鈕 */
+.btn{position:absolute;pointer-events:auto;border-radius:50%;display:grid;place-items:center;font-weight:900;touch-action:none;
+  background:rgba(10,18,30,.55);border:2px solid rgba(255,255,255,.35);box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.btn:active{transform:translateY(2px);box-shadow:none}
+#btnJump{right:calc(22px + var(--sr));bottom:calc(30px + var(--sb));width:78px;height:78px;font-size:20px}
+#btnSense{right:calc(110px + var(--sr));bottom:calc(46px + var(--sb));width:62px;height:62px;font-size:14px;color:var(--cyan);overflow:hidden}
+#btnSense::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.55);height:var(--cd,0%);top:auto}
+#btnSense.ready{border-color:var(--cyan);box-shadow:0 3px 0 rgba(0,0,0,.35),0 0 14px rgba(111,227,255,.45)}
+#stick{position:absolute;width:112px;height:112px;margin:-56px 0 0 -56px;border-radius:50%;border:2px solid rgba(255,255,255,.35);background:rgba(10,18,30,.25);
+  opacity:0;left:90px;bottom:0}
+#stick.on{opacity:1}
+#stick i{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(255,255,255,.75)}
+.hint{position:absolute;left:calc(16px + var(--sl));bottom:calc(20px + var(--sb));font-size:11px;color:rgba(255,255,255,.65);font-weight:500;text-shadow:0 1px 0 #000;line-height:1.6}
+
+/* 對話框 */
+#dialog{position:fixed;left:50%;bottom:calc(18px + var(--sb));transform:translate(-50%,20px);width:min(560px,calc(100vw - 24px));background:rgba(10,18,30,.88);
+  border:2px solid rgba(255,176,46,.6);border-radius:14px;padding:12px 16px 10px;opacity:0;pointer-events:none;transition:.3s}
+#dialog.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#dialog b{color:#ffb02e;font-size:13px}
+#dialog p{margin:4px 0 6px;font-size:16px;line-height:1.6;font-weight:500}
+#dialog small{display:block;text-align:right;color:var(--dim);font-size:11px;animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.3}}
+
+/* 片頭與片尾 */
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;
+  background:radial-gradient(ellipse at 50% 120%,rgba(10,16,24,.15),rgba(6,12,22,.82) 70%);transition:opacity .8s}
+.screen.hide{opacity:0;pointer-events:none}
+.screen h1{margin:0;font-size:clamp(56px,18vw,120px);font-weight:900;letter-spacing:.12em;line-height:1;text-shadow:0 4px 24px rgba(111,227,255,.35)}
+.screen .en{font-size:13px;letter-spacing:.4em;color:var(--cyan);font-weight:500}
+.screen .tag{font-size:15px;color:#d8e6f2;font-weight:500;max-width:22em;line-height:1.7}
+.start{margin-top:10px;font-size:20px;font-weight:900;padding:14px 44px;border-radius:14px;background:linear-gradient(180deg,#ffe28a,#ffb627);color:#3a2300;
+  box-shadow:0 5px 0 #b9771a}
+.start:active{transform:translateY(3px);box-shadow:0 2px 0 #b9771a}
+.screen .how{font-size:12px;color:var(--dim);font-weight:500;line-height:1.8}
+#ending{opacity:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,rgba(40,30,10,.72),rgba(6,12,22,.92) 75%)}
+#ending.show{opacity:1;pointer-events:auto}
+#ending h2{margin:0;font-size:clamp(26px,7vw,40px);letter-spacing:.2em}
+#ending .logo{font-size:clamp(36px,11vw,64px);font-weight:900;letter-spacing:.15em}
+#stats{color:var(--gold);font-size:14px}
+@media (max-height:480px){.quest{width:220px;font-size:12px}#mini{width:84px;height:84px}#mute{top:calc(100px + var(--st))}.hint{display:none}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div class="plate"><span class="lv" id="lv">Lv.1</span>旅人・阿流</div>
+  <div class="qi playonly"><span class="bar"><i id="qibar"></i></span><span id="qi">靈光 0</span></div>
+  <div class="quest playonly" id="quest"><b>主線任務 <em>▾</em></b><div id="qtitle"></div><div id="qchips"></div><ul id="qlist"></ul></div>
+  <canvas id="mini"></canvas>
+  <button id="mute" aria-label="靜音">🔊</button>
+  <div id="pop"></div>
+  <div id="toast"></div>
+  <div id="prog"><span>啟流中</span></div>
+  <div id="tag">阿汐</div>
+  <div id="stick"><i></i></div>
+  <button class="btn playonly" id="btnSense">感知</button>
+  <button class="btn playonly" id="btnJump">跳</button>
+  <div class="hint playonly">左邊拖曳：移動<br>右邊拖曳：轉視角</div>
+</div>
+<div id="dialog"><b>阿汐</b><p></p><small>點一下繼續 ▸</small></div>
+<div class="screen" id="title">
+  <div class="en">OCEAN FLOW · ORIGIN</div>
+  <h1>洋流</h1>
+  <div class="tag">山有脈，海有流，人亦有自己的道。<br>台灣，成為第一個重新啟流的地方。</div>
+  <button class="start">走出去</button>
+  <div class="how">Mobile Web Prototype v0.1・建議開聲音<br>電腦：WASD 移動、空白鍵跳、E 感知</div>
+</div>
+<div class="screen" id="ending">
+  <h2>這裡，是起源。</h2>
+  <div class="logo">洋流：起源</div>
+  <div class="tag">走出去，遇見你的機緣。</div>
+  <div id="stats"></div>
+  <button class="start" id="again">再走一次</button>
+</div>
+<script type="module" src="src/main.js"></script>
+<script>
+  // 收合任務面板（直式手機預設收合）
+  if (innerWidth < 600) document.getElementById('quest').classList.add('min');
+  document.getElementById('quest').addEventListener('pointerdown', e => { e.currentTarget.classList.toggle('min'); });
+</script>
+</body>
+</html>
