@@ -22,9 +22,9 @@ const ground = (x, z) => world.height(x, z);
 const at = ([x, z]) => [x + 0.5, ground(x + 0.5, z + 0.5), z + 0.5];
 
 const NODES = [
-  { id: 'city', name: '城之回聲', icon: '🏙', hint: '北邊城市的廣場', pos: at(PLACES.city), col: hex('#8fe9ff') },
-  { id: 'sea', name: '海之流痕', icon: '🌊', hint: '東海小島・跳進洋流', pos: at(PLACES.sea), col: hex('#6fd2ff') },
-  { id: 'peak', name: '山之鐘聲', icon: '⛰', hint: '中央山脈最高峰', pos: at(PLACES.peak), col: hex('#ffe08a') },
+  { id: 'city', name: '城之回聲', icon: '🏙', hint: '台北城裡的廣場', pos: at(PLACES.city), col: hex('#8fe9ff') },
+  { id: 'sea', name: '海之流痕', icon: '🌊', hint: '東北外海的龜山島・乘黑潮北上', pos: at(PLACES.sea), col: hex('#6fd2ff') },
+  { id: 'peak', name: '山之鐘聲', icon: '⛰', hint: '玉山主峰', pos: at(PLACES.peak), col: hex('#ffe08a') },
 ];
 for (const n of NODES) { n.mesh = r.mesh(nodeMesh(n.id)); n.awake = false; n.charge = 0; n.vein = null; n.flash = 0; }
 const GATE = at(PLACES.gate);
@@ -49,12 +49,26 @@ const motes = [];
 }
 const COST = 3;
 
+// 台灣之美：走近就會收進圖鑑（內容為真實地景的簡介）
+const SPOTS = [
+  { id: '101', name: '台北 101', area: '台北・Taipei 101', pos: [67, 30], r: 8, text: '高 508 公尺，2004 年完工，曾是世界最高的大樓。外型取自節節高升的竹子，每年跨年的煙火是台北的招牌畫面。' },
+  { id: 'turtle', name: '龜山島', area: '宜蘭外海・Guishan Island', pos: PLACES.sea, r: 7, text: '宜蘭外海的火山島，遠看像一隻浮在海上的烏龜。對宜蘭人來說，看到龜山島就是回到家了。' },
+  { id: 'kuroshio', name: '黑潮', area: '台灣東部海域・Kuroshio Current', pos: [curX(64), 64], r: 0, text: '流經台灣東岸、一路往北的強勁暖流，海水深藍近黑而得名。它帶來溫暖的海水和豐富的魚群，也是鯨豚出沒的海路。' },
+  { id: 'taroko', name: '太魯閣峽谷', area: '花蓮・Taroko Gorge', pos: world.gorge, r: 5, text: '立霧溪花了千萬年，切穿堅硬的大理石山壁，刻出深邃的峽谷。抬頭只看得見一線天。' },
+  { id: 'sunmoon', name: '日月潭', area: '南投・Sun Moon Lake', pos: PLACES.lake, r: 8, text: '台灣最大的湖泊，湖面一邊像日輪、一邊像月鉤。湖中的拉魯島是邵族祖靈的聖地。' },
+  { id: 'yushan', name: '玉山', area: '南投・嘉義・高雄・Yushan', pos: PLACES.peak, r: 5, text: '海拔 3,952 公尺，台灣最高峰，也是東北亞第一高峰。冬天山頂偶爾積雪，遠看如白玉。' },
+  { id: 'alishan', name: '阿里山神木', area: '嘉義・Alishan', pos: PLACES.shenmu, r: 6, text: '阿里山以千年紅檜巨木、雲海、日出和森林小火車聞名。站在神木下，人顯得好小。' },
+  { id: 'kenting', name: '鵝鑾鼻燈塔', area: '屏東墾丁・Eluanbi Lighthouse', pos: world.tip, r: 6, text: '位在台灣南端的白色燈塔，1883 年點亮，被稱為「東亞之光」。往南望去，就是巴士海峽。' },
+];
+for (const sp of SPOTS) sp.found = false;
+
+
 // ---------- 狀態 ----------
 const P = { x: PLACES.spawn[0] + 0.5, z: PLACES.spawn[1] - 1.5, y: 0, ry: 0, vx: 0, vz: 0, vy: 0, yaw: 0, onGround: true, swim: false, phase: 0, move: 0 };
 P.y = P.ry = ground(P.x, P.z);
 const XI = { x: PLACES.spawn[0] + 0.5, z: PLACES.spawn[1] + 1.5, yaw: Math.PI, wave: true };
 const cam = { yaw: 0, pitch: 0.5, dist: 9, tx: P.x, ty: P.y + 1.5, tz: P.z };
-const G = { state: 'title', t: 0, playT: 0, collected: 0, spent: 0, awakened: 0, gateOpen: false, gateT: 0, spirit: 0, spiritTarget: 0, sense: 0, senseCd: 0, pulse: [0, 0, 0, 0], particles: [], warnT: 0, endT: 0 };
+const G = { state: 'title', t: 0, playT: 0, bonus: 0, collected: 0, spent: 0, awakened: 0, gateOpen: false, gateT: 0, spirit: 0, spiritTarget: 0, sense: 0, senseCd: 0, pulse: [0, 0, 0, 0], particles: [], warnT: 0, endT: 0 };
 const input = { jx: 0, jy: 0, jump: false, keys: {} };
 
 // ---------- 操作：左半邊搖桿、右半邊轉鏡頭 ----------
@@ -99,14 +113,17 @@ document.addEventListener('gesturestart', e => e.preventDefault());
 // ---------- HUD ----------
 const pop = (text, kind = '') => { const el = $('#pop'); el.textContent = text; el.className = 'show ' + kind; clearTimeout(pop.t); pop.t = setTimeout(() => el.className = '', 2600); };
 const toast = text => { const el = $('#toast'); el.textContent = text; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); };
-const avail = () => G.collected - G.spent;
+const avail = () => G.collected + (G.bonus || 0) - G.spent;
 let hudKey = '';
 function hud() {
   const lv = 1 + Math.floor(G.collected / 5);
-  const key = [G.collected, G.spent, G.awakened, G.gateOpen, lv].join();
+  const found = SPOTS.filter(sp => sp.found).length;
+  const key = [G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, lv, found].join();
   if (key !== hudKey) {
     hudKey = key;
     $('#lv').textContent = 'Lv.' + lv;
+    $('#dexBtn').textContent = `📖 台灣之美 ${found}/${SPOTS.length}`;
+    $('#dexList').innerHTML = SPOTS.map(sp => sp.found ? `<li><b>${sp.name}</b><small>${sp.area}</small><p>${sp.text}</p></li>` : `<li class="lock"><b>？？？</b><small>${sp.area.split('・')[0]}</small></li>`).join('');
     $('#qi').textContent = `靈光 ${avail()}`;
     $('#qibar').style.width = Math.min(100, avail() / COST * 100) + '%';
     if (!G.gateOpen) {
@@ -144,6 +161,7 @@ function drawMini() {
   const dot = (x, z, col, rad) => { mg.fillStyle = col; mg.beginPath(); mg.arc(x * k, z * k, rad * k, 0, 7); mg.fill(); };
   for (const n of NODES) dot(n.pos[0], n.pos[2], n.awake ? '#ffcf5a' : `rgba(111,227,255,${0.6 + 0.4 * Math.sin(G.t * 4)})`, 3.2);
   dot(GATE[0], GATE[2], G.gateOpen ? '#ffcf5a' : '#b9483c', 3.2);
+  for (const sp of SPOTS) if (sp.r) { mg.strokeStyle = '#fff'; mg.lineWidth = k * 0.8; mg.beginPath(); mg.arc((sp.pos[0] + 0.5) * k, (sp.pos[1] + 0.5) * k, 2 * k, 0, 7); sp.found ? (mg.fillStyle = '#fff', mg.fill()) : mg.stroke(); }
   mg.save(); mg.translate(P.x * k, P.z * k); mg.rotate(-P.yaw);
   mg.fillStyle = '#fff'; mg.strokeStyle = '#123'; mg.lineWidth = k; mg.beginPath();
   mg.moveTo(0, 5 * k); mg.lineTo(3.4 * k, -3 * k); mg.lineTo(-3.4 * k, -3 * k); mg.closePath(); mg.fill(); mg.stroke(); mg.restore();
@@ -154,7 +172,8 @@ const LINES = [
   '你也聽見了嗎？山裡，有一陣不存在的鐘聲。',
   '山有脈，海有流，人亦有自己的道。這座島上，有三處靈脈還在沉睡。',
   '收集發光的「靈光」，按「感知」就能看見平常看不見的東西。',
-  '北邊的城市、東海的洋流、最高的山——把它們一一喚醒。',
+  '台北的城中、東北外海的龜山島、最高的玉山，把它們一一喚醒。',
+  '路上也去看看這座島：日月潭、阿里山、太魯閣、墾丁……每一處都會收進你的圖鑑。',
   '我在西邊的山門等你。走出去，遇見你的機緣。',
 ];
 let line = 0;
@@ -320,14 +339,29 @@ function updateGame(dt) {
   // 感知
   G.sense = Math.max(0, G.sense - dt); G.senseCd = Math.max(0, G.senseCd - dt);
   if (G.pulse[3] > 0) { G.pulse[2] += dt * 34; G.pulse[3] = Math.max(0, 1 - G.pulse[2] / 70); }
-  // 洋流提示
-  if (G.riding && !G.rodeOnce) { G.rodeOnce = true; pop('乘上洋流！', 'cyan'); }
+  // 台灣之美
+  for (const sp of SPOTS) {
+    if (sp.found) continue;
+    const hit = sp.id === 'kuroshio' ? G.riding : Math.hypot(sp.pos[0] + 0.5 - P.x, sp.pos[1] + 0.5 - P.z) < sp.r;
+    if (hit) discover(sp);
+  }
 }
+
+function discover(sp) {
+  sp.found = true; G.bonus = (G.bonus || 0) + 1; sfx.pick(); setTimeout(() => sfx.pick(), 120);
+  const c = $('#card');
+  c.querySelector('b').textContent = sp.name; c.querySelector('small').textContent = sp.area; c.querySelector('p').textContent = sp.text;
+  c.querySelector('em').textContent = `發現台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}・＋1 靈光`;
+  c.classList.add('show'); clearTimeout(discover.t); discover.t = setTimeout(() => c.classList.remove('show'), 8000);
+}
+$('#card').addEventListener('pointerdown', e => { e.preventDefault(); e.currentTarget.classList.remove('show'); });
+$('#dexBtn').addEventListener('pointerdown', e => { e.preventDefault(); $('#card').classList.remove('show'); $('#dex').classList.toggle('show'); });
+$('#dex').addEventListener('pointerdown', e => { e.preventDefault(); $('#dex').classList.remove('show'); });
 
 function ending() {
   G.state = 'ending'; G.spiritTarget = 1; setSpirit(1); sfx.gate();
   const s = Math.round(G.playT), mm = String(Math.floor(s / 60)).padStart(2, '0'), ss = String(s % 60).padStart(2, '0');
-  $('#stats').textContent = `用時 ${mm}:${ss}　靈光 ${G.collected}/${motes.length}　靈脈 3/3`;
+  $('#stats').textContent = `用時 ${mm}:${ss}　靈光 ${G.collected}/${motes.length}　台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}`;
   setTimeout(() => $('#ending').classList.add('show'), 600);
   $('#hud').classList.remove('play');
 }
@@ -439,6 +473,7 @@ function frame(dt) {
     r.box(GATE[0], GATE[1] + 2.35, GATE[2], 4.2, 3.9, 0.3, [1, 1, 1], 1, 0.25 * a * (0.6 + 0.4 * Math.sin(G.t * 5)));
     r.box(GATE[0], GATE[1] + 40, GATE[2], 2.5, 80, 2.5, C.gold, 1, 0.12 * a);
   }
+  if (world.lamp) r.box(world.lamp[0], world.lamp[1], world.lamp[2], 30, 0.35, 0.7, [1, 0.95, 0.7], 1, 0.12 + s * 0.25, G.t * 0.9);
   for (const p of G.particles) r.box(p.x, p.y, p.z, 0.18, 0.18, 0.18, p.col, 1, Math.min(1, p.life), p.life * 4);
   if (G.riding && P.swim) for (let i = 0; i < 3; i++) r.box(P.x + Math.sin(G.t * 7 + i * 2) * 0.6, WATER + 0.05, P.z + 0.6 + i * 0.7, 0.25, 0.05, 0.6, [0.8, 0.95, 1], 1, 0.5 - i * 0.12);
   r.blend(0);
@@ -475,4 +510,4 @@ if (params.has('play') || params.has('at') || params.has('awake')) {
   if (params.has('yaw')) cam.yaw = +params.get('yaw');
   if (params.has('pitch')) cam.pitch = +params.get('pitch');
 }
-window.__game = { G, P, cam, NODES, motes, input, awaken, doSense };
+window.__game = { G, P, cam, NODES, motes, input, awaken, doSense, SPOTS };

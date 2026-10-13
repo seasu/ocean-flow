@@ -14,16 +14,19 @@ export const PLACES = {
   spawn: [56, 56],
   gate: [55, 78],
   city: [61, 38],
-  sea: [Math.round(curX(56)) - 2, 56],
+  sea: [Math.round(curX(36)) - 2, 36],     // 龜山島
+  lake: [62, 65],                          // 日月潭
+  shenmu: [62, 86],                        // 阿里山神木
+  gorge: 60,                               // 太魯閣峽谷所在的 z
   peak: [68, 72],
 };
 
 // 地塊種類
-export const T = { SEA: 0, SAND: 1, GRASS: 2, FOREST: 3, ROCK: 4, ROAD: 5, STONE: 6, BUILDING: 7, TOWER: 8, PARK: 9 };
+export const T = { SEA: 0, SAND: 1, GRASS: 2, FOREST: 3, ROCK: 4, ROAD: 5, STONE: 6, BUILDING: 7, TOWER: 8, PARK: 9, MARBLE: 10 };
 const TOP = {
   [T.SEA]: hex('#c9b98c'), [T.SAND]: hex('#ecdcaa'), [T.GRASS]: hex('#6cc04f'), [T.FOREST]: hex('#4f9e45'),
   [T.ROCK]: hex('#9aa2a8'), [T.ROAD]: hex('#5c6470'), [T.STONE]: hex('#c8c3b6'), [T.BUILDING]: hex('#d9dee4'),
-  [T.TOWER]: hex('#6fa8a0'), [T.PARK]: hex('#79c95a'),
+  [T.TOWER]: hex('#6fa8a0'), [T.PARK]: hex('#79c95a'), [T.MARBLE]: hex('#e9e6dc'),
 };
 const DIRT = hex('#8d6a47'), DIRT2 = hex('#7b5b3c');
 
@@ -60,12 +63,13 @@ export function makeWorld(seed = 7) {
       H[i] = clamp(Math.floor(2 - (e - 1) * 9), 0, 2);
     }
   }
-  // 2. 東海小島（海之流痕）
+  // 2. 龜山島（海之流痕）：龜背＋往北伸出的龜頭
   {
     const [sx, sz] = PLACES.sea;
-    for (let z = sz - 3; z <= sz + 3; z++) for (let x = sx - 3; x <= sx + 3; x++) {
-      const d = Math.hypot(x - sx, z - sz), i = id(x, z);
-      if (d < 2.6) { land[i] = 1; H[i] = d < 1.3 ? 4 : 3; K[i] = T.ROCK; lock[i] = 1; }
+    for (let z = sz - 5; z <= sz + 4; z++) for (let x = sx - 4; x <= sx + 4; x++) {
+      const d = Math.hypot((x - sx) / 1.15, z - sz), i = id(x, z);
+      const head = Math.abs(x - sx) <= 0 && z >= sz - 4 && z < sz - 2;
+      if (d < 3 || head) { land[i] = 1; H[i] = head ? (z === sz - 3 ? 4 : 3) : d < 1.2 ? 5 : d < 2.2 ? 4 : 3; K[i] = d < 2.2 && !head ? T.FOREST : T.ROCK; lock[i] = 1; }
     }
   }
   // 3. 城市區先整平
@@ -107,6 +111,36 @@ export function makeWorld(seed = 7) {
     K[i] = h >= 13 ? T.ROCK : h <= 3 && nearSea(x, z, 2) ? T.SAND : h >= 6 ? T.FOREST : T.GRASS;
   }
 
+  // 5b. 日月潭：挖到海平面以下（用同一片水面），周圍做成緩坡，中央是拉魯島
+  {
+    const [lx, lz] = PLACES.lake;
+    for (let z = lz - 9; z <= lz + 9; z++) for (let x = lx - 9; x <= lx + 9; x++) {
+      const i = id(x, z), d = Math.hypot((x - lx) / 1.3, z - lz);
+      if (d < 3.6) {
+        if (Math.hypot(x - lx, z - lz) < 0.8) { H[i] = 3; K[i] = T.PARK; land[i] = 1; }
+        else { H[i] = d < 2.4 ? 0 : 1; K[i] = T.SEA; land[i] = 0; }
+        lock[i] = 4;
+      } else if (d < 8 && land[i] && !lock[i]) {
+        H[i] = Math.min(H[i], 3 + Math.floor(d - 3.6));
+        if (d < 4.6) K[i] = T.SAND;
+      }
+    }
+  }
+  // 5c. 太魯閣：從東岸切進山裡的大理石峽谷
+  const gz = PLACES.gorge;
+  let gx1 = CX; while (land[id(gx1 + 1, gz)]) gx1++;
+  const gx0 = gx1 - 10;
+  for (let x = gx0; x <= gx1; x++) {
+    const floor = 3 + Math.max(0, Math.floor((gx1 - 2 - x) / 2));
+    for (const z of [gz, gz + 1]) { const i = id(x, z); H[i] = floor; K[i] = T.SAND; lock[i] = 5; }
+    for (const z of [gz - 1, gz + 2]) { const i = id(x, z); H[i] = Math.max(H[i], floor + 4 + ((x * 7) % 3)); K[i] = T.MARBLE; lock[i] = 5; }
+  }
+  const gorge = [gx1 - 4, gz + 1];
+  relax();
+  // 5d. 墾丁：最南端的海岬
+  let tip = [CX, CZ];
+  for (let z = 0; z < N; z++) for (let x = 40; x < 90; x++) if (land[id(x, z)] && z > tip[1]) tip = [x, z];
+
   // 6. 城市：道路格線、大樓、廣場、地標高塔
   const R = rng(seed + 11), lots = [];
   for (let z = 26; z <= 47; z++) for (let x = 49; x <= 75; x++) {
@@ -136,12 +170,12 @@ export function makeWorld(seed = 7) {
   for (let z = 2; z < N - 2; z++) for (let x = 2; x < N - 2; x++) {
     const k = K[id(x, z)];
     if ((k === T.FOREST && TR() < 0.07) || (k === T.GRASS && TR() < 0.015) || (k === T.PARK && TR() < 0.05)) {
-      if (Math.hypot(x - PLACES.gate[0], z - PLACES.gate[1]) < 7 || Math.hypot(x - PLACES.spawn[0], z - PLACES.spawn[1]) < 9) continue;
+      if (Math.hypot(x - PLACES.gate[0], z - PLACES.gate[1]) < 7 || Math.hypot(x - PLACES.shenmu[0], z - PLACES.shenmu[1]) < 4 || Math.hypot(x - tip[0], z - tip[1]) < 4 || Math.hypot(x - PLACES.spawn[0], z - PLACES.spawn[1]) < 9) continue;
       trees.push([x, z, H[id(x, z)], k === T.FOREST ? 1 : 0]);
     }
   }
 
-  const world = { H, K, land, trees, towerTop, lots };
+  const world = { H, K, land, trees, towerTop, lots, tip, gorge };
   world.height = (x, z) => {
     const xi = Math.floor(x), zi = Math.floor(z);
     if (xi < 0 || zi < 0 || xi >= N || zi >= N) return 0;
@@ -183,7 +217,8 @@ export function terrainMesh(w) {
           e = winRow ? 0.25 : 0;
         } else if (y === h - 1 && k !== T.SEA && k !== T.ROCK && k !== T.ROAD && k !== T.STONE) {
           c = top.map(v => v * 0.85);
-        } else if (k === T.ROCK || y >= 12) c = hex('#8a9096').map(v => v * (y & 1 ? 1 : 0.94));
+        } else if (k === T.MARBLE) c = (y % 3 === 1) ? hex('#b9b6ad') : hex('#ebe8df');
+        else if (k === T.ROCK || y >= 12) c = hex('#8a9096').map(v => v * (y & 1 ? 1 : 0.94));
         else c = (y & 1) ? DIRT : DIRT2;
         b.box(x, y, z, 1, 1, 1, c, e, f);
       }
@@ -196,6 +231,31 @@ export function terrainMesh(w) {
     const g1 = big ? hex('#2f8445') : hex('#4aa84a'), g2 = big ? hex('#3f9a52') : hex('#62bd55');
     b.box(x - 0.1, h + th, z - 0.1, 1.2, 0.9, 1.2, g1);
     b.box(x + 0.15, h + th + 0.9, z + 0.15, 0.7, 0.6, 0.7, g2);
+  }
+  // 阿里山神木：巨大的紅檜
+  {
+    const [sx, sz] = PLACES.shenmu, h = w.height(sx + 0.5, sz + 0.5), bark = hex('#6b4129');
+    b.box(sx - 0.4, h, sz - 0.4, 1.8, 9, 1.8, bark);
+    b.box(sx - 0.9, h, sz - 0.9, 2.8, 1.2, 2.8, hex('#5a3620'));
+    const g = [hex('#2c7a3f'), hex('#368a48'), hex('#43995a')];
+    b.box(sx - 3, h + 7, sz - 3, 6.6, 2.2, 6.6, g[0]); b.box(sx - 2.2, h + 9.2, sz - 2.2, 5, 1.8, 5, g[1]); b.box(sx - 1.2, h + 11, sz - 1.2, 3, 1.4, 3, g[2]);
+    b.box(sx - 4, h + 6, sz + 0.2, 2, 1.2, 2, g[1]); b.box(sx + 2.6, h + 7.6, sz - 1.4, 2, 1.2, 2, g[1]);
+  }
+  // 鵝鑾鼻燈塔：白色塔身、黑色燈室
+  {
+    const [lx, lz] = w.tip, h = w.height(lx + 0.5, lz + 0.5), white = hex('#f4f4f0');
+    b.box(lx - 0.2, h, lz - 0.2, 1.4, 4.5, 1.4, white); b.box(lx - 0.05, h + 4.5, lz - 0.05, 1.1, 0.6, 1.1, white);
+    b.box(lx - 0.35, h + 5.1, lz - 0.35, 1.7, 0.2, 1.7, hex('#3a3f46'));
+    b.box(lx + 0.05, h + 5.3, lz + 0.05, 0.9, 0.8, 0.9, hex('#fff2b0'), 1);
+    b.box(lx - 0.05, h + 6.1, lz - 0.05, 1.1, 0.4, 1.1, hex('#30353c'));
+    w.lamp = [lx + 0.5, h + 5.7, lz + 0.5];
+  }
+  // 拉魯島上的小亭
+  {
+    const [lx, lz] = PLACES.lake;
+    b.box(lx + 0.15, 3, lz + 0.15, 0.15, 1.2, 0.15, hex('#b9483c')); b.box(lx + 0.7, 3, lz + 0.7, 0.15, 1.2, 0.15, hex('#b9483c'));
+    b.box(lx + 0.7, 3, lz + 0.15, 0.15, 1.2, 0.15, hex('#b9483c')); b.box(lx + 0.15, 3, lz + 0.7, 0.15, 1.2, 0.15, hex('#b9483c'));
+    b.box(lx - 0.1, 4.2, lz - 0.1, 1.2, 0.25, 1.2, hex('#2f4f6f'));
   }
   // 高塔頂與避雷尖
   const tx = 64 + 1, tz = 27 + 1;
