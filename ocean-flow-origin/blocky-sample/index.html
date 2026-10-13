@@ -1,0 +1,126 @@
+<title>洋流：起源 方塊風格樣片</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;900&display=swap">
+<style>
+/* 版面：16:9 遊戲畫面置中，下方一行說明；整頁固定深色，刻意只用一種主題 */
+:root{--bg:#0a1018;--ink:#e8eef5;--dim:#8394a6;--panel:rgba(12,20,32,.78);--gold:#ffcf5a;--cyan:#6fe3ff;--green:#7ee08a;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans)}
+.wrap{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:20px 28px;display:flex;flex-direction:column;gap:12px}
+.wrap h1{margin:0;font-size:clamp(18px,2.2vw,24px);font-weight:900;letter-spacing:.08em}
+.wrap p{margin:0;color:var(--dim);font-size:13px;line-height:1.6;max-width:70ch}
+.game{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:6px;container-type:inline-size;background:#87b6d8}
+canvas{position:absolute;inset:0;width:100%;height:100%}
+.hud{position:absolute;inset:0;pointer-events:none;font-weight:900}
+.quest{position:absolute;right:2cqw;top:2cqw;width:24cqw;background:var(--panel);border:.25cqw solid rgba(255,255,255,.12);border-radius:1cqw;padding:1.2cqw 1.4cqw;font-size:1.35cqw;line-height:1.5}
+.quest b{display:block;color:var(--gold);font-size:1.1cqw;letter-spacing:.12em;margin-bottom:.4cqw}
+.quest .bar{height:.8cqw;background:rgba(255,255,255,.12);border-radius:1cqw;margin-top:.8cqw;overflow:hidden}
+.quest .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold))}
+.name{position:absolute;left:2cqw;top:2cqw;display:flex;gap:1cqw;align-items:center;background:var(--panel);border-radius:1cqw;padding:.8cqw 1.2cqw;font-size:1.3cqw}
+.name .lv{background:var(--gold);color:#2a1c00;border-radius:.6cqw;padding:.1cqw .7cqw}
+.qi{position:absolute;left:2cqw;top:6.4cqw;width:18cqw;height:1cqw;background:rgba(0,0,0,.4);border-radius:1cqw;overflow:hidden}
+.qi i{display:block;height:100%;width:62%;background:linear-gradient(90deg,#5cc8ff,#a98bff)}
+.hot{position:absolute;left:50%;bottom:2cqw;transform:translateX(-50%);display:flex;gap:.8cqw}
+.hot span{width:5.2cqw;aspect-ratio:1;background:var(--panel);border:.25cqw solid rgba(255,255,255,.15);border-radius:.9cqw;display:grid;place-items:center;font-size:1.6cqw}
+.hot span.on{border-color:var(--gold)}
+.pop{position:absolute;left:50%;top:9%;transform:translateX(-50%);background:linear-gradient(180deg,#ffe28a,#ffb627);color:#3a2300;font-size:2.4cqw;padding:1cqw 2.6cqw;border-radius:1.2cqw;border:.35cqw solid #fff4c8;box-shadow:0 .6cqw 0 #b9771a;opacity:0;white-space:nowrap}
+.toast{position:absolute;left:2cqw;bottom:2.4cqw;font-size:1.3cqw;color:var(--green);text-shadow:0 .15cqw 0 #000;opacity:0}
+</style>
+<main class="wrap">
+  <h1>方塊風格樣片 · Shot 03–04「聽見不存在的鐘聲」</h1>
+  <p>試做一鏡，看《洋流：起源》改成方塊遊戲畫風加遊戲介面的感覺。角色依「洋流 Ocean Currents」設定圖：藍色款是玩家，橘色款是在山門等你的夥伴。12 秒循環，沒有聲音。</p>
+  <div class="game" id="game">
+    <canvas id="c"></canvas>
+    <div class="hud">
+      <div class="name"><span class="lv">Lv.1</span>旅人・阿流</div>
+      <div class="qi"><i></i></div>
+      <div class="quest"><b>主線任務</b><span id="qtext">在山中步道散步</span><div class="bar"><i id="qbar"></i></div></div>
+      <div class="hot"><span class="on">🧭</span><span>📿</span><span>🔔</span><span>📱</span></div>
+      <div class="pop" id="pop">新任務：尋找不存在的鐘聲</div>
+      <div class="toast" id="toast">＋1 靈感　感知力提升</div>
+    </div>
+  </div>
+</main>
+<script>
+const cv=document.getElementById("c"),g=cv.getContext("2d");
+let W,H,S,OX,OY;
+function size(){const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);W=cv.width=Math.round(r.width*d);H=cv.height=Math.round(r.height*d);S=W/17;OX=W*0.5-(9.6-2.6)*S*.866;OY=H*0.6-(9.6+2.6)*S*.5+S}
+new ResizeObserver(size).observe(cv);size();
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R=rng(7);
+const P=(x,y,z)=>[OX+(x-y)*S*.866,OY+(x+y)*S*.5-z*S];
+function shade(hex,k){const n=parseInt(hex.slice(1),16);const f=c=>Math.max(0,Math.min(255,Math.round(c*k)));return`rgb(${f(n>>16)},${f(n>>8&255)},${f(n&255)})`}
+function box(x,y,z,w,d,h,col,glow){
+  const q=(pts,c)=>{g.beginPath();pts.forEach((p,i)=>{const[a,b]=P(...p);i?g.lineTo(a,b):g.moveTo(a,b)});g.closePath();g.fillStyle=c;g.fill()};
+  q([[x,y,z+h],[x+w,y,z+h],[x+w,y+d,z+h],[x,y+d,z+h]],shade(col,1.08));
+  q([[x,y+d,z],[x+w,y+d,z],[x+w,y+d,z+h],[x,y+d,z+h]],shade(col,.78));
+  q([[x+w,y,z],[x+w,y+d,z],[x+w,y+d,z+h],[x+w,y,z+h]],shade(col,.62));
+  if(glow){g.strokeStyle=glow;g.lineWidth=S*.04;g.stroke()}
+}
+// 場景：地面、步道、樹、石燈、遠處的山門
+const ground=[],trees=[];
+for(let x=0;x<16;x++)for(let y=0;y<16;y++){const path=Math.abs(x-y*0.55-3)<1.1&&y<15;ground.push([x,y,path?"#c9b48a":((x+y)%2?"#5fae5a":"#58a553")])}
+for(let i=0;i<26;i++){const x=Math.floor(R()*16),y=Math.floor(R()*16);if(Math.abs(x-y*0.55-3)<2.2||(x>4&&x<11&&y<8)||(x>8&&y<8))continue;trees.push([x,y,2+Math.floor(R()*3)])}
+
+const BLUE={skin:"#f3d9bd",hair:"#e3e7ee",hairTip:"#8cc4f0",jacket:"#eef2f7",trim:"#1f4f9c",wave:"#58b0ea",inner:"#141b2a",pants:"#192236",pantWave:"#3f8fdc",shoe:"#eef3f8",shoeAcc:"#2b62b5",hp:"#f4f6fa",hpAcc:"#2f6fc0",ribbon:"120,198,245",eye:"#2d6fd0"};
+const ORANGE={skin:"#f3d9bd",hair:"#ece9e4",hairTip:"#ffb347",jacket:"#f4f2ee",trim:"#e8641c",wave:"#ffb02e",inner:"#16120e",pants:"#eceef1",pantWave:"#f08a24",shoe:"#f6f2ec",shoeAcc:"#e8641c",hp:"#f7f4ef",hpAcc:"#e8641c",ribbon:"255,170,50",eye:"#d9781b"};
+function avatar(x0,y0,c,bob,sw,t,k){
+  const B=(x,y,z,w,d,h,col,glow)=>box(x0+x*k,y0+y*k,.4+z*k,w*k,d*k,h*k,col,glow);
+  // 飄帶（畫在身體後面）
+  g.save();g.lineCap="round";
+  for(let r=0;r<2;r++){const[sx,sy]=P(x0+(.12+r*.36)*k,y0+.2*k,.4+.72*k);g.beginPath();g.moveTo(sx,sy);
+    for(let i=1;i<=12;i++){const u=i/12;const[px,py]=P(x0+(.12+r*.36-u*.9)*k,y0+(.2-u*.5)*k,.4+(.72-u*.35+.08*Math.sin(t*4+u*5+r))*k);g.lineTo(px,py)}
+    g.strokeStyle=`rgba(${c.ribbon},.85)`;g.lineWidth=S*.09;g.stroke()}
+  g.restore();
+  // 腿與鞋
+  for(const [lx,ph] of [[.03,sw],[.31,-sw]]){B(lx,.1+ph*.3,0,.26,.26,.12,c.shoe);B(lx+.02,.12+ph*.3,.12,.22,.22,.06,c.shoeAcc);B(lx,.1+ph*.3,.18,.26,.26,.2,c.pantWave);B(lx,.1+ph*.3,.38,.26,.26,.34,c.pants)}
+  // 後手臂、身體、前手臂（白外套，袖口藍白浪花）
+  const arm=(ax,ph)=>{B(ax,.12+ph,.78+bob,.22,.28,.12,c.skin);B(ax,.12+ph,.9+bob,.22,.28,.1,c.wave);B(ax,.12+ph,1.0+bob,.22,.28,.07,c.trim);B(ax,.12+ph,1.07+bob,.22,.28,.33,c.jacket)};
+  arm(-.22,-sw*.3);
+  B(0,.08,.72+bob,.6,.34,.68,c.jacket);
+  B(.18,.42,.72+bob,.24,.01,.68,c.inner);                 // 敞開外套裡的黑色內搭
+  B(.0,.42,.72+bob,.6,.01,.12,c.wave);                     // 外套下擺浪花
+  B(.0,.42,.84+bob,.6,.01,.04,c.trim);
+  B(.27,.43,1.02+bob,.06,.01,.14,"#c9d3de","rgba(255,255,255,.9)");   // 指南針掛飾
+  arm(.6,sw*.3);
+  // 頭、眼睛、頭髮、耳機
+  B(.08,.05,1.4+bob,.44,.44,.44,c.skin);
+  B(.15,.49,1.56+bob,.07,.01,.09,c.eye);B(.35,.49,1.56+bob,.07,.01,.09,c.eye);
+  B(.05,.02,1.72+bob,.5,.5,.16,c.hair);B(.05,.4,1.62+bob,.5,.12,.12,c.hair);   // 瀏海
+  [[.08,.08],[.3,.1],[.18,.3],[.38,.32]].forEach(([hx,hy],i)=>B(hx,hy,1.88+bob,.14,.14,.1+.05*(i%2),i===1?c.hairTip:c.hair));
+  B(-.04,.16,1.48+bob,.12,.22,.24,c.hp);B(-.05,.2,1.52+bob,.02,.14,.16,c.hpAcc);
+  B(.48,.16,1.48+bob,.12,.22,.24,c.hp);B(.6,.2,1.52+bob,.02,.14,.16,c.hpAcc);
+  B(-.02,.24,1.86+bob,.64,.06,.06,c.hp);
+}
+function scene(t){
+  const items=[];
+  ground.forEach(([x,y,c])=>items.push([x+y,()=>box(x,y,0,1,1,.4,c)]));
+  trees.forEach(([x,y,h])=>items.push([x+y+1,()=>{box(x+.35,y+.35,.4,.3,.3,h*.5,"#7a5131");for(let k=0;k<2;k++)box(x+.05+k*.1,y+.05+k*.1,.4+h*.5+k*.8,.9-k*.2,.9-k*.2,.8,k?"#3f9a52":"#2f8445")}]));
+  // 山門
+  const gx=12.4,gy=1.2, lit=Math.max(0,Math.min(1,(t-5)/1.5));
+  items.push([gx+gy+2,()=>{box(gx,gy,.4,.5,.5,3.2,"#9aa3ad");box(gx+2.5,gy,.4,.5,.5,3.2,"#9aa3ad");box(gx-.4,gy-.1,3.6,3.8,.7,.45,"#6d7884");box(gx-.1,gy,3.0,3.2,.5,.3,"#b9483c",lit>0?`rgba(255,207,90,${lit*.9})`:null)}]);
+  // 角色：依「洋流 Ocean Currents」設定圖（藍色款＝玩家，橘色款＝夥伴）
+  const walk=Math.min(t,5), ax=2.3+walk*0.9, ay=1+walk*0.6, bob=t<5?Math.abs(Math.sin(t*9))*.05:0, sw=t<5?Math.sin(t*9)*.22:0;
+  items.push([ax+ay+.8,()=>avatar(ax,ay,BLUE,bob,sw,t,1.45)]);
+  items.push([10.6+3.6+.8,()=>avatar(10.6,3.6,ORANGE,Math.abs(Math.sin(t*1.6))*.02,0,t+1.3,1.45)]);
+  items.sort((a,b)=>a[0]-b[0]).forEach(([,f])=>f());
+  // 鐘聲漣漪（從山門擴散）
+  if(t>5){const[cx,cy]=P(gx+1.4,gy+.3,2.4);g.save();g.globalCompositeOperation="lighter";for(let k=0;k<4;k++){const p=((t-5)*0.55+k/4)%1, r=p*S*9;g.strokeStyle=`rgba(255,214,120,${(1-p)*.75})`;g.lineWidth=S*.12*(1-p)+1;g.beginPath();g.ellipse(cx,cy,r,r*.55,0,0,6.283);g.stroke()}g.restore()}
+  // 光點
+  g.save();g.globalCompositeOperation="lighter";for(let i=0;i<40;i++){const r1=rng(i+1),x=r1()*W,y=((r1()*H-t*S*(.3+r1()*.5))%H+H)%H,a=t>5?.8:.25;g.fillStyle=i%2?`rgba(255,220,140,${a})`:`rgba(140,220,255,${a})`;const s=S*(.06+r1()*.06);g.fillRect(x-s/2,y-s/2,s,s)}g.restore();
+  // 角色頭上的驚嘆號
+  if(t>5.2&&t<9){const[x,y]=P(ax+.4,ay+.4,.4+2.35*1.45+Math.sin(t*6)*.08);g.fillStyle="#ffcf5a";g.strokeStyle="#3a2300";g.lineWidth=S*.06;g.font=`900 ${S*.9}px sans-serif`;g.textAlign="center";g.strokeText("!",x,y);g.fillText("!",x,y)}
+}
+const pop=document.getElementById("pop"),toast=document.getElementById("toast"),qbar=document.getElementById("qbar"),qtext=document.getElementById("qtext");
+function hud(t){
+  const pp=t<5.6?0:t<6?(t-5.6)/.4:t<9?1:Math.max(0,1-(t-9)/.4);
+  pop.style.opacity=pp;pop.style.transform=`translateX(-50%) scale(${.8+.2*Math.min(1,pp*1.2)})`;
+  qtext.textContent=t<5.8?"在山中步道散步":"尋找不存在的鐘聲（0/1）";
+  qbar.style.width=(t<5.8?Math.min(100,t/5*100):Math.min(35,(t-5.8)*12))+"%";
+  toast.style.opacity=t>7&&t<10.5?Math.min(1,(t-7)/.3,(10.5-t)/.3):0;toast.style.transform=`translateY(${-(t-7)*4}px)`;
+}
+const LOOP=12, start=performance.now();
+function frame(){const t=((performance.now()-start)/1000)%LOOP;g.fillStyle="#87b6d8";g.fillRect(0,0,W,H);const sky=g.createLinearGradient(0,0,0,H);sky.addColorStop(0,"#9fd0ee");sky.addColorStop(1,"#e9f4f8");g.fillStyle=sky;g.fillRect(0,0,W,H);scene(t);hud(t);requestAnimationFrame(frame)}
+window.__at=t=>{g.fillStyle="#9fd0ee";g.fillRect(0,0,W,H);scene(t);hud(t)};
+if(!location.search.includes("still"))requestAnimationFrame(frame);
+</script>

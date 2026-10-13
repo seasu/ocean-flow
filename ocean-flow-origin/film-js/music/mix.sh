@@ -1,0 +1,3 @@
+# 全片混音：bed.wav（0 秒起）+ score.wav（100.8 秒起），旁白側鏈平順壓低配樂
+ffmpeg -v error -y -i bed.wav -i score.wav -filter_complex "[1:a]adelay=100800|100800,volume=1.15[f];[0:a]volume=0.3[b];[b][f]amix=inputs=2:normalize=0,apad=whole_dur=114.3,atrim=0:114.3" music.wav
+ffmpeg -v error -y -i /tmp/claude-0/-home-user/f611a108-7764-5944-bac9-02332408e36a/scratchpad/film-js/narration.mp3 -i music.wav -filter_complex "[0:a]aresample=44100,pan=stereo|c0=c0|c1=c0,apad=whole_dur=114.3,asplit=2[v][sc];[1:a][sc]sidechaincompress=threshold=0.03:ratio=4:attack=120:release=1500:knee=6[md];[v][md]amix=inputs=2:normalize=0,atrim=0:114.3,alimiter=limit=0.95" -b:a 192k narration_bgm.mp3
