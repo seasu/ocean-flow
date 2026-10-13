@@ -381,9 +381,11 @@ function discover(sp) {
   showCard(sp.name, sp.area, sp.text, `發現台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}・＋1 靈光`);
 }
 function showCard(title, sub, text, em) {
+  // 低調的小卡：預設只顯示一行，點開才看介紹；沒點開就自己淡出
   const c = $('#card');
-  c.querySelector('b').textContent = title; c.querySelector('small').textContent = sub; c.querySelector('p').textContent = text; c.querySelector('em').textContent = em;
-  c.classList.add('show'); clearTimeout(showCard.t); showCard.t = setTimeout(() => c.classList.remove('show'), 9000);
+  c.querySelector('b').textContent = '📍 ' + title; c.querySelector('small').textContent = sub; c.querySelector('p').textContent = text; c.querySelector('em').textContent = em;
+  c.classList.remove('open'); c.querySelector('i').textContent = '介紹 ▴'; c.classList.add('show');
+  clearTimeout(showCard.t); showCard.t = setTimeout(() => { if (!c.classList.contains('open')) c.classList.remove('show'); }, 12000);
 }
 
 // ---------- 現世雷達：真實地點觸發機緣事件 ----------
@@ -506,7 +508,12 @@ function encounter(s) {
     showCard(s.name, '現世機緣・' + s.sub, s.text, `結下機緣・＋2 靈光（${visited.size} 處）`);
   }
 }
-$('#card').addEventListener('pointerdown', e => { e.preventDefault(); e.currentTarget.classList.remove('show'); });
+$('#card').addEventListener('pointerdown', e => {
+  e.preventDefault(); e.stopPropagation();
+  const c = e.currentTarget;
+  if (c.classList.toggle('open')) c.querySelector('i').textContent = '收起 ✕';
+  else { c.classList.remove('show'); }
+});
 $('#dexBtn').addEventListener('pointerdown', e => { e.preventDefault(); $('#card').classList.remove('show'); $('#dex').classList.toggle('show'); });
 $('#dex').addEventListener('pointerdown', e => { e.preventDefault(); $('#dex').classList.remove('show'); });
 
