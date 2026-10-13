@@ -64,6 +64,9 @@ const S = {
   endTitle: ['城市本身，也存在流。', 'The city itself has its own flow.', '都市そのものにも、流れがある。'],
   endTag: ['走出去，遇見你的機緣。', 'Go outside and meet your encounters.', '外へ出て、あなたの縁に出会おう。'],
   again: ['再走一次', 'Walk again', 'もう一度歩く'],
+  watchFilm: ['▶ 觀看介紹影片', '▶ Watch the intro film', '▶ 紹介映像を見る'],
+  skip: ['略過 ▸', 'Skip ▸', 'スキップ ▸'],
+  tapSound: ['🔊 點一下開聲音', '🔊 Tap for sound', '🔊 タップで音声オン'],
   noGL: ['此裝置無法執行 WebGL', 'WebGL is not available on this device', 'この端末では WebGL を実行できません'],
 
   shoushan: ['四獸山位在台北市信義區東南，屬於南港山系。四座小山因為外形像象、虎、豹、獅而得名，步道彼此相連，就在城市邊上。',
