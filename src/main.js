@@ -313,6 +313,28 @@ $('#title .start').addEventListener('click', () => start('geo'));
 $('#title .alt').addEventListener('click', () => start('island'));
 $('#again').addEventListener('click', () => location.reload());
 
+// ---------- 介紹影片：第一次開啟時自動播放，之後可從片頭／片尾按鈕重看 ----------
+const FILM_KEY = 'oceanflow.filmSeen';
+const film = $('#film'), video = film.querySelector('video');
+function closeFilm() {
+  video.pause(); film.classList.remove('show', 'muted');
+  try { localStorage.setItem(FILM_KEY, '1'); } catch { }
+}
+function openFilm() {
+  film.classList.add('show'); film.classList.remove('muted');
+  video.muted = false; video.currentTime = 0;
+  // 瀏覽器常擋有聲自動播放：擋了就先靜音播放，顯示「點一下開聲音」
+  video.play().catch(() => { video.muted = true; film.classList.add('muted'); video.play().catch(() => { video.controls = true; }); });
+}
+video.addEventListener('ended', closeFilm);
+film.querySelector('.skip').addEventListener('click', e => { e.stopPropagation(); closeFilm(); });
+film.querySelector('.sound').addEventListener('click', e => { e.stopPropagation(); video.muted = false; film.classList.remove('muted'); video.play().catch(() => { }); });
+film.addEventListener('click', () => { if (video.muted) { video.muted = false; film.classList.remove('muted'); } else if (video.paused) video.play().catch(() => { }); else video.pause(); });
+for (const b of document.querySelectorAll('.film-btn')) b.addEventListener('click', e => { e.stopPropagation(); openFilm(); });
+let filmSeen = false;
+try { filmSeen = !!localStorage.getItem(FILM_KEY); } catch { }
+if (!filmSeen && !params.has('play') && !params.has('geo') && !params.has('nofilm')) openFilm();
+
 // ---------- 玩法 ----------
 function doSense() {
   if (G.state !== 'play' || G.senseCd > 0) return;
@@ -631,7 +653,7 @@ $('#dexBtn').addEventListener('pointerdown', e => { e.preventDefault(); $('#card
 $('#dex').addEventListener('pointerdown', e => { e.preventDefault(); $('#dex').classList.remove('show'); });
 
 function ending() {
-  G.state = 'ending'; G.spiritTarget = 1; setSpirit(1); sfx.gate();
+  G.state = 'ending'; G.spiritTarget = 1; setSpirit(1); sfx.gate(); sfx.ending();
   const s = Math.round(G.playT), mm = String(Math.floor(s / 60)).padStart(2, '0'), ss = String(s % 60).padStart(2, '0');
   $('#stats').textContent = t('stats', { time: `${mm}:${ss}`, qi: G.collected, qim: motes.length, b: SPOTS.filter(s => s.found).length, bm: SPOTS.length });
   setTimeout(() => $('#ending').classList.add('show'), 600);

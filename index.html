@@ -168,6 +168,13 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 .langs{display:flex;gap:6px;justify-content:center;margin:4px 0}
 .langs button{font-size:13px;font-weight:900;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.1);color:var(--dim)}
 .langs button.on{background:rgba(255,207,90,.2);color:var(--gold)}
+.film-btn{font-size:13px;font-weight:900;padding:8px 18px;border-radius:999px;background:rgba(111,227,255,.14);color:var(--cyan)}
+#film{position:fixed;inset:0;z-index:20;background:#000;display:none;align-items:center;justify-content:center}
+#film.show{display:flex}
+#film video{width:100%;height:100%;object-fit:contain;background:#000}
+#film .skip{position:absolute;right:calc(14px + var(--sr, 0px));bottom:calc(18px + var(--sb));font-size:14px;font-weight:900;padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.16);color:#fff}
+#film .sound{position:absolute;left:50%;top:calc(18px + var(--st));transform:translateX(-50%);display:none;font-size:14px;font-weight:900;padding:8px 16px;border-radius:999px;background:rgba(255,207,90,.9);color:#2a1c00}
+#film.muted .sound{display:block}
 </style>
 </head>
 <body>
@@ -206,6 +213,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
   <div class="tag" data-i18n="tagline">山有脈，海有流，人亦有自己的道。<br>走遍一座方塊台灣：台北、龜山島、日月潭、玉山、墾丁。</div>
   <button class="start" data-i18n="startGeo">走出去・現地探索</button>
   <button class="alt" data-i18n="startIsland">先在島上逛逛</button>
+  <button class="film-btn" data-i18n="watchFilm">▶ 觀看介紹影片</button>
   <div class="langs"></div>
   <div class="how" data-i18n="how">現地探索會使用定位，從黑客松會場（北平東路30號）出發<br>沒有定位時會自動改用模擬定位・建議開聲音<br>電腦：WASD 移動、空白鍵跳、E 感知</div>
 </div>
@@ -214,9 +222,13 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
   <div class="logo" data-i18n="title">洋流：起源</div>
   <div class="tag" data-i18n="endTag">走出去，遇見你的機緣。</div>
   <div id="stats"></div>
+  <button class="film-btn" data-i18n="watchFilm">▶ 觀看介紹影片</button>
   <div class="langs"></div>
   <button class="start" id="again" data-i18n="again">再走一次</button>
 </div>
+<div id="film"><video playsinline preload="none" poster="video/intro-poster.jpg"><source src="video/intro.mp4" type="video/mp4"></video>
+  <button class="sound" data-i18n="tapSound">🔊 點一下開聲音</button>
+  <button class="skip" data-i18n="skip">略過 ▸</button></div>
 <script type="module" src="src/main.js"></script>
 <script>
   // 收合任務面板（直式手機預設收合）
