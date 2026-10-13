@@ -1,35 +1,61 @@
-// 以 WebAudio 即時合成的音效與環境音（不需要任何音檔）
-let ctx = null, master = null, padGain = null, padNodes = [];
+// 以 WebAudio 即時合成的音效與海潮環境音（不需要任何音檔）
+let ctx = null, master = null, sea = null, foam = null;
 export let muted = false;
+
+// 海潮音：低沉的遠浪底噪＋一波波湧上來又退下的浪（每 6–10 秒一波，彼此重疊）
+function noiseBuffer(sec, brown) {
+  const len = ctx.sampleRate * sec, buf = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c); let last = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      if (brown) { last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; } else d[i] = w;
+    }
+  }
+  return buf;
+}
+function loop(buf, when = 0) { const n = ctx.createBufferSource(); n.buffer = buf; n.loop = true; n.start(when, Math.random() * buf.duration); return n; }
+
+function wave(t) {
+  // 一道浪：先湧起（低頻變亮），浪頭碎開（白噪泡沫），再慢慢退去
+  const rise = 2 + Math.random() * 1.5, fall = 3.5 + Math.random() * 2.5, peak = 0.5 + Math.random() * 0.4;
+  const src = loop(sea.brown, t), lp = ctx.createBiquadFilter(), g = ctx.createGain(), pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+  lp.type = 'lowpass'; lp.Q.value = 0.4;
+  lp.frequency.setValueAtTime(250, t); lp.frequency.linearRampToValueAtTime(1100 + Math.random() * 500, t + rise); lp.frequency.exponentialRampToValueAtTime(280, t + rise + fall);
+  g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(peak, t + rise); g.gain.exponentialRampToValueAtTime(0.0001, t + rise + fall);
+  src.connect(lp); lp.connect(g);
+  if (pan) { pan.pan.value = Math.random() * 1.2 - 0.6; g.connect(pan); pan.connect(sea.out); } else g.connect(sea.out);
+  // 浪花：浪頭碎開時的沙沙聲
+  const fs = loop(sea.white, t), hp = ctx.createBiquadFilter(), fg = ctx.createGain();
+  hp.type = 'bandpass'; hp.frequency.value = 3000 + Math.random() * 1500; hp.Q.value = 0.6;
+  const ft = t + rise * 0.85, fv = (0.05 + Math.random() * 0.04) * foam;
+  fg.gain.setValueAtTime(0.0001, t); fg.gain.setValueAtTime(0.0001, ft); fg.gain.linearRampToValueAtTime(fv, ft + 0.35); fg.gain.exponentialRampToValueAtTime(0.0001, ft + fall * 0.8);
+  fs.connect(hp); hp.connect(fg); fg.connect(pan || sea.out);
+  const end = t + rise + fall + 0.2; src.stop(end); fs.stop(end);
+}
 
 export function initAudio() {
   if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
   const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
   ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.8; master.connect(ctx.destination);
-  // 環境音：D 調低音長音＋海浪雜訊
-  padGain = ctx.createGain(); padGain.gain.value = 0.0; padGain.connect(master);
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; lp.connect(padGain);
-  for (const [f, g] of [[73.4, 0.5], [110, 0.3], [146.8, 0.22], [220.2, 0.12]]) {
-    const o = ctx.createOscillator(), og = ctx.createGain(); o.type = 'sine'; o.frequency.value = f; o.detune.value = (Math.random() - 0.5) * 8;
-    og.gain.value = g; o.connect(og); og.connect(lp); o.start(); padNodes.push(o);
-  }
-  const len = ctx.sampleRate * 3, buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-  const n = ctx.createBufferSource(); n.buffer = buf; n.loop = true;
-  const nf = ctx.createBiquadFilter(); nf.type = 'lowpass'; nf.frequency.value = 500;
-  const ng = ctx.createGain(); ng.gain.value = 0.18;
-  const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 0.12; lg.gain.value = 0.12; lfo.connect(lg); lg.connect(ng.gain); lfo.start();
-  n.connect(nf); nf.connect(ng); ng.connect(padGain); n.start();
-  padGain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 4);
+  foam = 1;
+  sea = { brown: noiseBuffer(6, true), white: noiseBuffer(3, false), out: ctx.createGain() };
+  sea.out.gain.value = 0; sea.out.connect(master);
+  sea.out.gain.linearRampToValueAtTime(0.9, ctx.currentTime + 4);
+  // 遠浪底噪
+  const bed = loop(sea.brown), blp = ctx.createBiquadFilter(), bg = ctx.createGain();
+  blp.type = 'lowpass'; blp.frequency.value = 380; bg.gain.value = 0.22;
+  bed.connect(blp); blp.connect(bg); bg.connect(sea.out);
+  // 浪：先排兩道，之後每隔 6–10 秒再排下一道
+  let next = ctx.currentTime + 0.5;
+  const schedule = () => { while (next < ctx.currentTime + 12) { wave(next); next += 6 + Math.random() * 4; } };
+  schedule(); setInterval(schedule, 3000);
 }
 
 export function setMuted(m) { muted = m; if (master) master.gain.setTargetAtTime(m ? 0 : 0.8, ctx.currentTime, 0.1); }
 
-// 靈界越開，環境音越亮
-export function setSpirit(s) {
-  if (!ctx) return;
-  padNodes.forEach((o, i) => o.detune.setTargetAtTime(i === 3 ? s * 400 : 0, ctx.currentTime, 2));
-}
+// 靈界越開，浪花越亮
+export function setSpirit(s) { foam = 1 + s * 0.8; }
 
 function tone(freq, dur, type = 'sine', vol = 0.2, delay = 0) {
   if (!ctx) return;
