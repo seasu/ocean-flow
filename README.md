@@ -77,3 +77,7 @@ npx http-server -p 8080 .
 - `src/avatar.js`：方塊角色與動作
 - `src/main.js`：操作、鏡頭、任務流程、HUD
 - `src/audio.js`：合成音效
+
+## 概念片製作檔案
+
+`ocean-flow-origin/`：《洋流：起源》90 秒世界觀概念片的製作檔案（製作包、旁白稿、製作紀錄、角色設定圖、關鍵畫面、試音、配樂、影片與產生腳本），目錄說明見 [ocean-flow-origin/README.md](ocean-flow-origin/README.md)。影音與圖片直接存在 git 裡（每個檔案都在 GitHub 100 MB 上限內），影片各版本都保留在 `ocean-flow-origin/films/`。

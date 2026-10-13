@@ -1,0 +1,272 @@
+<title>洋流：起源</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;500&family=Noto+Sans+TC:wght@400;500&display=swap">
+<style>
+/* 版面：一個 16:9 的放映框置中，控制列在下方；整頁固定深海色，刻意只用一種主題 */
+:root{
+  --abyss:#05090f; --deep:#0b1622; --line:#1c2b3a; --mist:#c9d6e2; --dim:#7f93a6; --gold:#e3c38a; --cyan:#8fd3f0;
+  --serif:"Noto Serif TC","Songti TC","PMingLiU",serif; --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--abyss);color:var(--mist);font-family:var(--sans)}
+.wrap{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:20px 28px;display:flex;flex-direction:column;gap:14px}
+.head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px}
+.head h1{font-family:var(--serif);font-weight:500;font-size:clamp(20px,2.4vw,28px);letter-spacing:.18em;margin:0;text-wrap:balance}
+.head p{margin:0;color:var(--dim);font-size:13px;letter-spacing:.06em}
+.stage{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;overflow:hidden;background:#000;container-type:inline-size;border-radius:2px}
+#shots{position:absolute;inset:0;z-index:0}
+.shot{position:absolute;inset:0;opacity:0;will-change:opacity}
+.shot img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;will-change:transform;transform-origin:50% 50%}
+.shot canvas.world{position:absolute;inset:0;width:100%;height:100%}
+.gh{position:absolute;opacity:0;font-family:var(--sans);font-weight:500;color:#fff;pointer-events:none}
+.gh b{font-weight:500}
+.load{left:50%;top:40%;transform:translateX(-50%);text-align:center;background:rgba(5,12,24,.72);border:1px solid rgba(143,211,240,.45);border-radius:1cqw;padding:1.6cqw 3cqw;font-size:1.5cqw;letter-spacing:.2em;display:flex;flex-direction:column;gap:.8cqw;min-width:26cqw}
+.load b{font-size:2.6cqw;letter-spacing:.4em;color:var(--cyan)}
+.pbar{height:.7cqw;background:rgba(255,255,255,.14);border-radius:1cqw;overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold))}
+.zone{left:50%;top:9%;transform:translateX(-50%);text-align:center;font-family:var(--serif);font-size:3.4cqw;letter-spacing:.3em;text-shadow:0 0 1cqw rgba(0,0,0,.6);white-space:nowrap}
+.zone small{display:block;font-family:var(--sans);font-size:1.2cqw;letter-spacing:.5em;color:var(--gold);margin-bottom:.4cqw}
+.party{left:2cqw;top:2cqw;display:flex;flex-direction:column;gap:.5cqw;font-size:1.3cqw}
+.party div{display:flex;align-items:center;gap:.7cqw;background:rgba(10,18,30,.7);border-radius:.8cqw;padding:.5cqw 1cqw}
+.party i{width:1cqw;height:1cqw;border-radius:.2cqw}
+.party em{font-style:normal;color:var(--gold);font-size:1.1cqw}
+.quest{right:2cqw;top:2cqw;width:24cqw;background:rgba(10,18,30,.75);border-radius:1cqw;padding:1.1cqw 1.4cqw;font-size:1.35cqw;line-height:1.5;display:flex;flex-direction:column;gap:.5cqw}
+.quest b{color:var(--gold);font-size:1.05cqw;letter-spacing:.15em}
+.pop{left:50%;top:14%;background:linear-gradient(180deg,#ffe28a,#ffb627);color:#3a2300;font-weight:500;font-size:2.3cqw;padding:.9cqw 2.4cqw;border-radius:1.1cqw;border:.3cqw solid #fff4c8;box-shadow:0 .5cqw 0 #b9771a;white-space:nowrap}
+.toast{right:2cqw;top:13cqw;font-size:1.4cqw;color:#9ef0a8;text-shadow:0 .15cqw 0 #000}
+.warn{left:50%;top:9%;transform:translateX(-50%);background:rgba(30,8,8,.7);border:1px solid rgba(255,140,120,.6);color:#ffb4a0;border-radius:.8cqw;padding:.8cqw 2cqw;font-size:1.6cqw;letter-spacing:.2em;white-space:nowrap}
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(2,5,10,.55) 100%)}
+.bloom{position:absolute;inset:0;pointer-events:none;opacity:0;mix-blend-mode:screen;background:radial-gradient(circle at 50% 55%,rgba(255,244,220,.95),rgba(143,211,240,.35) 35%,transparent 70%)}
+.black{position:absolute;inset:0;background:#000;pointer-events:none}
+.sub{position:absolute;left:8%;right:8%;bottom:6.5%;text-align:center;font-family:var(--serif);font-weight:500;font-size:2.6cqw;line-height:1.5;letter-spacing:.12em;color:#f4f1ea;text-shadow:0 0 .6em rgba(0,0,0,.9),0 0 .15em rgba(0,0,0,.9);pointer-events:none;text-wrap:balance}
+.card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.2cqw;pointer-events:none}
+.card .t{font-family:var(--serif);font-weight:300;font-size:6.4cqw;letter-spacing:.28em;color:#fff;padding-left:.28em;white-space:nowrap}
+.card .t span{display:inline-block}
+.card .g{font-family:var(--serif);font-weight:300;font-size:2.2cqw;letter-spacing:.32em;color:var(--mist);padding-left:.32em}
+.card .rule{width:14cqw;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(transparent 40%,rgba(3,7,12,.65));border:0;color:var(--mist);cursor:pointer;font:inherit}
+.start .ring{width:clamp(56px,9cqw,96px);aspect-ratio:1;border-radius:50%;border:1px solid rgba(227,195,138,.8);display:grid;place-items:center;backdrop-filter:blur(4px);background:rgba(5,9,15,.35);transition:transform .3s}
+.start .ring::after{content:"";margin-left:12%;border-style:solid;border-width:.9em 0 .9em 1.5em;border-color:transparent transparent transparent var(--gold);font-size:clamp(9px,1.4cqw,15px)}
+.start span{font-size:clamp(12px,1.6cqw,15px);letter-spacing:.3em;padding-left:.3em}
+.start:hover .ring,.start:focus-visible .ring{transform:scale(1.06)}
+.start:focus-visible{outline:2px solid var(--gold);outline-offset:-4px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.bar button{font:inherit;font-size:13px;color:var(--mist);background:var(--deep);border:1px solid var(--line);border-radius:3px;padding:7px 12px;cursor:pointer;letter-spacing:.06em}
+.bar button:hover{border-color:var(--dim)}
+.bar button:focus-visible,#seek:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.bar button[aria-pressed="false"]{color:var(--dim)}
+#seek{flex:1 1 220px;min-width:0;accent-color:var(--gold)}
+.time{font-variant-numeric:tabular-nums;font-size:13px;color:var(--dim);min-width:92px}
+.chapters{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--dim);letter-spacing:.05em;margin:0;padding:0;list-style:none}
+.chapters button{font:inherit;color:inherit;background:none;border:0;padding:2px 0;cursor:pointer}
+.chapters button.on{color:var(--gold)}
+.chapters button:focus-visible{outline:1px solid var(--gold)}
+</style>
+
+<main class="wrap">
+  <header class="head">
+    <h1>洋流：起源</h1>
+    <p>世界觀概念片 · 中文旁白 · 1:54 · 寫實開場，啟流後進入方塊遊戲世界</p>
+  </header>
+  <div class="stage" id="stage">
+    <div id="shots"></div>
+    <canvas id="fx"></canvas>
+    <div class="bloom" id="bloom"></div>
+    <div class="vignette"></div>
+    <div class="card" id="card" aria-hidden="true">
+      <div class="t" id="cardTitle"></div>
+      <div class="rule" id="cardRule"></div>
+      <div class="g" id="cardTag">走出去，遇見你的機緣。</div>
+    </div>
+    <div class="sub" id="sub" aria-live="off"></div>
+    <div class="black" id="black"></div>
+    <button class="start" id="start" type="button" aria-label="播放影片"><div class="ring"></div><span>播放</span></button>
+  </div>
+  <div class="bar">
+    <button id="play" type="button">播放</button>
+    <input id="seek" type="range" min="0" max="114.3" step="0.01" value="0" aria-label="播放位置">
+    <span class="time" id="time">0:00 / 1:54</span>
+    <button id="subs" type="button" aria-pressed="true">字幕</button>
+    <button id="fs" type="button">全螢幕</button>
+  </div>
+  <ul class="chapters" id="chapters"></ul>
+  <audio id="audio" src="narration_bgm_v2.mp3" preload="auto"></audio>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="world.js"></script>
+<script>
+const DATA = {"end": 114.3, "cuts": [["01", 0, 7.28], ["02", 7.28, 16.8], ["03", 16.8, 19.48], ["04a", 19.48, 24.07], ["04b", 24.07, 29.01], ["04c", 29.01, 35.76], ["05", 35.76, 42.84], ["06", 42.84, 50.4], ["07", 50.4, 65.32], ["08", 65.32, 73.56], ["09", 73.56, 82.76], ["10", 82.76, 95.32], ["11", 95.32, 103.76], ["12", 103.76, 114.3]], "subs": [[0, 6.88, "我們一直以為，世界只有眼睛看見的樣子"], [7.28, 16.4, "城市、山脈、海洋、人群，各自存在，彼此分離"], [16.8, 19.08, "直到有一天"], [19.48, 24.07, "有人在山中聽見不存在的鐘聲"], [24.07, 29.01, "有人在海邊看見逆光流動的痕跡"], [29.01, 35.36, "有人在夢裡，走進同一座從未見過的山門"], [35.76, 42.44, "我們開始明白，這個世界，從來不只一層"], [42.84, 50.0, "山有脈，海有流，人，亦有自己的道"], [50.4, 58.96, "那些被古人稱為氣、脈、道的存在，也許從未消失"], [58.96, 64.92, "只是人類，曾經失去感知它的能力"], [65.32, 73.16, "而現在，台灣，成為第一個重新啟流的地方"], [73.56, 82.36, "山脈甦醒，海流共鳴，城市之中，也出現靈界的回聲"], [82.76, 87.15, "有人開始修行，有人尋找宗門"], [87.15, 89.85, "有人踏上現世的路"], [89.85, 94.92, "只為了在靈界中，找到自己的機緣"], [95.32, 100.82, "這不是結束，而是一切的開始"], [100.82, 103.36, "這裡，是起源"]]};
+const END = DATA.end, XF = 0.9;
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// 每鏡的運鏡：起訖的縮放與位移（%），以及動態圖層強度
+const MOVE = {
+  "01":{from:[1.04,-1.5,0], to:[1.13,1.5,-1], fog:.35, motes:0,  flow:0},
+  "02":{from:[1.12,2.5,0],  to:[1.05,-2.5,0], fog:.28, motes:0,  flow:0},
+  "03":{from:[1.03,0,0],    to:[1.16,0,-2],   fog:.4,  motes:.25,flow:0},
+  "04a":{from:[1.02,0,0],   to:[1.14,0,0],    fog:.35, motes:.8, flow:0},
+  "04b":{from:[1.10,-2,0],  to:[1.10,2,0],    fog:0,   motes:.6, flow:.55},
+  "04c":{from:[1.06,0,3],   to:[1.14,0,-2],   fog:.6,  motes:.35,flow:0},
+  "05":{from:[1.0,0,0,-2],  to:[1.12,0,0,1],  fog:0,   motes:.6, flow:.7},
+  "06":{from:[1.12,2,0],    to:[1.06,-2,0],   fog:.15, motes:.6, flow:.6},
+  "07":{from:[1.03,0,0],    to:[1.15,-1.5,0], fog:0,   motes:.55,flow:.3},
+  "08":{from:[1,0,0], to:[1,0,0], fog:0, motes:.2, flow:0, world:true},
+  "09":{from:[1,0,0], to:[1,0,0], fog:0, motes:.2, flow:0, world:true},
+  "10":{from:[1,0,0], to:[1,0,0], fog:0, motes:.2, flow:0, world:true},
+  "11":{from:[1,0,0], to:[1,0,0], fog:0, motes:.2, flow:0, world:true},
+  "12":{from:[1.0,0,0],     to:[1.05,0,0],    fog:0,   motes:.45,flow:.45}
+};
+const $ = id => document.getElementById(id);
+const stage=$("stage"), shotsEl=$("shots"), sub=$("sub"), audio=$("audio");
+const fx = {fog:0, motes:0, flow:0};
+
+// 方塊世界各鏡的遊戲介面（淡入淡出由 hud() 依本鏡時間控制）
+const HUD={
+  "08":`<div class="gh load" data-a="0.15" data-b="2.7"><b>啟流中</b><span class="lt">正在進入靈界…</span><div class="pbar"><i></i></div></div>
+        <div class="gh zone" data-a="2.8" data-b="7.4"><small>新區域解鎖</small>台灣・起源之地</div>`,
+  "09":`<div class="gh zone" data-a="0.6" data-b="4.2"><small>抵達</small>靈界・雲海山門</div>
+        <div class="gh party" data-a="1.8" data-b="99"><div><i style="background:#58b0ea"></i>阿流<em>Lv.1</em></div><div><i style="background:#f08a24"></i>阿汐<em>Lv.3</em></div></div>`,
+  "10":`<div class="gh party" data-a="0" data-b="99"><div><i style="background:#58b0ea"></i>阿流<em>Lv.1</em></div><div><i style="background:#f08a24"></i>阿汐<em>Lv.3</em></div></div>
+        <div class="gh quest" data-a="0.3" data-b="99"><b>主線任務</b><span class="qt"></span><div class="pbar"><i></i></div></div>
+        <div class="gh pop" data-a="7.7" data-b="10.6">獲得機緣：洋流羅盤</div>
+        <div class="gh toast" data-a="8.2" data-b="11.8">＋1 機緣　感知力提升</div>`,
+  "11":`<div class="gh zone" data-a="0.4" data-b="3.2"><small>世界地圖</small>台灣・起源之地</div>
+        <div class="gh warn" data-a="3.4" data-b="7.6">⚠ 偵測到未知流場</div>`
+};
+function hud(el,lt,L){
+  el.querySelectorAll(".gh").forEach(h=>{const a=+h.dataset.a,b=Math.min(+h.dataset.b,L+1);h.style.opacity=Math.max(0,Math.min(1,(lt-a)/.3,(b-lt)/.3))});
+  const lb=el.querySelector(".load .pbar i"); if(lb){lb.style.width=Math.min(100,Math.max(0,(lt-.2)/2*100))+"%"; el.querySelector(".load .lt").textContent=lt<2.2?"正在進入靈界…":"連線成功"}
+  const q=el.querySelector(".quest .qt"); if(q){q.textContent=lt<4.4?"靜心修行，感應靈脈":lt<7.1?"踏上現世之路":"尋找你的機緣（1/1）";el.querySelector(".quest .pbar i").style.width=(lt<7.6?Math.min(80,lt/7.6*80):100)+"%"}
+  const p=el.querySelector(".pop"); if(p) p.style.transform=`translateX(-50%) scale(${.85+.15*Math.min(1,(lt-7.7)/.25)})`;
+}
+// 畫面
+const shotEls = DATA.cuts.map(([key],i)=>{
+  const d=document.createElement("div"); d.className="shot"; d.style.zIndex=i;
+  if(World.SCENES[key]){   // 方塊世界的鏡頭：canvas＋遊戲介面
+    const c=document.createElement("canvas"); c.className="world"; d.appendChild(c);
+    d.insertAdjacentHTML("beforeend",HUD[key]||""); d.view=World.View(c); new ResizeObserver(()=>d.view.size()).observe(c);
+  } else { const im=new Image(); im.src=`img/${key}.jpg`; im.alt=""; im.decoding="async"; d.appendChild(im); }
+  shotsEl.appendChild(d); return d;
+});
+// 片名逐字
+const title="洋流：起源"; $("cardTitle").innerHTML=[...title].map(c=>`<span>${c}</span>`).join("");
+
+// GSAP 主時間軸：由旁白的播放時間驅動（tl.time(t)），所以拖曳、暫停都會同步
+const tl = gsap.timeline({paused:true});
+DATA.cuts.forEach(([key,a,b],i)=>{
+  const m=MOVE[key], el=shotEls[i], img=el.firstChild;
+  const st = i===0 ? 0 : a-XF/2;
+  tl.fromTo(el,{opacity:0},{opacity:1,duration:i===0?1.6:XF,ease:"sine.inOut"},st);
+  const [s0,x0,y0,r0=0]=m.from, [s1,x1,y1,r1=0]=m.to;
+  if(!reduce) tl.fromTo(img,{scale:s0,xPercent:x0,yPercent:y0,rotation:r0},{scale:s1,xPercent:x1,yPercent:y1,rotation:r1,duration:(b-st)+XF,ease:"none"},st);
+  tl.to(fx,{fog:m.fog,motes:m.motes,flow:m.flow,duration:i===0?2:XF*1.6,ease:"sine.inOut"},st);
+  if(i>0) tl.set(shotEls[i-1],{opacity:0},a+XF/2+0.05);   // 上一鏡淡完就隱藏，省效能
+});
+tl.fromTo("#black",{opacity:1},{opacity:0,duration:1.6,ease:"sine.out"},0);
+// 啟流：「而現在，台灣」那一刻的光爆
+const awake = DATA.cuts.find(c=>c[0]==="08")[1];
+tl.fromTo("#bloom",{opacity:0},{opacity:.85,duration:.5,ease:"power2.out"},awake-.35).to("#bloom",{opacity:0,duration:2.4,ease:"sine.inOut"});
+// 片尾字卡
+const cardAt = DATA.cuts.find(c=>c[0]==="12")[1]+0.04;   // 與配樂重擊、旁白「洋流」同時
+tl.fromTo("#cardTitle span",{opacity:0,filter:"blur(10px)",y:"0.15em"},{opacity:1,filter:"blur(0px)",y:0,duration:1.6,stagger:.18,ease:"power2.out"},cardAt)
+  .fromTo("#cardTitle",{letterSpacing:"0.5em"},{letterSpacing:"0.28em",duration:3.2,ease:"power2.out"},cardAt)
+  .fromTo("#cardRule",{scaleX:0,opacity:0},{scaleX:1,opacity:1,duration:1.6,ease:"power2.inOut"},cardAt+1.3)
+  .fromTo("#cardTag",{opacity:0,y:"0.6em"},{opacity:1,y:0,duration:1.6,ease:"sine.out"},cardAt+1.8)
+  .to("#black",{opacity:1,duration:1.8,ease:"sine.in"},END-1.8);
+tl.set({}, {}, END);
+
+// 動態圖層（canvas）：全部是時間 t 的函數，沒有隨機狀態，拖曳到哪裡都一樣
+const cv=$("fx"), cx=cv.getContext("2d");
+let W=0,H=0;
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R=rng(20261012);
+const motes=Array.from({length:150},()=>({x:R(),y:R(),rise:.012+R()*.03,sway:.004+R()*.012,sp:.2+R()*.6,ph:R()*6.283,size:.0012+R()*.0032,tw:.4+R()*1.6,gold:R()<.5}));
+const blobs=Array.from({length:22},()=>({x:R(),y:.25+R()*.7,r:.18+R()*.28,v:.004+R()*.012,a:.25+R()*.45}));
+const ribbons=Array.from({length:4},(_,i)=>({y:.3+R()*.45,A:.03+R()*.06,k:.6+R()*.9,w:.05+R()*.08,ph:R()*6.283,gold:i%3===0}));
+function sprite(rgb){const c=document.createElement("canvas");c.width=c.height=64;const g=c.getContext("2d");const gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,`rgba(${rgb},1)`);gr.addColorStop(.18,`rgba(${rgb},.85)`);gr.addColorStop(.45,`rgba(${rgb},.18)`);gr.addColorStop(1,`rgba(${rgb},0)`);g.fillStyle=gr;g.fillRect(0,0,64,64);return c}
+const SG=sprite("255,226,170"), SC=sprite("170,225,255");
+function resize(){const r=stage.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);W=cv.width=Math.min(1920,Math.round(r.width*d));H=cv.height=Math.round(W*9/16)}
+function drawFX(t){
+  cx.clearRect(0,0,W,H);
+  cx.globalCompositeOperation="lighter";
+  if(fx.fog>.01){
+    for(const b of blobs){
+      const x=((b.x+b.v*t)%1.6-.3)*W, y=b.y*H, r=b.r*W;
+      const g=cx.createRadialGradient(x,y,0,x,y,r);
+      const a=b.a*fx.fog*.32;
+      g.addColorStop(0,`rgba(214,224,234,${a})`);g.addColorStop(.6,`rgba(190,205,220,${a*.45})`);g.addColorStop(1,"rgba(190,205,220,0)");
+      cx.fillStyle=g;cx.fillRect(x-r,y-r,2*r,2*r);
+    }
+  }
+  if(fx.flow>.01){
+    cx.lineCap="round";
+    for(const rb of ribbons){
+      for(const pass of [[.018,.10],[.0026,.85]]){
+        cx.beginPath();
+        for(let i=0;i<=96;i++){const u=i/96, y=(rb.y+rb.A*Math.sin(6.283*(rb.k*u-rb.w*t)+rb.ph)+rb.A*.18*Math.sin(6.283*(1.7*rb.k*u+rb.w*t)+rb.ph*2))*H; i?cx.lineTo(u*W,y):cx.moveTo(0,y)}
+        const gr=cx.createLinearGradient(0,0,W,0), c=rb.gold?"255,214,150":"150,215,255", s=(t*.08+rb.ph)%1;
+        for(let j=0;j<=6;j++){const p=j/6, pulse=.35+.65*(.5+.5*Math.sin(6.283*(p*2-s*2)));gr.addColorStop(p,`rgba(${c},${pass[1]*fx.flow*pulse})`)}
+        cx.strokeStyle=gr;cx.lineWidth=pass[0]*H;cx.stroke();
+      }
+    }
+  }
+  if(fx.motes>.01){
+    for(const m of motes){
+      const y=(((m.y-m.rise*t)%1)+1)%1*H, x=(m.x+m.sway*Math.sin(m.sp*t+m.ph))*W;
+      const a=fx.motes*(.45+.55*Math.sin(m.tw*t+m.ph)**2), s=m.size*W*6;
+      cx.globalAlpha=a; cx.drawImage(m.gold?SG:SC,x-s/2,y-s/2,s,s);
+    }
+    cx.globalAlpha=1;
+  }
+  cx.globalCompositeOperation="source-over";
+}
+// 字幕
+let subsOn=true, lastSub="";
+function drawSub(t){
+  const s=subsOn && DATA.subs.find(([a,b])=>t>=a&&t<b);
+  const txt=s?s[2]:"";
+  if(txt!==lastSub){sub.textContent=txt;lastSub=txt}
+  sub.style.opacity=s?Math.min(1,(t-s[0])/.3,(s[1]-t)/.3):0;
+}
+function drawWorld(t){
+  DATA.cuts.forEach(([key,a,b],i)=>{const el=shotEls[i]; if(!el.view) return;
+    if(+getComputedStyle(el).opacity<=0.001) return;
+    const lt=Math.max(0,t-a); World.SCENES[key].draw(el.view,lt,b-a); hud(el,lt,b-a)});
+}
+function render(t){tl.time(Math.max(0,Math.min(END,t)),true);drawWorld(t);drawFX(t);drawSub(t)}
+window.__render=render; window.__END=END;
+
+// 播放控制：旁白檔比片長短，旁白結束後改用時鐘把片尾跑完
+const fmt=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+let playing=false, clockAt=0, clockT=0, cur=0;
+function now(){ if(!playing) return cur; if(!audio.ended && !audio.paused) return audio.currentTime; return clockT+(performance.now()-clockAt)/1000 }
+function setPlaying(p){
+  playing=p; $("play").textContent=p?"暫停":"播放"; $("start").hidden=true;
+  if(p){ if(cur>=END-0.05) cur=0; if(cur<audio.duration-0.05||isNaN(audio.duration)){audio.currentTime=cur;audio.play().catch(()=>{})} clockT=cur;clockAt=performance.now() }
+  else { audio.pause() }
+}
+audio.addEventListener("ended",()=>{clockT=audio.duration;clockAt=performance.now()});
+function seekTo(t){cur=t;clockT=t;clockAt=performance.now();if(t<(audio.duration||0)){audio.currentTime=t;if(playing)audio.play().catch(()=>{})}else audio.pause()}
+$("start").onclick=()=>{cur=0;setPlaying(true)};
+$("play").onclick=()=>setPlaying(!playing);
+$("seek").oninput=e=>{seekTo(+e.target.value); if(!playing) $("start").hidden=true};
+$("subs").onclick=e=>{subsOn=!subsOn;e.currentTarget.setAttribute("aria-pressed",subsOn)};
+$("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():stage.requestFullscreen().catch(()=>{})}catch(_){}};
+const NAMES={"01":"日常世界","04a":"異象出現","05":"啟流","08":"進入遊戲世界","09":"靈界揭示","10":"人的道路","11":"起源與未來"};
+DATA.cuts.forEach(([k,a])=>{ if(!NAMES[k])return; const li=document.createElement("li"),b=document.createElement("button");b.type="button";b.textContent=`${fmt(a)}　${NAMES[k]}`;b.dataset.t=a;b.onclick=()=>{seekTo(a);$("start").hidden=true;if(!playing)setPlaying(true)};li.appendChild(b);$("chapters").appendChild(li)});
+const chapBtns=[...document.querySelectorAll("#chapters button")];
+function loop(){
+  const t=now(); cur=t;
+  if(playing && t>=END){setPlaying(false);cur=END}
+  render(cur);
+  $("seek").value=cur; $("time").textContent=`${fmt(cur)} / ${fmt(END)}`;
+  chapBtns.forEach((b,i)=>b.classList.toggle("on",cur>=+b.dataset.t&&(i===chapBtns.length-1||cur<+chapBtns[i+1].dataset.t)));
+  requestAnimationFrame(loop);
+}
+new ResizeObserver(resize).observe(stage); resize();
+if(!location.search.includes("render")){ cur=4.2; render(cur); requestAnimationFrame(loop) }   // 封面停在第一鏡
+else { $("start").hidden=true; document.querySelector(".head").hidden=true }
+</script>
