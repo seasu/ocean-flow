@@ -7,6 +7,11 @@
 - 角色依「洋流 Ocean Currents」設定圖：藍色款＝玩家阿流，橘色款＝夥伴阿汐
 - 音效與環境音用 WebAudio 即時合成，沒有音檔
 
+## 作品網址
+
+- 可玩版本（GitHub Pages）：https://seasu.github.io/ocean-flow/ （手機開啟，片頭選「走出去・現地探索」可用真實定位）
+- 程式碼：https://github.com/seasu/ocean-flow
+
 ## 玩法
 
 | 操作 | 手機 | 電腦 |
@@ -48,6 +53,63 @@
 - 地點座標寫在 `src/geo.js`，是事前估計的。到現場用 `?calib` 開啟，站在每個地點按「設為目前位置」就會校正（存在這支手機的瀏覽器），下方會印出可以貼回 `src/geo.js` 的座標。
 - 地點都選公共、可步行的場所；雷達上一直提醒走人行道、注意來車。
 
+## 使用的開源套件、資料與 AI 工具
+
+遊戲本身**沒有使用任何第三方函式庫**：WebGL 渲染、物理、觸控操作、定位、音效都是本 repo 自己寫的程式。
+
+| 類別 | 名稱 | 用途 |
+|---|---|---|
+| 開放資料 | [臺北旅遊網 Open API](https://www.travel.taipei/open-api)（臺北市政府觀光傳播局） | 象山、虎山等景點的官方介紹與照片 |
+| 開源工具 | [http-server](https://github.com/http-party/http-server) | 本機開發時的靜態伺服器 |
+| 開源工具 | [Playwright](https://playwright.dev/) | 以手機尺寸自動化測試遊戲流程（開發時使用，不隨網站發佈） |
+| 開源工具 | GitHub Actions：`actions/checkout`、`configure-pages`、`upload-pages-artifact`、`deploy-pages` | 抓取開放資料、部署 GitHub Pages |
+| 開源工具 | [GSAP](https://gsap.com/)、[FFmpeg](https://ffmpeg.org/) | 概念片（`ocean-flow-origin/`）的網頁動畫與影片合成 |
+| AI 工具 | Claude（Anthropic，Claude Code） | 撰寫遊戲程式、測試、文件與企劃整理 |
+| AI 工具 | ChatGPT（OpenAI） | 世界觀與企劃討論（`docs/world-bible-v1.md`） |
+| AI 工具 | Gemini（Google） | 概念片關鍵畫面生成、中文旁白 TTS |
+| AI 工具 | Google Cloud Text-to-Speech | 旁白試音 |
+
+## 如果市府上任 100 天內要落地，需要做什麼
+
+目標：把這個原型變成四獸山與周邊文化徑的**手機數位導覽**，搭配象山登山觀光中心推廣「走一條路，認識台北這座城」。下面的局處分工、資料與成本都是**團隊的估計**，需要與各局處確認。
+
+**參與局處**
+
+| 局處 | 負責 |
+|---|---|
+| 觀光傳播局 | 主責單位；景點介紹與照片授權（臺北旅遊網）、推廣活動、多語翻譯 |
+| 工務局大地工程處 | 親山步道資料、路況與封閉公告、步道上的安全點位與標示 |
+| 文化局 | 文化徑地點（古蹟、歷史建築、文學基地）的內容審訂 |
+| 資訊局 | 開放資料介接、資安與個資檢測、網站上架 |
+
+**需要的資料**
+
+- 臺北旅遊網景點 Open API（已接上，見下方「景點介紹與照片」）
+- 台北市親山步道路線、出入口與里程資料（大地工程處）
+- 步道即時路況與封閉公告（讓遊戲在步道封閉時自動停用該點）
+- 文化資產／古蹟清單與座標（文化局）
+- 各點位的實地 GPS 校正座標與照片（現場踏查）
+
+**100 天時程**
+
+| 期間 | 工作 |
+|---|---|
+| 第 1–30 天 | 確認主責局處與資料授權；選定四獸山步道口與文化徑點位；完成安全評估（人行道、避開車道與施工） |
+| 第 31–60 天 | 現場踏查校正座標、補拍豹山／獅山等缺照片的點位；文案審訂與中英日韓翻譯；接上步道路況資料 |
+| 第 61–90 天 | 無障礙與資安檢測；在步道口與象山登山觀光中心設置 QR Code 立牌；小規模市民試玩 |
+| 第 91–100 天 | 正式上線、搭配週末走讀活動推廣；收集使用數據（匿名、不存位置軌跡） |
+
+**成本估計（新台幣，估計值）**
+
+| 項目 | 估計 |
+|---|---|
+| 網站託管 | 約 0 元（靜態網站，可放 GitHub Pages 或市府既有主機） |
+| 內容：文案審訂、攝影、四語翻譯 | 30–50 萬 |
+| 程式擴充、無障礙與資安檢測 | 80–150 萬 |
+| 現場 QR Code 立牌（約 10 處） | 10–20 萬 |
+| 推廣活動 | 30–50 萬 |
+| **合計** | **約 150–270 萬** |
+
 ## 景點介紹與照片（臺北旅遊網 Open API）
 
 `tools/fetch-taipei-travel.mjs` 會從 [臺北旅遊網 Open API](https://www.travel.taipei/open-api) 抓四獸山與現世機緣地點的官方介紹和照片（每處最多 3 張），存到 `data/taipei-travel.json` 與 `data/photos/`。遊戲裡點開景點小卡就會看到，並標示出處（臺北市政府觀光傳播局）。
@@ -67,7 +129,7 @@ npx http-server -p 8080 .
 
 ## 部署
 
-合併到 `main` 後，`.github/workflows/pages.yml` 會發佈到 GitHub Pages（需要在 repo Settings → Pages 把 Source 設為 GitHub Actions）。
+合併到 `main` 後，`.github/workflows/pages.yml` 會發佈到 https://seasu.github.io/ocean-flow/ 。第一次使用前，要到 repo 的 Settings → Pages 把 Source 設為「GitHub Actions」。
 
 ## 檔案
 
