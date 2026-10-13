@@ -46,6 +46,12 @@
 - 地點座標寫在 `src/geo.js`，是事前估計的。到現場用 `?calib` 開啟，站在每個地點按「設為目前位置」就會校正（存在這支手機的瀏覽器），下方會印出可以貼回 `src/geo.js` 的座標。
 - 地點都選公共、可步行的場所；雷達上一直提醒走人行道、注意來車。
 
+## 景點介紹與照片（臺北旅遊網 Open API）
+
+`tools/fetch-taipei-travel.mjs` 會從 [臺北旅遊網 Open API](https://www.travel.taipei/open-api) 抓四獸山與現世機緣地點的官方介紹和照片（每處最多 3 張），存到 `data/taipei-travel.json` 與 `data/photos/`。遊戲裡點開景點小卡就會看到，並標示出處（臺北市政府觀光傳播局）。
+
+這個開發環境連不到 travel.taipei，所以由 `.github/workflows/taipei-data.yml` 在 GitHub Actions 執行並提交回分支；要更新資料，可以到 Actions 手動執行，或在本機跑 `node tools/fetch-taipei-travel.mjs`。資料使用前請再確認臺北市政府的開放資料授權條款。
+
 ## 本機執行
 
 ES modules 需要經由 HTTP 開啟：

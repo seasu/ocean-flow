@@ -265,7 +265,7 @@ function awaken(n) {
   n.awake = true; n.flash = 1; G.spent += COST; G.awakened++;
   sfx.bell(n.bell || 196);
   pop(`${n.icon} ${n.name}甦醒了`, 'gold');
-  setTimeout(() => showCard(n.name, '台北四獸山・信義區', n.info + (G.awakened === 1 ? '\n\n' + SHOUSHAN : ''), `第一階・四獸山 ${G.awakened}/4`), 1300);
+  setTimeout(() => showCard(n.name, '台北四獸山・信義區', n.info + (G.awakened === 1 ? '\n\n' + SHOUSHAN : ''), `第一階・四獸山 ${G.awakened}/4`, n.id), 1300);
   burst(n.pos[0], n.pos[1] + 1.5, n.pos[2], [1, 0.85, 0.45], 70, 8);
   buildVein(n);
   G.spiritTarget = G.awakened / 4 * 0.8;
@@ -382,12 +382,24 @@ function updateGame(dt) {
 
 function discover(sp) {
   sp.found = true; G.bonus = (G.bonus || 0) + 1; sfx.pick(); setTimeout(() => sfx.pick(), 120);
-  showCard(sp.name, sp.area, sp.text, `發現台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}・＋1 靈光`);
+  showCard(sp.name, sp.area, sp.text, `發現台灣之美 ${SPOTS.filter(s => s.found).length}/${SPOTS.length}・＋1 靈光`, sp.id);
 }
-function showCard(title, sub, text, em) {
-  // 低調的小卡：預設只顯示一行，點開才看介紹；沒點開就自己淡出
-  const c = $('#card');
-  c.querySelector('b').textContent = '📍 ' + title; c.querySelector('small').textContent = sub; c.querySelector('p').textContent = text; c.querySelector('em').textContent = em;
+// 臺北旅遊網 Open API 的介紹與照片（由 tools/fetch-taipei-travel.mjs 產生；沒有檔案時就只用遊戲內文字）
+let TT = null;
+fetch('data/taipei-travel.json').then(r => r.ok ? r.json() : null).then(j => { TT = j; }).catch(() => { });
+const clip = (t, n) => t.length > n ? t.slice(0, n).replace(/\s+$/, '') + '…' : t;
+function showCard(title, sub, text, em, key) {
+  // 低調的小卡：預設只顯示一行，點開才看介紹與照片；沒點開就自己淡出
+  const c = $('#card'), d = key && TT?.spots?.[key];
+  c.querySelector('b').textContent = '📍 ' + title; c.querySelector('small').textContent = sub; c.querySelector('em').textContent = em;
+  c.querySelector('p').textContent = d?.introduction ? text + '\n\n' + clip(d.introduction.replace(/\s*\n\s*/g, ''), 120) : text;
+  const ph = c.querySelector('.ph'), cr = c.querySelector('.cr');
+  ph.replaceChildren(...(d?.images || []).map(im => { const i = document.createElement('img'); i.src = im.file; i.alt = im.subject || d.name; i.loading = 'lazy'; i.onerror = () => i.remove(); return i; }));
+  cr.replaceChildren();
+  if (d) {
+    const a = document.createElement('a'); a.href = d.url || TT.sourceUrl; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = `臺北旅遊網・${d.name}`; cr.append('介紹與照片：', a, '（臺北市政府觀光傳播局）');
+  }
   c.classList.remove('open'); c.querySelector('i').textContent = '介紹 ▴'; c.classList.add('show');
   clearTimeout(showCard.t); showCard.t = setTimeout(() => { if (!c.classList.contains('open')) c.classList.remove('show'); }, 12000);
 }
@@ -504,15 +516,16 @@ function encounter(s) {
       G.state = 'play';
       if (!node.awake) { G.bonus += COST; awaken(node); }
       else G.bonus += 1;
-      if (node.awake) setTimeout(() => showCard(s.name, '現世機緣・' + s.sub, s.text, `已和${node.name}結緣`), 900);
+      if (node.awake) setTimeout(() => showCard(s.name, '現世機緣・' + s.sub, s.text, `已和${node.name}結緣`, s.id), 900);
     });
   } else {
     G.bonus += 2; sfx.pick(); setTimeout(() => sfx.pick(), 150);
     burst(P.x, P.y + 1.5, P.z, [1, 0.9, 0.5], 40, 5);
-    showCard(s.name, '現世機緣・' + s.sub, s.text, `結下機緣・＋2 靈光（${visited.size} 處）`);
+    showCard(s.name, '現世機緣・' + s.sub, s.text, `結下機緣・＋2 靈光（${visited.size} 處）`, s.id);
   }
 }
 $('#card').addEventListener('pointerdown', e => {
+  if (e.target.closest('a, .ph')) return;
   e.preventDefault(); e.stopPropagation();
   const c = e.currentTarget;
   if (c.classList.toggle('open')) c.querySelector('i').textContent = '收起 ✕';
