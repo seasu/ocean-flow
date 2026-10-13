@@ -32,6 +32,12 @@ for (let page = 1; page < 60; page++) {
   if (all.length >= (j.total || Infinity)) break;
 }
 console.log('attractions', all.length);
+if (process.env.DEBUG) {
+  const near = all.filter(a => /豹|獅|四獸|善導|監察|濟南|光華|象山|虎山/.test(a.name)).map(a => ({ id: a.id, name: a.name, images: a.images }));
+  const sample = Object.fromEntries(Object.entries(all.find(a => a.name.includes('象山')) || all[0]).map(([k, v]) => [k, typeof v === 'string' ? v.slice(0, 80) : v]));
+  await mkdir('data', { recursive: true });
+  await writeFile('data/debug.json', JSON.stringify({ near, sample }, null, 2));
+}
 
 const pick = keys => {
   for (const k of keys) {
