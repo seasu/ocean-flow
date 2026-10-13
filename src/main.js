@@ -133,12 +133,16 @@ let hudKey = '';
 function hud() {
   const lv = 1 + Math.floor(G.collected / 5);
   const found = SPOTS.filter(sp => sp.found).length;
-  const key = [G.geo, G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, lv, found].join();
+  const key = [visited.size, G.geo, G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, lv, found].join();
   if (key !== hudKey) {
     hudKey = key;
     $('#lv').textContent = 'Lv.' + lv;
     $('#dexBtn').textContent = `📖 台灣之美 ${found}/${SPOTS.length}`;
-    $('#dexList').innerHTML = SPOTS.map(sp => sp.found ? `<li><b>${sp.name}</b><small>${sp.area}</small><p>${sp.text}</p></li>` : `<li class="lock"><b>？？？</b><small>${sp.area.split('・')[0]}</small></li>`).join('');
+    $('#dexList').innerHTML = '<li class="sec">第一階・台北四獸山</li>'
+      + S1.map(n => n.awake ? `<li><b>${n.icon} ${n.name}</b><small>台北四獸山・信義區</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>四獸山</small></li>`).join('')
+      + (visited.size ? '<li class="sec">現世機緣</li>' + REAL.filter(x => visited.has(x.id)).map(x => `<li><b>${x.name}</b><small>${x.sub}</small><p>${x.text}</p></li>`).join('') : '')
+      + '<li class="sec">台灣之美</li>'
+      + SPOTS.map(sp => sp.found ? `<li><b>${sp.name}</b><small>${sp.area}</small><p>${sp.text}</p></li>` : `<li class="lock"><b>？？？</b><small>${sp.area.split('・')[0]}</small></li>`).join('');
     $('#qi').textContent = `靈光 ${avail()}`;
     $('#qibar').style.width = Math.min(100, avail() / COST * 100) + '%';
     if (!G.gateOpen) {
