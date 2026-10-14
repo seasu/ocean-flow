@@ -340,12 +340,14 @@ function hud() {
     $('#meGrid').innerHTML = [[t('meSeals'), `${G.awakened}/${S1.length + S2.length}`], [t('meQi'), avail()], [t('beauty'), `${found}/${SPOTS.length}`], [t('meChances'), visited.size]]
       .map(([k, v]) => `<li><small>${k}</small><b>${v}</b></li>`).join('');
     $('#dexN').textContent = found; $('#dexSub').textContent = t('dexSub', { n: found, m: SPOTS.length });
-    $('#dexList').innerHTML = `<li class="sec">${t('secMountain')}</li>`
-      + S1.map(n => n.awake ? `<li><b>${n.icon} ${n.name}${t('sep')}${n.hill}</b><small>${n.seal}${t('sep')}${n.virtue}</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`).join('')
-      + (stage1Done() ? `<li class="sec">${t('secFlows')}</li>` + S2.map(n => n.awake ? `<li><b>${n.icon} ${n.name}${t('sep')}${n.hill}</b><small>${n.seal}${t('sep')}${n.virtue}</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`).join('') : '')
-      + (visited.size ? `<li class="sec">${t('secCulture')}</li>` + REAL.filter(x => visited.has(x.id)).map(x => `<li><b>${x.name}</b><small>${x.sub}</small><p>${x.text}</p></li>`).join('') : '')
+    // 已收集的項目可以點開，用景點介紹頁再看一次；有照片就放縮圖
+    const ent = (k, key, title, sub, text) => { const im = TT?.spots?.[key]?.images?.[0]?.file; return `<li class="open" data-k="${k}"><div class="t"><b>${title}</b><small>${sub}</small><p>${text}</p></div>${im ? `<img src="${im}" alt="">` : ''}<i class="chev"></i></li>`; };
+    const gate = n => n.awake ? ent('g:' + n.id, n.id, `${n.icon} ${n.name}${t('sep')}${n.hill}`, `${n.seal}${t('sep')}${n.virtue}`, n.info) : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`;
+    $('#dexList').innerHTML = `<li class="sec">${t('secMountain')}</li>` + S1.map(gate).join('')
+      + (stage1Done() ? `<li class="sec">${t('secFlows')}</li>` + S2.map(gate).join('') : '')
+      + (visited.size ? `<li class="sec">${t('secCulture')}</li>` + REAL.filter(x => visited.has(x.id)).map(x => ent('r:' + x.id, x.id, x.name, x.sub, x.text)).join('') : '')
       + `<li class="sec">${t('beauty')}</li>`
-      + SPOTS.map(sp => sp.found ? `<li><b>${sp.name}</b><small>${sp.area}</small><p>${sp.text}</p></li>` : `<li class="lock"><b>？？？</b><small>${sp.area.split(/・|, | · /)[0]}</small></li>`).join('');
+      + SPOTS.map(sp => sp.found ? ent('s:' + sp.id, sp.id, sp.name, sp.area, sp.text) : `<li class="lock"><b>？？？</b><small>${sp.area.split(/・|, | · /)[0]}</small></li>`).join('');
     $('#qi').textContent = t('qiOf', { n: avail(), cost: COST });
     $('#qibar').style.width = Math.min(100, avail() / COST * 100) + '%';
     const stars = n => ' ' + '★'.repeat(n.star);
@@ -747,7 +749,7 @@ function discover(sp) {
 }
 // 臺北旅遊網 Open API 的介紹與照片（由 tools/fetch-taipei-travel.mjs 產生；沒有檔案時就只用遊戲內文字）
 let TT = null;
-fetch('data/taipei-travel.json').then(r => r.ok ? r.json() : null).then(j => { TT = j; }).catch(() => { });
+fetch('data/taipei-travel.json').then(r => r.ok ? r.json() : null).then(j => { TT = j; hudKey = ''; }).catch(() => { });
 const clip = (t, n) => t.length > n ? t.slice(0, n).replace(/\s+$/, '') + '…' : t;
 let spotData = null;
 function showCard(title, sub, text, em, key) {
@@ -780,6 +782,14 @@ function openSpot() {
   spotEl.hidden = false; spotEl.scrollTop = 0;
 }
 spotPh.addEventListener('scroll', () => { const k = Math.round(spotPh.scrollLeft / spotPh.clientWidth); spotDots.querySelectorAll('i').forEach((el, n) => el.classList.toggle('on', n === k)); }, { passive: true });
+$('#dexList').addEventListener('click', e => {
+  const li = e.target.closest('li[data-k]'); if (!li) return;
+  const [kind, id] = li.dataset.k.split(':'), d = TT?.spots?.[id];
+  if (kind === 'g') { const n = NODES.find(x => x.id === id); spotData = { title: `${n.name}${t('sep')}${n.hill}`, sub: `${n.seal}${t('sep')}${n.virtue}`, text: n.info, em: '', d }; }
+  else if (kind === 'r') { const x = REAL.find(r => r.id === id); spotData = { title: x.name, sub: x.sub, text: x.text, em: '', d }; }
+  else { const sp = SPOTS.find(q => q.id === id); spotData = { title: sp.name, sub: sp.area, text: sp.text, em: '', d }; }
+  openSpot();
+});
 spotEl.querySelector('.xbtn').addEventListener('click', () => { spotEl.hidden = true; });
 
 // ---------- 現世雷達：真實地點觸發機緣事件 ----------
@@ -826,7 +836,7 @@ for (const page of [radar, $('#dex'), $('#spot'), $('#settings'), $('#me')]) {
 }
 function openRadar() { if (G.state !== 'play' && G.state !== 'ending') return; radarOpen = true; radar.classList.add('show'); setZoom(null); geo.start(); renderList(); }
 function closeRadar() { radarOpen = false; radar.classList.remove('show'); }
-$('#radarBtn').addEventListener('pointerdown', e => { e.preventDefault(); openRadar(); });
+$('#radarBtn').addEventListener('click', e => { e.stopPropagation(); openRadar(); });
 $('#rClose').addEventListener('click', closeRadar);
 $('#simT').addEventListener('change', e => geo.setSim(e.target.checked));
 $('#enc button').addEventListener('click', () => encSpot && encounter(encSpot));
@@ -972,8 +982,8 @@ function encounter(s) {
     showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('chanceBonus', { n: visited.size }), s.id);
   }
 }
-$('#card').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); openSpot(); });
-$('#dexBtn').addEventListener('pointerdown', e => { e.preventDefault(); $('#card').classList.remove('show'); $('#dex').classList.toggle('show'); });
+$('#card').addEventListener('click', e => { e.stopPropagation(); openSpot(); });
+$('#dexBtn').addEventListener('click', e => { e.stopPropagation(); $('#card').classList.remove('show'); $('#dex').classList.toggle('show'); });
 $('#dexClose').addEventListener('click', () => $('#dex').classList.remove('show'));
 
 function ending() {
