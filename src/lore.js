@@ -30,20 +30,18 @@ const CH = [
 ];
 const L = { zh: 0, en: 1, ja: 2 }[lang] ?? 0;
 
+const X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
 const el = document.createElement('div');
 el.id = 'lore'; el.hidden = true;
-el.innerHTML = `<button class="ico x" aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-  <div class="pages">
-    <section class="cover"><small>${t('loreKicker')}</small><h2>${t('loreTitle')}</h2><p>${t('loreIntro')}</p><span class="hintSwipe">${t('loreSwipe')}</span></section>
-    ${CH.map((c, i) => `<section class="ch"><img src="img/lore/ch${i}.jpg" alt="" loading="${i < 2 ? 'eager' : 'lazy'}">
-      <small>${c.no[L]}${i === 0 ? `<em>${t('loreHere')}</em>` : ''}</small><h2>${t('loreName', { name: c.name[L] })}</h2><b>— ${c.sub[L]} —</b><blockquote>${c.epi[L]}</blockquote><p>${c.text[L]}</p></section>`).join('')}
-  </div>
-  <nav><button class="ico prev" aria-label="previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-    <div class="dots">${['', ...CH].map(() => '<i></i>').join('')}</div>
-    <button class="ico next" aria-label="next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button></nav>`;
+el.innerHTML = `<button class="ico x" aria-label="close">${X}<path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <div class="pages"></div>
+  <nav><button class="ico prev" aria-label="previous">${X}<path d="M15 5l-7 7 7 7"/></svg></button><div class="dots"></div>
+    <button class="ico next" aria-label="next">${X}<path d="M9 5l7 7-7 7"/></svg></button></nav>`;
 document.body.appendChild(el);
 
-const pages = el.querySelector('.pages'), dots = [...el.querySelectorAll('.dots i')], secs = [...pages.children];
+// 同一本「書」用來翻世界觀和境界：換掉頁面內容就好
+const pages = el.querySelector('.pages'), dotsEl = el.querySelector('.dots');
+let secs = [], dots = [];
 const cur = () => Math.round(pages.scrollLeft / pages.clientWidth);
 const go = i => pages.scrollTo({ left: Math.max(0, Math.min(secs.length - 1, i)) * pages.clientWidth, behavior: 'smooth' });
 function mark() {
@@ -55,8 +53,45 @@ function mark() {
 pages.addEventListener('scroll', () => requestAnimationFrame(mark), { passive: true });
 el.querySelector('.prev').addEventListener('click', () => go(cur() - 1));
 el.querySelector('.next').addEventListener('click', () => go(cur() + 1));
-dots.forEach((d, k) => d.addEventListener('click', () => go(k)));
+dotsEl.addEventListener('click', e => { const k = dots.indexOf(e.target); if (k >= 0) go(k); });
 el.querySelector('.x').addEventListener('click', () => { el.hidden = true; });
 addEventListener('keydown', e => { if (el.hidden) return; if (e.key === 'ArrowRight') go(cur() + 1); if (e.key === 'ArrowLeft') go(cur() - 1); if (e.key === 'Escape') el.hidden = true; });
+function openBook(html) {
+  pages.innerHTML = html; secs = [...pages.children];
+  dotsEl.innerHTML = secs.map(() => '<i></i>').join(''); dots = [...dotsEl.children];
+  el.hidden = false; pages.scrollLeft = 0; mark();
+}
+const cover = (kicker, title, intro, swipe) => `<section class="cover"><small>${kicker}</small><h2>${title}</h2><p>${intro}</p><span class="hintSwipe">${swipe}</span></section>`;
 
-export function openLore() { el.hidden = false; pages.scrollLeft = 0; mark(); }
+export function openLore() {
+  openBook(cover(t('loreKicker'), t('loreTitle'), t('loreIntro'), t('loreSwipe'))
+    + CH.map((c, i) => `<section class="ch"><img src="img/lore/ch${i}.jpg" alt="" loading="${i < 2 ? 'eager' : 'lazy'}">
+      <small>${c.no[L]}${i === 0 ? `<em>${t('loreHere')}</em>` : ''}</small><h2>${t('loreName', { name: c.name[L] })}</h2><b>— ${c.sub[L]} —</b><blockquote>${c.epi[L]}</blockquote><p>${c.text[L]}</p></section>`).join(''));
+}
+
+// 境界：走路修行的五個境界；核心問題取自世界觀聖經第 11 章
+const RQ = [
+  { q: ['我能不能聽見世界？', 'Can I hear the world?', '世界の声が聞こえるだろうか？'],
+    text: ['開始感知流。第一次察覺地脈、情緒、靈氣、危險與機緣。\n走出門的第一步，就站在這裡。', 'You begin to sense the Flow. For the first time you notice earth veins, emotions, spirit, danger and chance encounters.\nYour first step out the door brings you here.', '流れを感じはじめる。地脈、感情、霊気、危険、そして縁に、はじめて気づく。\n外へ出た最初の一歩で、ここに立つ。'] },
+  { q: ['我是誰？', 'Who am I?', 'わたしは誰だろう？'],
+    text: ['開始建立自己的內在秩序。\n不再只是被外界的流帶著走。', 'You begin to build an order within yourself.\nYou are no longer simply carried along by the currents around you.', '自分の内側に秩序を築きはじめる。\nもう外の流れに流されるだけではない。'] },
+  { q: ['我的流往哪裡去？', 'Where is my Flow going?', 'わたしの流れはどこへ向かう？'],
+    text: ['形成屬於自己的穩定「內在之流」，開始走出自己的路。\n城、海、山三流，要到這個境界才喚得醒。', 'A steady inner Flow of your own takes shape, and you begin to walk your own path.\nThe City, Sea and Mountain Flows only wake for those who reach this realm.', '自分だけの安定した「内なる流れ」が生まれ、自分の道を歩きはじめる。\n街・海・山の三流は、この境地に至ってはじめて目覚める。'] },
+  { q: ['我與世界的邊界在哪裡？', 'Where do I end and the world begin?', 'わたしと世界の境界はどこにある？'],
+    text: ['意識不再完全受限於身體與單一空間。\n能感知更大範圍的流。', 'Your awareness is no longer bound to one body and one place.\nYou can sense the Flow across a far wider range.', '意識はもう、身体とひとつの空間だけに縛られない。\nより広い範囲の流れを感じとれる。'] },
+  { q: ['我的存在如何影響世界？', 'How does my being change the world?', 'わたしの存在は世界をどう変える？'],
+    text: ['你本身開始成為一個「流源」。\n你的選擇、想法與存在，都會改變周圍的世界。', 'You yourself begin to become a source of Flow.\nYour choices, your thoughts and your very presence change the world around you.', 'あなた自身が「流れの源」になりはじめる。\n選択も、思いも、存在そのものも、まわりの世界を変えていく。'] },
+];
+// 境界的徽記：一圈一圈往外長的光環，境界越高圈越多、越亮
+const emblem = (k, now) => `<svg class="emblem${now ? ' now' : ''}" viewBox="0 0 200 200">${[...Array(5)].map((_, r) => {
+  const on = r <= k, rad = 26 + r * 16;
+  return `<circle cx="100" cy="100" r="${rad}" fill="none" stroke="${on ? (r === k ? '#ffcf5a' : '#7fe8ff') : 'rgba(255,255,255,.12)'}" stroke-width="${r === k ? 3.5 : 2}" ${on ? '' : 'stroke-dasharray="3 7"'} opacity="${on ? 1 - (k - r) * 0.12 : 1}"/>`;
+}).join('')}<circle cx="100" cy="100" r="${10 + k * 2}" fill="#ffcf5a"/></svg>`;
+export function openRealms({ realms, need, now, geo }) {
+  openBook(cover(t('realmKicker'), t('realmTitle'), t('realmIntro'), t('realmSwipe'))
+    + realms.map((name, i) => `<section class="ch realm">${emblem(i, i === now)}
+      <small>${t('realmNo', { n: i + 1 })}${i === now ? `<em>${t('loreHere')}</em>` : ''}</small><h2>${name}</h2>
+      <blockquote>${L === 1 ? `“${RQ[i].q[L]}”` : `「${RQ[i].q[L]}」`}</blockquote><p>${RQ[i].text[L]}</p>
+      <ul class="facts"><li><small>${t('realmPurify')}</small><b>${i ? `+${i * 20}%` : t('realmBase')}</b></li><li><small>${t('realmNeed')}</small><b>${i ? t(geo ? 'realmNeedGeo' : 'realmNeedIsland', { n: need[i - 1] }) : t('realmStart')}</b></li></ul></section>`).join(''));
+  if (now > 0) setTimeout(() => go(now + 1), 350);
+}
