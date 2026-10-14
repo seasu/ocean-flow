@@ -3,7 +3,7 @@ import { M, clamp, lerp, rng, hex, mixColor, smooth } from './math.js';
 import { Renderer, Builder } from './gl.js';
 import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, bellMesh, beastMesh, N, WATER, T, PLACES, CURRENT, curX } from './world.js';
 import { drawAvatar, BLUE, ORANGE } from './avatar.js';
-import { initAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
+import { initAudio, unlockAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
 import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
 import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
 import { battle } from './battle.js';
@@ -575,6 +575,10 @@ if (!params.has('play') && !params.has('geo') && (wantFilm || (showA2hs && !a2hs
     else window.armTitle?.();
   });
 }
+
+// 片頭「洋流」與「啟程」第一次滑開時的音效；音效通道要在第一次點擊時打開
+addEventListener('pointerdown', () => unlockAudio(), { once: true, capture: true });
+addEventListener('of-title-open', () => { if (G.state === 'title') sfx.reveal(); }, { once: true });
 
 // ---------- 玩法 ----------
 function doSense() {
