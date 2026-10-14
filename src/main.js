@@ -8,6 +8,7 @@ import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
 import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
 import { battle } from './battle.js';
 import { openLore, openRealms } from './lore.js';
+import { VERSION } from './version.js';
 
 applyStatic();
 
@@ -491,7 +492,9 @@ $('#title .start').addEventListener('click', () => start('geo'));
 // 版本號：頁面和程式各自的版本，不一致時兩個都列出來，方便判斷是不是快取到舊檔
 {
   const el = $('#title .ver'), hv = el.dataset.v.startsWith('__') ? 'dev' : el.dataset.v, jv = new URL(import.meta.url).searchParams.get('v') || 'dev';
-  el.textContent = hv === jv ? 'v ' + jv : `html ${hv} · js ${jv}`;
+  el.textContent = 'v' + VERSION + (hv === jv ? '' : ' · ' + t('verStale'));
+  $('#verV').textContent = 'v' + VERSION;
+  $('#verB').textContent = hv === jv ? 'build ' + jv : `html ${hv} · js ${jv}`;
 }
 $('#title .alt')?.addEventListener('click', () => start('island'));
 $('#again').addEventListener('click', () => location.reload());
