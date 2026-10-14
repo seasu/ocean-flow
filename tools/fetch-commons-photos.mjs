@@ -4,16 +4,16 @@ import { mkdir, writeFile, readdir, rm } from 'node:fs/promises';
 
 // 遊戲裡的 id → 中文維基百科條目（依序嘗試）
 const WANT = {
-  leopard: [['四獸山'], 'Leopard Mountain Taipei hiking trail'], lion: [['四獸山'], 'Lion Mountain Taipei Xinyi trail'],
+  leopard: [['四獸山'], 'Four Beasts Mountain Taipei'], lion: [['四獸山'], 'Taipei 101 view from Elephant Mountain'],
   city: [['北門 (臺北)', '臺北府城'], 'Beimen Taipei North Gate'], sea: [['龜山島'], 'Guishan Island Yilan'], peak: [['玉山'], 'Yushan main peak'],
   shandao: [['善導寺 (臺北市)'], 'Shandao Temple Taipei'], controlyuan: [['監察院大樓', '監察院'], 'Control Yuan building Taipei'],
   jinan: [['濟南基督長老教會'], 'Jinan Presbyterian Church Taipei'], guanghua: [['光華商場'], 'Guanghua Digital Plaza'],
-  turtle: [['龜山島'], 'Guishan Island Yilan'], kuroshio: [['黑潮'], 'Pacific Ocean east coast Taiwan Hualien sea'],
-  taroko: [['太魯閣峽谷', '太魯閣國家公園'], 'Taroko Gorge'], sunmoon: [['日月潭'], 'Sun Moon Lake'],
+  turtle: [['龜山島'], 'Guishan Island Yilan'], kuroshio: [['黑潮'], 'Qingshui Cliff Hualien'],
+  taroko: [['太魯閣峽谷', '太魯閣國家公園'], 'Taroko Gorge'], sunmoon: [['日月潭'], 'Sun Moon Lake Taiwan'],
   yushan: [['玉山'], 'Yushan main peak'], alishan: [['阿里山神木', '阿里山國家森林遊樂區'], 'Alishan giant tree'], kenting: [['鵝鑾鼻燈塔'], 'Eluanbi Lighthouse'],
 };
 const MAX = 3, UA = 'ocean-flow-prototype/1.0 (https://github.com/seasu/ocean-flow)';
-const SKIP = /總統|president|典禮|ceremony|election|選舉|campaign|parade|logo|map|flag|icon|locator|location|seal|emblem|coat|diagram|chart|關係|位置|地圖|標誌|\.svg$|\.gif$/i;
+const SKIP = /protest|rally|demonstration|抗議|遊行|Guilin|桂林|China|總統|president|典禮|ceremony|election|選舉|campaign|parade|logo|map|flag|icon|locator|location|seal|emblem|coat|diagram|chart|關係|位置|地圖|標誌|\.svg$|\.gif$/i;
 
 async function api(host, params) {
   const u = `https://${host}/w/api.php?` + new URLSearchParams({ format: 'json', formatversion: '2', origin: '*', ...params });
