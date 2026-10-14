@@ -56,13 +56,18 @@ function startMusic() {
   }).catch(() => { });
 }
 
-export function initAudio() {
+// 只開音效通道（片頭用）：要在使用者點擊時呼叫，iOS 才放行
+export function unlockAudio() {
   if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
   const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-  ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.8; master.connect(ctx.destination);
+  ctx = new AC(); master = ctx.createGain(); master.gain.value = muted ? 0 : 0.8; master.connect(ctx.destination);
   // 音效匯流排：乾聲＋殘響
   fx = ctx.createGain(); fx.connect(master);
   verb = makeReverb(); const wet = ctx.createGain(); wet.gain.value = 0.32; fx.connect(verb); verb.connect(wet); wet.connect(master);
+}
+let started = false;
+export function initAudio() {
+  unlockAudio(); if (!ctx || started) return; started = true;
   foam = 1;
   sea = { brown: noiseBuffer(6, true), white: noiseBuffer(3, false), out: ctx.createGain() };
   sea.out.gain.value = 0; sea.out.connect(master);
@@ -145,6 +150,18 @@ export const sfx = {
     lp.type = 'lowpass'; lp.frequency.value = 500; env(g, t, 0.01, 0.15, 0.3); s.connect(lp); lp.connect(g); g.connect(fx); s.stop(t + 0.4);
   },
   purify() { [587.3, 740, 880, 1174.7, 1480].forEach((f, i) => celesta(f, 0.09, i * 0.07)); strings([293.7, 440, 587.3], 2.5, 0.04, 0.1); },
+  // 片頭展開：氣聲往上掃開、弦樂和弦慢慢打開、豎琴往上刮奏，最後鋼片琴點亮——豁然開朗
+  reveal() {
+    if (!ctx) return;
+    const t = ctx.currentTime, n = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
+    n.buffer = noiseBuffer(2, false); bp.type = 'bandpass'; bp.Q.value = 0.8;
+    bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(5000, t + 1.1);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.09, t + 0.5); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
+    n.connect(bp); bp.connect(g); g.connect(fx); n.start(t); n.stop(t + 1.6);
+    strings([146.8, 220, 293.7, 370, 440], 3.2, 0.045);
+    [293.7, 329.6, 370, 440, 493.9, 587.3, 659.3, 740, 880, 987.8, 1174.7].forEach((f, i) => harp(f, 0.11, 0.15 + i * 0.055));
+    [1174.7, 1480, 1760].forEach((f, i) => celesta(f, 0.07, 0.85 + i * 0.12));
+  },
   // 不行：低音撥弦兩下
   deny() { harp(146.8, 0.2); harp(138.6, 0.18, 0.14); },
   // 靈門開啟：豎琴刮奏＋弦樂和弦＋鐘

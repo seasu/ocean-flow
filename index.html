@@ -564,6 +564,7 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
     if (title.classList.contains('calm') === calm) return;
     const a = keep.map(e => e.getBoundingClientRect());
     title.classList.toggle('calm', calm);
+    if (calm) dispatchEvent(new Event('of-title-open'));
     keep.forEach((e, i) => {
       const b = e.getBoundingClientRect(), k = a[i].width / b.width;
       const dx = a[i].left + a[i].width / 2 - b.left - b.width / 2, dy = a[i].top + a[i].height / 2 - b.top - b.height / 2;
