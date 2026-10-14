@@ -45,7 +45,7 @@ export function taphero(A, { star, ease }) {
       S.claw = Math.max(0, S.claw - dt); S.blockT = Math.max(0, S.blockT - dt);
       // 守護獸每秒出手一次
       S.pet -= dt;
-      if (S.pet <= 0 && !shielded()) { S.pet = 1; A.add(PET); A.shoot(A.lay.w / 2, A.lay.gy - 20, '#ffcf5a'); }
+      if (S.pet <= 0 && !shielded()) { S.pet = 1; A.add(PET); A.shoot(A.lay.gx, A.lay.gy - 20, '#ffcf5a'); }
       for (const r of S.ripples) r.t += dt; S.ripples = S.ripples.filter(r => r.t < 0.4);
       for (const n of S.nums) n.t += dt; S.nums = S.nums.filter(n => n.t < 0.7);
       if (S.time <= 0 && A.pur < 99.99) A.lose();
