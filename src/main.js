@@ -701,8 +701,8 @@ function updateGame(dt) {
       toast(t('plusOne', { n: avail() }));
     }
   }
-  // 靈脈節點
-  let charging = null;
+  // 靈脈節點：走到門前只提示，按了才開始
+  let charging = null, act = null;
   for (const n of NODES) {
     n.flash = Math.max(0, n.flash - dt * 0.6);
     if (n.awake) continue;
@@ -711,10 +711,8 @@ function updateGame(dt) {
     if (n.stage === 2 && G.realm < REQ) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); toast(t('needRealm', { name: n.name, realm: REALMS[REQ], now: REALMS[G.realm] })); } continue; }
     if (!canOpen(n)) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); const nx = nextGate(); toast(t('outOfOrder', { name: n.name, next: nx.name, hill: nx.hill })); } continue; }
     if (d < 2.6 && Math.abs(P.y - n.pos[1]) < 3) {
-      if (avail() >= COST) {
-        n.charge += dt / 1.6; charging = n;
-        if (n.charge >= 1) { n.charge = 0; fight(n, () => awaken(n)); }
-      } else if (G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); toast(t('notEnough', { cost: COST, n: avail() })); }
+      if (avail() >= COST) act = { key: n.id, text: t('gateHere', { icon: n.icon, name: n.name }), btn: t('gateGo'), fn: () => fight(n, () => awaken(n)) };
+      else if (G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); toast(t('notEnough', { cost: COST, n: avail() })); }
     } else n.charge = Math.max(0, n.charge - dt);
   }
   const pr = $('#prog');
@@ -723,8 +721,9 @@ function updateGame(dt) {
   // 台北靈門
   if (G.gateOpen) {
     G.gateT += dt;
-    if (Math.abs(P.x - GATE[0]) < 2.4 && Math.abs(P.z - GATE[2]) < 0.9 && G.state === 'play') ending();
+    if (Math.abs(P.x - GATE[0]) < 2.6 && Math.abs(P.z - GATE[2]) < 2.2) act = { key: 'gate', text: t('finalHere'), btn: t('finalGo'), fn: ending };
   }
+  setAct(G.state === 'play' ? act : null);
   // 感知
   G.sense = Math.max(0, G.sense - dt); G.senseCd = Math.max(0, G.senseCd - dt);
   if (G.pulse[3] > 0) { G.pulse[2] += dt * 34; G.pulse[3] = Math.max(0, 1 - G.pulse[2] / 70); }
@@ -745,6 +744,15 @@ function updateGame(dt) {
   nearHint(near, nd);
 }
 const nearEl = $('#near'), nearArrow = nearEl.querySelector('i'), nearText = nearEl.querySelector('p');
+const actEl = $('#act'); let actNow = null;
+function setAct(a) {
+  if ((a && a.key) === (actNow && actNow.key)) { if (a) actNow.fn = a.fn; return; }
+  actNow = a; actEl.classList.toggle('show', !!a); if (!a) return;
+  actEl.querySelector('p').textContent = a.text; actEl.querySelector('button').textContent = a.btn;
+  sfx.sense(); try { navigator.vibrate && navigator.vibrate(40); } catch { }
+}
+actEl.addEventListener('pointerdown', e => e.stopPropagation());
+actEl.querySelector('button').addEventListener('click', e => { e.stopPropagation(); const a = actNow; if (!a || G.state !== 'play') return; setAct(null); a.fn(); });
 function nearHint(sp, d) {
   const on = !!sp && G.state === 'play';
   nearEl.classList.toggle('show', on);
