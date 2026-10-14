@@ -500,6 +500,16 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
   // 開 app 第一個畫面就是影片入口：在主程式載入前就蓋上，避免先閃出主畫面
   (() => { const q = new URLSearchParams(location.search); if (!['play', 'geo', 'nofilm'].some(k => q.has(k))) document.getElementById('launch').classList.add('show'); })();
 </script>
+<script>
+  // 手機上看不到主控台：程式出錯時在畫面底部顯示一行，方便回報
+  addEventListener('error', e => {
+    if (document.getElementById('errbar')) return;
+    const d = document.createElement('div'); d.id = 'errbar';
+    d.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99;padding:8px 12px;border-radius:12px;background:rgba(120,20,20,.9);color:#fff;font:14px/1.4 sans-serif';
+    d.textContent = '出錯了：' + (e.message || e.error) + (e.filename ? '（' + e.filename.split('/').pop() + ':' + e.lineno + '）' : '');
+    d.onclick = () => d.remove(); document.body.append(d);
+  });
+</script>
 <script type="module" src="src/main.js"></script>
 <script>
   // 下一步卡：點一下展開完整任務清單，8 秒後自動收回

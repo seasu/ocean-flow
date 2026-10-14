@@ -23,6 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Stamp module versions
+        run: python3 tools/stamp-version.py
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
