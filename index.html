@@ -169,6 +169,20 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 .langs button{font-size:13px;font-weight:900;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.1);color:var(--dim)}
 .langs button.on{background:rgba(255,207,90,.2);color:var(--gold)}
 .film-btn{font-size:13px;font-weight:900;padding:8px 18px;border-radius:999px;background:rgba(111,227,255,.14);color:var(--cyan)}
+#battle{position:fixed;inset:0;z-index:8;display:none;touch-action:none;user-select:none;-webkit-user-select:none}
+#battle.show{display:block}
+#battle canvas{position:absolute;inset:0;width:100%;height:100%}
+#battle header{position:absolute;left:16px;right:16px;top:calc(12px + var(--st));display:flex;align-items:center;gap:10px;font-weight:900;pointer-events:none}
+#battle header b{font-size:14px;white-space:nowrap}
+#battle .bar{flex:1;height:10px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden}
+#battle .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width .15s}
+#battle .hp{color:var(--gold);letter-spacing:.1em;font-size:14px}
+#battle .msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(320px,calc(100vw - 32px));background:var(--panel);border-radius:14px;
+  padding:18px 16px;text-align:center;display:none;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#battle .msg.show{display:block}
+#battle .msg h3{margin:0 0 8px;color:var(--gold);font-size:17px;letter-spacing:.06em}
+#battle .msg p{margin:0 0 14px;font-size:13px;line-height:1.7;font-weight:500;white-space:pre-line;color:#dbe6f0}
+#battle .msg button{background:var(--gold);color:#3a2300;border-radius:10px;padding:10px 22px;font-weight:900;font-size:15px}
 #film{position:fixed;inset:0;z-index:20;background:#000;display:none;align-items:center;justify-content:center}
 #film.show{display:flex}
 #film video{width:100%;height:100%;object-fit:contain;background:#000}

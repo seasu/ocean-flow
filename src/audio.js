@@ -136,6 +136,15 @@ export const sfx = {
     bp.type = 'bandpass'; bp.frequency.setValueAtTime(1800, t); bp.frequency.exponentialRampToValueAtTime(500, t + 0.35); env(g, t, 0.01, 0.18, 0.4);
     s.connect(bp); bp.connect(g); g.connect(fx); s.stop(t + 0.5);
   },
+  // 戰鬥：點中流眼（豎琴五聲，連擊往上爬）、驅散濁滴、被濁滴打中、淨化完成
+  hit(n = 0) { harp(PENTA[n % 7] / 2, 0.18); celesta(PENTA[n % 7], 0.06, 0.02); },
+  dispel() { harp(440, 0.1); },
+  hurt() {
+    harp(110, 0.22); harp(103.8, 0.2, 0.08);
+    if (!ctx) return; const t = ctx.currentTime, s = loop(sea.white, t), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+    lp.type = 'lowpass'; lp.frequency.value = 500; env(g, t, 0.01, 0.15, 0.3); s.connect(lp); lp.connect(g); g.connect(fx); s.stop(t + 0.4);
+  },
+  purify() { [587.3, 740, 880, 1174.7, 1480].forEach((f, i) => celesta(f, 0.09, i * 0.07)); strings([293.7, 440, 587.3], 2.5, 0.04, 0.1); },
   // 不行：低音撥弦兩下
   deny() { harp(146.8, 0.2); harp(138.6, 0.18, 0.14); },
   // 靈門開啟：豎琴刮奏＋弦樂和弦＋鐘

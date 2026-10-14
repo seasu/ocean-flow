@@ -6,6 +6,7 @@ import { drawAvatar, BLUE, ORANGE } from './avatar.js';
 import { initAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
 import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
 import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
+import { battle } from './battle.js';
 
 applyStatic();
 
@@ -362,6 +363,13 @@ function buildVein(n) {
   n.vein = r.mesh(b);
 }
 
+// 開門前先淨化擋在門前的濁流；?nobattle 可跳過（測試用）
+function fight(n, then) {
+  if (params.has('nobattle')) return then();
+  G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show');
+  battle(n).then(() => { G.state = 'play'; $('#hud').classList.add('play', 'on'); then(); });
+}
+
 function awaken(n) {
   n.awake = true; n.flash = 1; G.spent += COST; G.awakened++;
   sfx.bell(n.bell || 196);
@@ -467,7 +475,7 @@ function updateGame(dt) {
     if (d < 2.6 && Math.abs(P.y - n.pos[1]) < 3) {
       if (avail() >= COST) {
         n.charge += dt / 1.6; charging = n;
-        if (n.charge >= 1) awaken(n);
+        if (n.charge >= 1) { n.charge = 0; fight(n, () => awaken(n)); }
       } else if (G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); toast(t('notEnough', { cost: COST, n: avail() })); }
     } else n.charge = Math.max(0, n.charge - dt);
   }
@@ -632,9 +640,9 @@ function encounter(s) {
     }
     say(s.story, () => {
       G.state = 'play';
-      if (!node.awake) { G.bonus += COST; awaken(node); }
-      else G.bonus += 1;
-      if (node.awake) setTimeout(() => showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('boundWith', { name: node.name }), s.id), 900);
+      const card = () => setTimeout(() => showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('boundWith', { name: node.name }), s.id), 900);
+      if (!node.awake) fight(node, () => { G.bonus += COST; awaken(node); card(); });
+      else { G.bonus += 1; card(); }
     });
   } else {
     G.bonus += 2; sfx.pick(); setTimeout(() => sfx.pick(), 150);
@@ -806,4 +814,4 @@ if (params.has('play') || params.has('at') || params.has('awake') || params.has(
   if (params.has('yaw')) cam.yaw = +params.get('yaw');
   if (params.has('pitch')) cam.pitch = +params.get('pitch');
 }
-window.__game = { G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
+window.__game = { fight, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
