@@ -82,6 +82,8 @@ const S = {
   more: ['介紹 ▴', 'More ▴', '紹介 ▴'],
   less: ['收起 ✕', 'Close ✕', '閉じる ✕'],
   dexTitle: ['台灣之美 圖鑑', 'Beauty of Taiwan · Field Guide', '台湾の美 図鑑'],
+  lockedGate: ['這道靈門還沒開啟。\n\n線索：{hint}。\n依序開啟四獸靈門，就能在這裡讀到它的故事。', 'This gate is still sealed.\n\nClue: {hint}.\nOpen the Four Beast Gates in order to read its story here.', 'この霊門はまだ閉じている。\n\n手がかり：{hint}。\n四獣霊門を順番に開くと、ここで物語が読める。'],
+  lockedSpot: ['還沒收集到這處台灣之美。\n\n到島上「{area}」一帶走走，靠近時就會收進圖鑑，照片和完整介紹也會出現在這裡。', 'You haven\'t found this place yet.\n\nWander around {area} on the island; get close and it joins your field guide, with photos and the full story.', 'まだ見つけていない場所。\n\n島の「{area}」あたりを歩いてみよう。近づくと図鑑に載り、写真と紹介もここに出てくる。'],
   dexSub: ['已收集 {n}/{m} 處台灣地景', '{n}/{m} Taiwan landmarks found', '台湾の名所 {n}/{m} か所'],
   tapClose: ['點一下關閉', 'Tap to close', 'タップで閉じる'],
   radarTitle: ['現世・靈脈雷達', 'Real World · Spirit Radar', '現世・霊脈レーダー'],
