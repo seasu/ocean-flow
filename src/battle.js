@@ -22,13 +22,20 @@ const el = document.createElement('div');
 el.id = 'battle';
 el.innerHTML = `<canvas></canvas>
   <header><b></b><div class="bar"><i></i></div><span class="hp"></span></header>
-  <div class="msg"><h3></h3><p></p><button></button></div>`;
+  <div class="msg"><h3></h3><p></p><button></button></div>
+  <button class="xbtn quit" aria-label="leave"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`;
 document.body.appendChild(el);
 const cv = el.querySelector('canvas'), g = cv.getContext('2d');
 const bar = el.querySelector('.bar i'), hpEl = el.querySelector('.hp');
 const msg = el.querySelector('.msg'), msgH = msg.querySelector('h3'), msgP = msg.querySelector('p'), msgB = msg.querySelector('button');
 
 let S = null, raf = 0, last = 0;
+// 隨時可以離開：門不會開，之後再回來挑戰
+const quitB = el.querySelector('.quit');
+quitB.addEventListener('click', e => {
+  e.stopPropagation(); if (!S || S.win) return;
+  const done = S.done; S = null; msg.classList.remove('show'); el.classList.remove('show'); cancelAnimationFrame(raf); sfx.deny(); done && done(false);
+});
 const tries = {};
 
 // 星等（node.star）決定這一戰多難，每種玩法各自調整；lv：走路修行的境界，每一境淨化力 +20%；realm：境界名稱
@@ -37,7 +44,7 @@ export function battle(node, lv = 0, realm = '') {
     tries[node.id] = tries[node.id] || 0;
     el.classList.add('show');
     el.querySelector('header b').textContent = `${node.icon} ${node.name} ${'★'.repeat(node.star || 1)}`;
-    start(node, lv, resolve);
+    start(node, lv, resolve); quitB.setAttribute('aria-label', t('battleQuit'));
     const make = gameOf(node);
     const note = lv ? '\n' + t('realmPower', { realm, p: lv * 20 }) : '';
     showMsg(t('battleTitle', { name: node.name }), t('battleTip_' + node.id) + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
@@ -123,7 +130,7 @@ function win() {
   const L = S.lay; api.burst(L.ex, L.ey, '#ffcf5a', 60, 320); api.burst(L.ex, L.ey, '#7fe8ff', 40, 240);
   sfx.purify();
   const done = S.done;
-  setTimeout(() => { el.classList.remove('show'); S = null; done && done(); }, 1800);
+  setTimeout(() => { el.classList.remove('show'); S = null; done && done(true); }, 1800);
 }
 function lose() {
   if (!S.run) return;

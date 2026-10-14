@@ -594,7 +594,7 @@ function buildVein(n) {
 function fight(n, then) {
   if (params.has('nobattle')) return then();
   G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show');
-  battle(n, G.realm, REALMS[G.realm]).then(() => { G.state = 'play'; $('#hud').classList.add('play', 'on'); then(); });
+  battle(n, G.realm, REALMS[G.realm]).then(ok => { G.state = 'play'; $('#hud').classList.add('play', 'on'); if (ok) then(); else toast(t('battleLeft', { name: n.name })); });
 }
 
 function awaken(n) {
