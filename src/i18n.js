@@ -67,6 +67,13 @@ const S = {
   watchFilm: ['▶ 觀看介紹影片', '▶ Watch the intro film', '▶ 紹介映像を見る'],
   skip: ['略過 ▸', 'Skip ▸', 'スキップ ▸'],
   tapSound: ['🔊 點一下開聲音', '🔊 Tap for sound', '🔊 タップで音声オン'],
+  launchGo: ['▶ 點一下開始', '▶ Tap to begin', '▶ タップしてはじめる'],
+  launchSound: ['🔊 開啟聲音，會先播一段介紹影片', '🔊 Turn your sound on — a short intro film plays first', '🔊 音声をオンに。最初に紹介映像が流れます'],
+  a2hsTitle: ['加到主畫面，像 App 一樣全螢幕玩', 'Add to Home Screen to play full screen like an app', 'ホーム画面に追加すると、アプリのように全画面で遊べます'],
+  a2hsIos: ['點 <b>分享</b> <span class="ico">⎙</span>（新版 iOS 在 <b>⋯</b> 裡），選 <b>加入主畫面</b>', 'Tap <b>Share</b> <span class="ico">⎙</span> (under <b>⋯</b> on newer iOS), then <b>Add to Home Screen</b>', '<b>共有</b> <span class="ico">⎙</span>（新しい iOS では <b>⋯</b> の中）から <b>ホーム画面に追加</b>'],
+  a2hsIosApp: ['請先用 <b>Safari</b> 開啟這個網址，再從 <b>分享</b> 選 <b>加入主畫面</b>', 'Open this page in <b>Safari</b> first, then <b>Share</b> → <b>Add to Home Screen</b>', 'まず <b>Safari</b> で開き、<b>共有</b> → <b>ホーム画面に追加</b>'],
+  a2hsOther: ['在瀏覽器選單選 <b>加到主畫面</b> 或 <b>安裝應用程式</b>', 'In the browser menu choose <b>Add to Home screen</b> or <b>Install app</b>', 'ブラウザのメニューから <b>ホーム画面に追加</b> または <b>アプリをインストール</b>'],
+  a2hsInstall: ['📲 加到主畫面', '📲 Add to Home Screen', '📲 ホーム画面に追加'],
   noGL: ['此裝置無法執行 WebGL', 'WebGL is not available on this device', 'この端末では WebGL を実行できません'],
 
   shoushan: ['四獸山位在台北市信義區東南，屬於南港山系。四座小山因為外形像象、虎、豹、獅而得名，步道彼此相連，就在城市邊上。',
