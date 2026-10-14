@@ -45,6 +45,16 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 .quest li.wait{opacity:.5}
 .quest li.note{display:block;color:var(--dim);font-weight:500;font-size:11px;margin-top:6px}
 .quest.min ul{display:none}
+#guideBtn{display:block;margin-top:6px;background:linear-gradient(180deg,#ffe28a,#ffb627);color:#3a2300;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:900;box-shadow:0 2px 0 #b07a10}
+#guide{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(176px + var(--sb));display:none;align-items:center;gap:8px;max-width:calc(100vw - 32px);
+  background:var(--panel);border-radius:999px;padding:6px 8px 6px 6px;pointer-events:auto;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+#guide.show{display:flex}
+#guide .arrow{flex:none;width:40px;height:40px;border-radius:50%;background:var(--gold);display:grid;place-items:center}
+#guide .arrow i{width:18px;height:22px;background:#3a2300;clip-path:polygon(50% 0,100% 100%,50% 76%,0 100%);transition:transform .15s linear}
+#guide p{margin:0;min-width:0;font-size:13px;line-height:1.35}
+#guide a{flex:none;background:#fff;color:#06263f;border-radius:999px;padding:5px 9px;font-size:12px;text-decoration:none;white-space:nowrap}
+#guide:not(.geo) a{display:none}
+#guide .x{flex:none;background:none;color:var(--dim);font-size:15px;padding:4px}
 .quest b em{font-style:normal;color:var(--dim)}
 #qchips{display:none;gap:8px;margin-top:2px;font-size:15px}
 #qchips span{opacity:.55}#qchips span.done{opacity:1;color:var(--gold)}
@@ -200,9 +210,10 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
   <div class="qi playonly"><span class="bar"><i id="qibar"></i></span><span id="qi">靈光 0</span></div>
   <button class="playonly" id="radarBtn" data-i18n="radar">📍 現世</button>
   <button class="playonly" id="dexBtn">📖 台灣之美 0/8</button>
-  <div class="quest playonly" id="quest"><b><span data-i18n="quest">主線任務</span> <em>▾</em></b><div id="qtitle"></div><div id="qchips"></div><ul id="qlist"></ul></div>
+  <div class="quest playonly" id="quest"><b><span data-i18n="quest">主線任務</span> <em>▾</em></b><div id="qtitle"></div><div id="qchips"></div><button id="guideBtn" data-i18n="guideBtn">🧭 帶我去</button><ul id="qlist"></ul></div>
   <canvas id="mini"></canvas>
   <button id="mute" aria-label="靜音" data-i18n-label="mute">🔊</button>
+  <div id="guide"><span class="arrow"><i></i></span><p></p><a target="_blank" rel="noopener" data-i18n="maps">Google 地圖步行</a><button class="x" aria-label="關閉">✕</button></div>
   <div id="pop"></div>
   <div id="toast"></div>
   <div id="prog"><span data-i18n="charging">啟流中</span></div>
@@ -249,7 +260,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 <script>
   // 收合任務面板（直式手機預設收合）
   if (innerWidth < 600) document.getElementById('quest').classList.add('min');
-  document.getElementById('quest').addEventListener('pointerdown', e => { e.currentTarget.classList.toggle('min'); });
+  document.getElementById('quest').addEventListener('pointerdown', e => { if (!e.target.closest('#guideBtn')) e.currentTarget.classList.toggle('min'); });
 </script>
 </body>
 </html>
