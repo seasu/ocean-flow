@@ -448,6 +448,7 @@ const FILM_KEY = 'oceanflow.filmSeen';
 const film = $('#film'), video = film.querySelector('video');
 function closeFilm() {
   video.pause(); film.classList.remove('show', 'muted');
+  window.armTitle?.();
   try { localStorage.setItem(FILM_KEY, '1'); } catch { }
 }
 // 手機直拿播直式（9:16），橫拿或電腦播橫式；播放中轉向就換檔、接著同一秒播
@@ -473,9 +474,8 @@ film.querySelector('.skip').addEventListener('click', e => { e.stopPropagation()
 film.querySelector('.sound').addEventListener('click', e => { e.stopPropagation(); video.muted = false; film.classList.remove('muted'); video.play().catch(() => { }); });
 film.addEventListener('click', () => { if (video.muted) { video.muted = false; film.classList.remove('muted'); } else if (video.paused) video.play().catch(() => { }); else video.pause(); });
 for (const b of document.querySelectorAll('.film-btn')) b.addEventListener('click', e => { e.stopPropagation(); openFilm(); });
-let filmSeen = false;
-try { filmSeen = !!localStorage.getItem(FILM_KEY); } catch { }
-const wantFilm = !filmSeen && !params.has('play') && !params.has('geo') && !params.has('nofilm');
+// 每次開啟都先播介紹影片（可略過），之後才到主畫面
+const wantFilm = !params.has('play') && !params.has('geo') && !params.has('nofilm');
 
 // ---------- 開場：點一下開始 ----------
 // 瀏覽器不讓影片自己有聲播放，要先有一次點擊；趁這一頁提示「加到主畫面」
@@ -503,6 +503,7 @@ if (!params.has('play') && !params.has('geo') && (wantFilm || (showA2hs && !a2hs
     launch.classList.remove('show');
     try { localStorage.setItem(A2HS_KEY, '1'); } catch { }
     if (wantFilm) openFilm();   // 這一下點擊讓影片可以直接有聲播放
+    else window.armTitle?.();
   });
 }
 

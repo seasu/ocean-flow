@@ -295,6 +295,10 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
   <small data-i18n="launchSound">🔊 開啟聲音，會先播一段介紹影片</small>
   <div class="arrow" hidden>↓</div>
 </div>
+<script>
+  // 開 app 第一個畫面就是影片入口：在主程式載入前就蓋上，避免先閃出主畫面
+  (() => { const q = new URLSearchParams(location.search); if (!['play', 'geo', 'nofilm'].some(k => q.has(k))) document.getElementById('launch').classList.add('show'); })();
+</script>
 <script type="module" src="src/main.js"></script>
 <script>
   // 收合任務面板（直式手機預設收合）
@@ -319,7 +323,10 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
       e.animate([{ transform: `translate(${dx}px,${dy}px) scale(${k})` }, { transform: 'none' }], { duration: calm ? 1200 : 600, easing: 'cubic-bezier(.22,.8,.24,1)' });
     });
   }
-  let tT = setTimeout(() => small() && flip(true), 3000);
+  // 主畫面真正出現（開場與影片都關掉）之後才開始倒數 3 秒
+  let tT = 0;
+  window.armTitle = () => { clearTimeout(tT); title.classList.remove('calm'); tT = setTimeout(() => small() && flip(true), 3000); };
+  if (!document.getElementById('launch').classList.contains('show')) armTitle();
   title.addEventListener('pointerdown', e => {
     if (e.target.closest('button:not(.more)')) return;
     flip(false); clearTimeout(tT);
