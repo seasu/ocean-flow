@@ -153,7 +153,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #radar footer label{display:flex;gap:6px;align-items:center;color:var(--ink)}
 #radar footer small{color:#ffb4a0}
 #calOut{white-space:pre-wrap;word-break:break-all;font-size:10px;margin:0;user-select:text;-webkit-user-select:text}
-.screen .alt{font-size:15px;font-weight:900;padding:10px 26px;border-radius:12px;background:rgba(255,255,255,.12);color:var(--ink)}
+.screen .alt{font-size:16px;font-weight:900;padding:11px 28px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 
 /* 對話框 */
 #dialog{position:fixed;left:50%;bottom:calc(18px + var(--sb));transform:translate(-50%,20px);width:min(560px,calc(100vw - 24px));background:rgba(10,18,30,.88);
@@ -179,14 +179,16 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
   #title.calm .more{opacity:1;pointer-events:auto}
   /* 收起後：「洋流」移到上方放大、「啟程」移到下方（位移動畫在下面的 flip()） */
   #title.calm h1{position:absolute;left:0;right:0;top:calc(9% + var(--st));font-size:clamp(84px,28vw,150px);text-shadow:0 4px 28px rgba(6,12,22,.6),0 2px 0 rgba(6,12,22,.35)}
-  #title.calm .start{position:absolute;left:0;right:0;margin:0 auto;width:max-content;bottom:calc(44px + var(--sb))}
+  #title.calm .start{position:absolute;left:0;right:0;margin:0 auto;width:min(calc(100% - 40px),320px);font-size:22px;padding:17px 0;bottom:calc(44px + var(--sb))}
 }
 .screen h1{margin:0;font-size:clamp(56px,18vw,120px);font-weight:900;letter-spacing:.12em;line-height:1;text-shadow:0 4px 24px rgba(111,227,255,.35)}
 .screen .en{font-size:13px;letter-spacing:.4em;color:var(--cyan);font-weight:500}
 .screen .tag{font-size:15px;color:#d8e6f2;font-weight:500;max-width:22em;line-height:1.7}
-.start{margin-top:10px;font-size:20px;font-weight:900;padding:14px 44px;border-radius:14px;background:linear-gradient(180deg,#ffe28a,#ffb627);color:#3a2300;
-  box-shadow:0 5px 0 #b9771a}
-.start:active{transform:translateY(3px);box-shadow:0 2px 0 #b9771a}
+/* 按鈕：和影片「略過」同一套半透明毛玻璃樣式；主按鈕較大、邊框較亮 */
+.start{margin-top:10px;font-size:20px;font-weight:900;padding:15px 48px;border-radius:999px;color:#fff;letter-spacing:.12em;
+  background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.45);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  box-shadow:0 8px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.25);text-shadow:0 1px 8px rgba(6,16,30,.5);transition:transform .15s,background .15s}
+.start:active,.screen .alt:active,.film-btn:active{transform:scale(.97);background:rgba(255,255,255,.28)}
 .screen .how{font-size:12px;color:var(--dim);font-weight:500;line-height:1.8}
 #ending{opacity:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,rgba(40,30,10,.72),rgba(6,12,22,.92) 75%)}
 #ending.show{opacity:1;pointer-events:auto}
@@ -198,7 +200,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 .langs{display:flex;gap:6px;justify-content:center;margin:4px 0}
 .langs button{font-size:13px;font-weight:900;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.1);color:var(--dim)}
 .langs button.on{background:rgba(255,207,90,.2);color:var(--gold)}
-.film-btn{font-size:13px;font-weight:900;padding:8px 18px;border-radius:999px;background:rgba(111,227,255,.14);color:var(--cyan)}
+.film-btn{font-size:16px;font-weight:900;padding:9px 22px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 #battle{position:fixed;inset:0;z-index:8;display:none;touch-action:none;user-select:none;-webkit-user-select:none}
 #battle.show{display:block}
 #battle canvas{position:absolute;inset:0;width:100%;height:100%}
@@ -212,7 +214,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #battle .msg.show{display:block}
 #battle .msg h3{margin:0 0 8px;color:var(--gold);font-size:17px;letter-spacing:.06em}
 #battle .msg p{margin:0 0 14px;font-size:13px;line-height:1.7;font-weight:500;white-space:pre-line;color:#dbe6f0}
-#battle .msg button{background:var(--gold);color:#3a2300;border-radius:10px;padding:10px 22px;font-weight:900;font-size:15px}
+#battle .msg button{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.45);color:#fff;border-radius:999px;padding:12px 30px;font-weight:900;font-size:17px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 /* 開場：啟程前的提醒（點一下才能讓影片有聲播放）＋加到主畫面 */
 #launch{position:fixed;inset:0;z-index:30;display:none;flex-direction:column;align-items:center;gap:28px;text-align:center;
   padding:calc(9vh + var(--st)) calc(20px + var(--sr)) calc(28px + var(--sb)) calc(20px + var(--sl));
@@ -236,9 +238,9 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #launch .tip p small{display:block;margin-top:4px;font-size:14px;color:#b9cde0}
 #launch .tip p b{display:inline;font-size:inherit;color:var(--ink)}
 #launch .ico{display:inline-block;padding:0 6px;border-radius:6px;background:rgba(111,227,255,.18);color:var(--cyan)}
-#launch .install{margin-top:8px;font-size:15px;font-weight:900;padding:9px 20px;border-radius:12px;background:rgba(111,227,255,.2);color:var(--cyan)}
+#launch .install{margin-top:10px;font-size:16px;font-weight:900;padding:10px 22px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);color:#fff}
 #launch .foot{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
-#launch .go{margin:0;width:min(100%,320px);font-size:22px;padding:16px 0}
+#launch .go{margin:0;width:min(100%,320px);font-size:22px;padding:17px 0}
 #film{position:fixed;inset:0;z-index:20;background:#000;display:none;align-items:center;justify-content:center}
 #film.show{display:flex}
 #film video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
