@@ -243,24 +243,14 @@ function dirFor(s) {
 let guideOn = false;
 const guideEl = $('#guide'), guideArrow = guideEl.querySelector('i'), guideText = guideEl.querySelector('p');
 // 「帶我去」：直接打開雷達（島上是小地圖）標出目的地；遊戲畫面只留一顆小方向箭頭＋距離
+// 主畫面的箭頭跟著角色走：量的是島上目標的步數；真實世界的距離和方向看雷達
 function guideTarget() {
   const n = nextGate();
-  if (G.geo) { const s = radarTarget(); return s && { name: s.name, s }; }
   return n ? { name: n.name, pos: n.pos } : { name: t('gateName'), pos: GATE };
 }
 function updateGuide() {
   if (!guideOn) return;
-  const g = guideTarget(); if (!g) return;
-  let deg = 0, text, nodir = false;
-  if (G.geo) {
-    const d = meters(geo.pos, g.s), [x, y] = offset(geo.pos, g.s), h = heading ?? course;
-    if (d <= g.s.r) text = t('guideArrived');
-    else { text = fmt(d); nodir = h == null; if (!nodir) deg = ((Math.atan2(x, y) * 180 / Math.PI - h + 540) % 360) - 180; }
-  } else {
-    const [, n, a] = islandRel(g.pos); deg = a;
-    text = n < 3 ? t('guideArrived') : t('guideSteps', { n });
-  }
-  guideEl.classList.toggle('nodir', nodir);
+  const g = guideTarget(), [, n, deg] = islandRel(g.pos), text = n < 3 ? t('guideArrived') : t('guideSteps', { n });
   guideArrow.style.transform = `rotate(${deg.toFixed(0)}deg)`;
   if (guideText.textContent !== text) guideText.textContent = text;
 }
@@ -400,7 +390,7 @@ function drawMini() {
   const dot = (x, z, col, rad) => { mg.fillStyle = col; mg.beginPath(); mg.arc(x * k, z * k, rad * k, 0, 7); mg.fill(); };
   for (const n of NODES) dot(n.pos[0], n.pos[2], n.awake ? '#ffcf5a' : n.stage === 2 && !stage1Done() ? 'rgba(150,165,180,.7)' : `rgba(255,190,110,${0.6 + 0.4 * Math.sin(G.t * 4)})`, n.stage === 2 ? 2.2 : 3.2);
   dot(GATE[0], GATE[2], G.gateOpen ? '#ffcf5a' : '#b9483c', 3.2);
-  if (guideOn && !G.geo) { // 「帶我去」的目的地：金色脈動圈＋虛線
+  if (guideOn) { // 「帶我去」的目的地：金色脈動圈＋虛線
     const g = guideTarget(), x = g.pos[0] * k, z = g.pos[2] * k;
     mg.setLineDash([3 * k, 3 * k]); mg.strokeStyle = 'rgba(255,207,90,.85)'; mg.lineWidth = k; mg.beginPath(); mg.moveTo(P.x * k, P.z * k); mg.lineTo(x, z); mg.stroke(); mg.setLineDash([]);
     mg.lineWidth = 1.4 * k; mg.beginPath(); mg.arc(x, z, (6 + 2 * Math.sin(G.t * 4)) * k, 0, 7); mg.stroke();
