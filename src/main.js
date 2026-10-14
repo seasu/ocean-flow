@@ -292,11 +292,23 @@ function xiuLine() {
   if (xiuFull()) return t('xiuReady');
   return t(G.geo ? 'xiuLeftGeo' : 'xiuLeftIsland', { n: Math.ceil(NEED[G.realm] - G.xiu), next: REALMS[G.realm + 1] });
 }
+// 現世走路帶動靈界：離真實目的地近了幾成，阿流就在島上朝下一座門走幾成，真的走到時島上也剛好到門前
+let sync = null;
+function syncIsland(p) {
+  const tg = radarTarget(), it = guideTarget(); if (!tg || G.state === 'title') return;
+  const d = meters(p, tg), key = tg.id + (geo.sim ? 's' : 'g');
+  const left = () => Math.max(0, Math.hypot(it.pos[0] - P.x, it.pos[2] - P.z) - 2.4);
+  if (!sync || sync.key !== key || Math.abs(d - sync.last) > 250) { sync = { key, d0: Math.max(d, 30), f: 0, L0: left(), last: d }; G.auto = 0; return; }
+  sync.last = d;
+  const f = Math.min(1, Math.max(0, 1 - d / sync.d0));
+  if (f > sync.f) { G.auto = Math.min(left(), (G.auto || 0) + (f - sync.f) * sync.L0); sync.f = f; }
+}
 let anchor = null;
 geo.on(p => {
   if (!G.geo || G.state === 'title') return;
   const acc = geo.sim ? 0 : (geo.acc || 50), now = performance.now();
   if (acc > 40) return;   // 定位太飄就不算
+  syncIsland(p);
   if (!anchor) { anchor = { ...p, ts: now }; return; }
   const d = meters(anchor, p);
   if (d < Math.max(4, acc * 0.5)) return;
@@ -654,7 +666,13 @@ function updatePlayer(dt) {
   let mag = Math.hypot(ix, iy); if (mag > 1) { ix /= mag; iy /= mag; mag = 1; }
   if (G.state !== 'play') { ix = iy = 0; mag = 0; }
   const fx = Math.sin(cam.yaw), fz = Math.cos(cam.yaw);
-  const mx = fx * iy - fz * ix, mz = fz * iy + fx * ix;
+  let mx = fx * iy - fz * ix, mz = fz * iy + fx * ix;
+  // 現世走路累積的距離：玩家沒操作時，阿流自己朝下一座門走
+  if (G.auto > 0 && mag < 0.1 && G.state === 'play') {
+    const tp = guideTarget().pos, dx = tp[0] - P.x, dz = tp[2] - P.z, L = Math.hypot(dx, dz);
+    if (L < 2.4) G.auto = 0;
+    else { mx = dx / L; mz = dz / L; mag = 1; G.auto -= (P.swim ? 3.8 : 7) * dt; }
+  }
   const speed = P.swim ? 3.8 : 7;
   const a = 1 - Math.exp(-dt * 12);
   P.vx = lerp(P.vx, mx * speed, a); P.vz = lerp(P.vz, mz * speed, a);
