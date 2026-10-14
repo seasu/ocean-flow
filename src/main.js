@@ -7,6 +7,7 @@ import { initAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
 import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
 import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
 import { battle } from './battle.js';
+import { openLore } from './lore.js';
 
 applyStatic();
 
@@ -187,6 +188,7 @@ syncSound();
 for (const b of document.querySelectorAll('#menuBtn, #title .more')) b.addEventListener('click', e => { e.stopPropagation(); syncSound(); settings.hidden = false; });
 soundT.addEventListener('click', () => { setMuted(!muted); syncSound(); });
 settings.addEventListener('click', e => { if (e.target === settings || e.target.closest('.close')) settings.hidden = true; });
+$('#loreBtn').addEventListener('click', () => { settings.hidden = true; openLore(); });
 // 個人資訊：點左上角頭像，滿版顯示走了多少步、境界與收集進度
 const meEl = $('#me');
 $('#meBtn').addEventListener('click', e => { e.stopPropagation(); hudKey = ''; hud(); meEl.hidden = false; });
