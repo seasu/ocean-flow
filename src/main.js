@@ -29,38 +29,58 @@ const at = ([x, z]) => [x + 0.5, ground(x + 0.5, z + 0.5), z + 0.5];
 // 第一階：四獸靈門（象→虎→豹→獅，依序開啟）；第二階的三處靈脈先放在島上預告
 const SHOUSHAN = t('shoushan');
 const NODES = [
-  { id: 'elephant', stage: 1, name: '象門', hill: '象山', seal: '第一印', virtue: '穩定・記憶・承載', icon: '🐘', hint: '最靠近 101 的山', pos: at(PLACES.elephant), col: hex('#cfe3ff'), bell: 146.8,
+  { id: 'elephant', stage: 1, star: 1, name: '象門', hill: '象山', seal: '第一印', virtue: '穩定・記憶・承載', icon: '🐘', hint: '最靠近 101 的山', pos: at(PLACES.elephant), col: hex('#cfe3ff'), bell: 146.8,
     info: '海拔 183 公尺，是看台北 101 和城市夜景最熱門的步道。山頂有幾塊大石頭，很多人坐在上面等夕陽。',
     en: { name: 'Elephant Gate', hill: 'Elephant Mountain', seal: 'First Seal', virtue: 'Stability · Memory · Bearing', hint: 'The hill closest to 101',
       info: 'At 183 m, its trail is the most popular spot for views of Taipei 101 and the city at night. Big boulders sit on the summit, where many people wait for the sunset.' },
     ja: { name: '象門', hill: '象山', seal: '第一の印', virtue: '安定・記憶・支え', hint: '101 にいちばん近い山',
       info: '標高 183 m。台北101と夜景を眺める一番人気の遊歩道です。山頂の大きな岩に座って夕日を待つ人がたくさんいます。' } },
-  { id: 'tiger', stage: 1, name: '虎門', hill: '虎山', seal: '第二印', virtue: '行動・勇氣・爆發', icon: '🐯', hint: '101 東北邊的山', pos: at(PLACES.tiger), col: hex('#ffb35c'), bell: 196,
+  { id: 'tiger', stage: 1, star: 1, name: '虎門', hill: '虎山', seal: '第二印', virtue: '行動・勇氣・爆發', icon: '🐯', hint: '101 東北邊的山', pos: at(PLACES.tiger), col: hex('#ffb35c'), bell: 196,
     info: '四獸山最北的一座。虎山自然步道沿著溪谷走，林蔭濃密，是觀察青蛙、蝴蝶等生態的好地方。',
     en: { name: 'Tiger Gate', hill: 'Tiger Mountain', seal: 'Second Seal', virtue: 'Action · Courage · Power', hint: 'The hill northeast of 101',
       info: 'The northernmost of the four. The Tiger Mountain nature trail follows a shady stream valley, a great place to spot frogs and butterflies.' },
     ja: { name: '虎門', hill: '虎山', seal: '第二の印', virtue: '行動・勇気・爆発', hint: '101 の北東の山',
       info: '四獣山でいちばん北の山。虎山自然遊歩道は渓谷沿いの木陰の道で、カエルや蝶など生き物の観察にぴったりです。' } },
-  { id: 'leopard', stage: 1, name: '豹門', hill: '豹山', seal: '第三印', virtue: '敏捷・感知・身法', icon: '🐆', hint: '虎山南邊的山', pos: at(PLACES.leopard), col: hex('#ffd76a'), bell: 220,
+  { id: 'leopard', stage: 1, star: 2, name: '豹門', hill: '豹山', seal: '第三印', virtue: '敏捷・感知・身法', icon: '🐆', hint: '虎山南邊的山', pos: at(PLACES.leopard), col: hex('#ffd76a'), bell: 220,
     info: '四獸山裡比較少人知道、也比較安靜的一座，山徑和虎山、獅山相連，適合慢慢走。',
     en: { name: 'Leopard Gate', hill: 'Leopard Mountain', seal: 'Third Seal', virtue: 'Agility · Perception · Movement', hint: 'The hill south of Tiger Mountain',
       info: 'The quietest and least-known of the four. Its paths connect to Tiger and Lion Mountains and are best walked slowly.' },
     ja: { name: '豹門', hill: '豹山', seal: '第三の印', virtue: '敏捷・感知・身のこなし', hint: '虎山の南の山',
       info: '四獣山の中であまり知られていない、静かな山。虎山・獅山へ道がつながっていて、ゆっくり歩くのに向いています。' } },
-  { id: 'lion', stage: 1, name: '獅門', hill: '獅山', seal: '第四印', virtue: '威勢・領導・氣運', icon: '🦁', hint: '豹山西南邊的山', pos: at(PLACES.lion), col: hex('#ffc58a'), bell: 174.6,
+  { id: 'lion', stage: 1, star: 2, name: '獅門', hill: '獅山', seal: '第四印', virtue: '威勢・領導・氣運', icon: '🦁', hint: '豹山西南邊的山', pos: at(PLACES.lion), col: hex('#ffc58a'), bell: 174.6,
     info: '山形像一頭伏臥的獅子。走在步道上，可以從樹梢間望見信義區的城市天際線。',
     en: { name: 'Lion Gate', hill: 'Lion Mountain', seal: 'Fourth Seal', virtue: 'Presence · Leadership · Fortune', hint: 'The hill southwest of Leopard Mountain',
       info: 'Shaped like a lion lying down. From the trail you can see the Xinyi skyline through the treetops.' },
     ja: { name: '獅門', hill: '獅山', seal: '第四の印', virtue: '威厳・統率・気運', hint: '豹山の南西の山',
       info: '伏せた獅子のような山の形。遊歩道からは木々の間に信義区のスカイラインが見えます。' } },
-  { id: 'city', stage: 2, name: '城之回聲', en: { name: 'Echo of the City' }, ja: { name: '街のこだま' }, icon: '🏙', pos: at(PLACES.city), col: hex('#8fa4b5') },
-  { id: 'sea', stage: 2, name: '海之流痕', en: { name: 'Trace of the Sea' }, ja: { name: '海の流れ痕' }, icon: '🌊', pos: at(PLACES.sea), col: hex('#8fa4b5') },
-  { id: 'peak', stage: 2, name: '山之鐘聲', en: { name: 'Bell of the Mountain' }, ja: { name: '山の鐘の音' }, icon: '⛰', pos: at(PLACES.peak), col: hex('#8fa4b5') },
+  // 第二階：城海山三流（3 星），四獸共鳴後開放、要化流境以上，不分順序
+  { id: 'city', stage: 2, star: 3, name: '城之回聲', hill: '台北城', seal: '城流', virtue: '人聲・節奏・匯聚', icon: '🏙', pos: at(PLACES.city), col: hex('#8fd3ff'), bell: 261.6,
+    info: '城市也有自己的流：車站的人潮、捷運的節奏、街角的叫賣聲。聽得見城市的回聲，就聽得見每個人走過的路。',
+    en: { name: 'Echo of the City', hill: 'Taipei City', seal: 'City Flow', virtue: 'Voices · Rhythm · Gathering',
+      info: 'The city has its own flow: crowds at the station, the rhythm of the MRT, vendors calling on street corners. Hear the city\'s echo and you hear the paths everyone has walked.' },
+    ja: { name: '街のこだま', hill: '台北の街', seal: '街の流れ', virtue: '人の声・リズム・集まり',
+      info: '街にも流れがある。駅の人波、MRT のリズム、街角の呼び声。街のこだまが聞こえれば、みんなが歩いた道が聞こえる。' } },
+  { id: 'sea', stage: 2, star: 3, name: '海之流痕', hill: '龜山島', seal: '海流', virtue: '潮汐・遠方・連結', icon: '🌊', pos: at(PLACES.sea), col: hex('#5fd3e6'), bell: 293.7,
+    info: '黑潮從菲律賓北上，貼著台灣東岸流過，帶來溫暖的海水和豐富的漁場。龜山島就在它經過的地方。',
+    en: { name: 'Trace of the Sea', hill: 'Guishan Island', seal: 'Sea Flow', virtue: 'Tides · Distance · Connection',
+      info: 'The Kuroshio Current flows north from the Philippines along Taiwan\'s east coast, bringing warm water and rich fishing grounds. Guishan Island sits right in its path.' },
+    ja: { name: '海の流れ痕', hill: '亀山島', seal: '海の流れ', virtue: '潮・遠く・つながり',
+      info: '黒潮はフィリピンから北上し、台湾の東岸に沿って流れ、暖かい海と豊かな漁場をもたらす。亀山島はその通り道にある。' } },
+  { id: 'peak', stage: 2, star: 3, name: '山之鐘聲', hill: '玉山', seal: '山流', virtue: '高度・寂靜・回響', icon: '⛰', pos: at(PLACES.peak), col: hex('#c7d6e8'), bell: 220,
+    info: '玉山海拔 3952 公尺，是東北亞最高峰。山上的寂靜裡，連風聲都像鐘聲一樣傳得很遠。',
+    en: { name: 'Bell of the Mountain', hill: 'Yushan', seal: 'Mountain Flow', virtue: 'Height · Stillness · Resonance',
+      info: 'At 3,952 m, Yushan is the highest peak in Northeast Asia. In its stillness even the wind carries far, like a bell.' },
+    ja: { name: '山の鐘の音', hill: '玉山', seal: '山の流れ', virtue: '高さ・静けさ・響き',
+      info: '玉山は標高 3952 m、北東アジアの最高峰。山の静けさの中では、風の音さえ鐘のように遠くまで届く。' } },
 ];
 localize(NODES);
-const S1 = NODES.filter(n => n.stage === 1);
+const S1 = NODES.filter(n => n.stage === 1), S2 = NODES.filter(n => n.stage === 2);
+const REQ = 2;   // 第二階需要的境界（化流境）
+const stage1Done = () => S1.every(n => n.awake);
 const placeOf = n => REAL.find(r => r.node === n.id).name;
-const nextGate = () => S1.find(n => !n.awake);
+const nextGate = () => S1.find(n => !n.awake) || S2.find(n => !n.awake);
+// 這一處現在能不能開：第一階要依序；第二階要四獸共鳴之後、而且境界夠
+const canOpen = n => n.stage === 1 ? n === S1.find(m => !m.awake) : stage1Done() && G.realm >= REQ;
 for (const n of NODES) {
   n.mesh = r.mesh(nodeMesh(n.id)); n.awake = false; n.charge = 0; n.vein = null; n.flash = 0;
   if (n.stage === 1) { n.beast = r.mesh(beastMesh(n.id)); n.face = Math.atan2(56 - n.pos[0], 56 - n.pos[2]) + Math.PI; }
@@ -279,15 +299,23 @@ function hud() {
     $('#dexBtn').textContent = t('dexBtn', { n: found, m: SPOTS.length });
     $('#dexList').innerHTML = `<li class="sec">${t('secMountain')}</li>`
       + S1.map(n => n.awake ? `<li><b>${n.icon} ${n.name}${t('sep')}${n.hill}</b><small>${n.seal}${t('sep')}${n.virtue}</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`).join('')
+      + (stage1Done() ? `<li class="sec">${t('secFlows')}</li>` + S2.map(n => n.awake ? `<li><b>${n.icon} ${n.name}${t('sep')}${n.hill}</b><small>${n.seal}${t('sep')}${n.virtue}</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`).join('') : '')
       + (visited.size ? `<li class="sec">${t('secCulture')}</li>` + REAL.filter(x => visited.has(x.id)).map(x => `<li><b>${x.name}</b><small>${x.sub}</small><p>${x.text}</p></li>`).join('') : '')
       + `<li class="sec">${t('beauty')}</li>`
       + SPOTS.map(sp => sp.found ? `<li><b>${sp.name}</b><small>${sp.area}</small><p>${sp.text}</p></li>` : `<li class="lock"><b>？？？</b><small>${sp.area.split(/・|, | · /)[0]}</small></li>`).join('');
     $('#qi').textContent = t('qi', { n: avail() });
     $('#qibar').style.width = Math.min(100, avail() / COST * 100) + '%';
-    if (!G.gateOpen) {
+    const stars = n => ' ' + '★'.repeat(n.star);
+    if (!G.gateOpen && stage1Done()) {
+      const done2 = S2.filter(n => n.awake).length;
+      $('#qtitle').textContent = t('questTitle2', { n: done2 });
+      $('#qchips').innerHTML = S2.map(n => `<span class="${n.awake ? 'done' : ''}">${n.icon}${n.awake ? '✓' : ''}</span>`).join('');
+      $('#qlist').innerHTML = S2.map(n => `<li class="${n.awake ? 'done' : G.realm >= REQ ? '' : 'wait'}"><span>${n.awake ? '✓' : n.icon}</span>${n.seal}${t('sep')}${n.name}${stars(n)}<small>${n.awake ? n.virtue : (G.realm < REQ ? t('needRealmShort', { realm: REALMS[REQ], now: REALMS[G.realm] }) + t('sep') : '') + (G.geo ? t('questGeo', { place: placeOf(n), hill: n.hill }) : n.hill)}</small></li>`).join('')
+        + `<li class="note">${t('questNote2', { cost: COST, realm: REALMS[REQ] })}</li><li class="note">${xiuLine()}</li>`;
+    } else if (!G.gateOpen) {
       $('#qtitle').textContent = t('questTitle', { n: G.awakened });
       $('#qchips').innerHTML = S1.map(n => `<span class="${n.awake ? 'done' : ''}">${n.icon}${n.awake ? '✓' : ''}</span>`).join('');
-      $('#qlist').innerHTML = S1.map(n => `<li class="${n.awake ? 'done' : n === nextGate() ? '' : 'wait'}"><span>${n.awake ? '✓' : n.icon}</span>${n.seal}${t('sep')}${n.name}<small>${n.awake ? n.virtue : n !== nextGate() ? t('waitPrev') : G.geo ? t('questGeo', { place: placeOf(n), hill: n.hill }) : n.hint + t('sep') + n.hill}</small></li>`).join('')
+      $('#qlist').innerHTML = S1.map(n => `<li class="${n.awake ? 'done' : n === nextGate() ? '' : 'wait'}"><span>${n.awake ? '✓' : n.icon}</span>${n.seal}${t('sep')}${n.name}${stars(n)}<small>${n.awake ? n.virtue : n !== nextGate() ? t('waitPrev') : G.geo ? t('questGeo', { place: placeOf(n), hill: n.hill }) : n.hint + t('sep') + n.hill}</small></li>`).join('')
         + `<li class="note">${t('questNote', { cost: COST })}</li><li class="note">${xiuLine()}</li>`;
     } else {
       $('#qtitle').textContent = t('questDone');
@@ -317,7 +345,7 @@ function drawMini() {
   const s = mini.width = mini.height = Math.round(mini.clientWidth * Math.min(devicePixelRatio, 2)), k = s / N;
   mg.imageSmoothingEnabled = false; mg.drawImage(base, 0, 0, s, s);
   const dot = (x, z, col, rad) => { mg.fillStyle = col; mg.beginPath(); mg.arc(x * k, z * k, rad * k, 0, 7); mg.fill(); };
-  for (const n of NODES) dot(n.pos[0], n.pos[2], n.awake ? '#ffcf5a' : n.stage === 2 ? 'rgba(150,165,180,.7)' : `rgba(255,190,110,${0.6 + 0.4 * Math.sin(G.t * 4)})`, n.stage === 2 ? 2.2 : 3.2);
+  for (const n of NODES) dot(n.pos[0], n.pos[2], n.awake ? '#ffcf5a' : n.stage === 2 && !stage1Done() ? 'rgba(150,165,180,.7)' : `rgba(255,190,110,${0.6 + 0.4 * Math.sin(G.t * 4)})`, n.stage === 2 ? 2.2 : 3.2);
   dot(GATE[0], GATE[2], G.gateOpen ? '#ffcf5a' : '#b9483c', 3.2);
   for (const sp of SPOTS) if (sp.r) { mg.strokeStyle = '#fff'; mg.lineWidth = k * 0.8; mg.beginPath(); mg.arc((sp.pos[0] + 0.5) * k, (sp.pos[1] + 0.5) * k, 2 * k, 0, 7); sp.found ? (mg.fillStyle = '#fff', mg.fill()) : mg.stroke(); }
   mg.save(); mg.translate(P.x * k, P.z * k); mg.rotate(-P.yaw);
@@ -332,7 +360,7 @@ const LINES = {
     '山有脈，海有流，人亦有自己的道。城市邊上，有四座守門的山還在沉睡。',
     '收集發光的「靈光」，按「感知」就能看見平常看不見的東西。',
     '台北 101 東邊的四獸山，是城市之流和山之流交會的四道靈門。',
-    '依序開啟：象門、虎門、豹門、獅門。四印齊了，四獸共鳴，台北靈門就會打開。',
+    '依序開啟：象門、虎門、豹門、獅門。四印齊了，四獸共鳴，城海山三流就會甦醒；邊走邊修行，三流歸一，台北靈門就會打開。',
     '路上也去看看這座島：日月潭、阿里山、太魯閣、墾丁……每一處都會收進你的圖鑑。',
     '我在西邊的台北靈門等你。走出去，遇見你的機緣。',
   ],
@@ -341,7 +369,7 @@ const LINES = {
     'Mountains have veins, the sea has currents, and people have their own way. At the edge of the city, four guardian mountains are still asleep.',
     'Collect the glowing Spirit Light. Press "Sense" to see what is usually hidden.',
     'East of Taipei 101, the Four Beasts Mountains are four spirit gates where the flow of the city meets the flow of the mountains.',
-    'Open them in order: Elephant, Tiger, Leopard, Lion. With all four seals, the beasts resonate and the Taipei Spirit Gate opens.',
+    'Open them in order: Elephant, Tiger, Leopard, Lion. With all four seals the beasts resonate and the three flows of city, sea and mountain awaken. Keep walking to cultivate; when the three flows unite, the Taipei Spirit Gate opens.',
     'Along the way, see the island too: Sun Moon Lake, Alishan, Taroko, Kenting… each goes into your field guide.',
     'I\'ll wait for you at the Taipei Spirit Gate in the west. Go out and meet your encounters.',
   ],
@@ -350,7 +378,7 @@ const LINES = {
     '山に脈あり、海に流れあり、人にもまた道あり。街のはずれで、四つの守りの山がまだ眠っている。',
     '光る「霊光」を集めて。「感知」を押すと、ふだん見えないものが見えてくる。',
     '台北101の東にある四獣山は、街の流れと山の流れが交わる四つの霊門。',
-    '順番に開こう：象門、虎門、豹門、獅門。四つの印がそろえば四獣が共鳴し、台北霊門が開く。',
+    '順番に開こう：象門、虎門、豹門、獅門。四つの印がそろえば四獣が共鳴し、街・海・山の三流が目覚める。歩いて修行し、三流が一つになれば台北霊門が開く。',
     '途中で島もめぐってみて：日月潭、阿里山、太魯閣、墾丁……どこも図鑑に載っていくよ。',
     '西の台北霊門で待ってる。外へ出て、あなたの縁に出会おう。',
   ],
@@ -363,7 +391,7 @@ const GEO_LINES = {
     '四獸山是城市之流和山之流交會的四道靈門。走一段文化徑，就能開啟山林徑上的靈門。',
     '依序走：象門在華山1914，虎門在台灣文學基地，豹門在濟南教會，獅門在善導寺。',
     '走人行道、注意來車喔。到了地點，牠們就會現身。',
-    '四印齊了，四獸共鳴，就回到這裡打開台北靈門。走出去，遇見你的機緣。',
+    '四印齊了，城海山三流會在台北車站、光華、監察院甦醒，要走到化流境才淨化得了。三流歸一，就回到這裡打開台北靈門。',
   ],
   en: [
     'Did you hear it too? A bell that doesn\'t exist, ringing beneath this city.',
@@ -372,7 +400,7 @@ const GEO_LINES = {
     'The Four Beasts Mountains are four spirit gates where the city\'s flow meets the mountains\'. Walk a Culture Trail to open the gates on the Mountain Trail.',
     'In order: the Elephant Gate is at Huashan 1914, the Tiger Gate at the Taiwan Literature Base, the Leopard Gate at Jinan Church, and the Lion Gate at Shandao Temple.',
     'Stay on the sidewalk and watch for cars. When you arrive, the beasts will appear.',
-    'With all four seals, the beasts resonate. Then come back here to open the Taipei Spirit Gate. Go out and meet your encounters.',
+    'With all four seals, the three flows awaken at Taipei Main Station, Guanghua and the Control Yuan; you will need Flow-Shaping to purify them. When the three flows unite, come back here to open the Taipei Spirit Gate.',
   ],
   ja: [
     'あなたにも聞こえた？この街の下で、存在しないはずの鐘が鳴っている。',
@@ -381,7 +409,7 @@ const GEO_LINES = {
     '四獣山は、街の流れと山の流れが交わる四つの霊門。文化の道を歩けば、山林の道の霊門が開く。',
     '順番に：象門は華山1914、虎門は台湾文学基地、豹門は済南教会、獅門は善導寺。',
     '歩道を歩いて、車に気をつけてね。着いたら、獣たちが姿を現すよ。',
-    '四つの印がそろったら四獣が共鳴する。ここに戻って台北霊門を開こう。外へ出て、あなたの縁に出会おう。',
+    '四つの印がそろうと、台北駅・光華・監察院で三流が目覚める。浄化するには化流境が必要。三流が一つになったら、ここに戻って台北霊門を開こう。',
   ],
 }[lang];
 let talk = null;
@@ -485,20 +513,29 @@ function awaken(n) {
   n.awake = true; n.flash = 1; G.spent += COST; G.awakened++;
   sfx.bell(n.bell || 196);
   pop(t('gateOpened', { seal: n.seal, icon: n.icon, name: n.name }), 'gold');
-  setTimeout(() => showCard(n.name + t('sep') + n.hill, t('cardSub', { seal: n.seal, virtue: n.virtue }), n.info + (G.awakened === 1 ? '\n\n' + SHOUSHAN : ''), t('cardEm', { n: G.awakened, virtue: n.virtue }), n.id), 1300);
+  const s2 = n.stage === 2, k2 = S2.filter(m => m.awake).length;
+  setTimeout(() => showCard(n.name + t('sep') + n.hill, t(s2 ? 'cardSub2' : 'cardSub', { seal: n.seal, virtue: n.virtue }), n.info + (G.awakened === 1 ? '\n\n' + SHOUSHAN : ''), s2 ? t('cardEm2', { n: k2, virtue: n.virtue }) : t('cardEm', { n: G.awakened, virtue: n.virtue }), n.id), 1300);
   burst(n.pos[0], n.pos[1] + 1.5, n.pos[2], [1, 0.85, 0.45], 70, 8);
   buildVein(n);
-  G.spiritTarget = G.awakened / 4 * 0.8;
+  G.spiritTarget = G.awakened / NODES.length * 0.85;
   setSpirit(G.spiritTarget);
   try { navigator.vibrate && navigator.vibrate([40, 60, 80]); } catch { }
-  if (G.awakened === 4) setTimeout(resonance, 3600);
+  if (n.stage === 1 && stage1Done()) setTimeout(resonance, 3600);
+  else if (n.stage === 2 && S2.every(m => m.awake)) setTimeout(unite, 3600);
   else { const nx = nextGate(); setTimeout(() => toast(t('nextSeal', { icon: nx.icon, name: nx.name, where: G.geo ? placeOf(nx) : nx.hill })), 1400); }
 }
 
-// 四獸共鳴：四座靈門的光同時升起，台北靈門隨後開啟
+// 四獸共鳴：四座靈門的光同時升起，第二階城海山三流隨後開放
 function resonance() {
   pop(t('resonance'), 'gold'); sfx.bell(146.8); setTimeout(() => sfx.bell(196), 220); setTimeout(() => sfx.bell(220), 440); setTimeout(() => sfx.bell(174.6), 660);
   for (const n of S1) { n.flash = 1; burst(n.pos[0], n.pos[1] + 2, n.pos[2], [1, 0.85, 0.45], 50, 9); }
+  try { navigator.vibrate && navigator.vibrate([60, 60, 60, 60, 160]); } catch { }
+  setTimeout(() => toast(t('stage2Open', { realm: REALMS[REQ] })), 2600);
+}
+// 三流歸一：城、海、山三道光一起升起，台北靈門隨後開啟
+function unite() {
+  pop(t('flowsUnite'), 'gold'); S2.forEach((n, i) => setTimeout(() => sfx.bell(n.bell), i * 260));
+  for (const n of NODES) { n.flash = 1; burst(n.pos[0], n.pos[1] + 2, n.pos[2], [1, 0.85, 0.45], 40, 9); }
   try { navigator.vibrate && navigator.vibrate([60, 60, 60, 60, 160]); } catch { }
   setTimeout(openGate, 2600);
 }
@@ -581,8 +618,9 @@ function updateGame(dt) {
     n.flash = Math.max(0, n.flash - dt * 0.6);
     if (n.awake) continue;
     const d = Math.hypot(n.pos[0] - P.x, n.pos[2] - P.z);
-    if (n.stage === 2) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; toast(t('stage2', { name: n.name })); } continue; }
-    if (n !== nextGate()) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); const nx = nextGate(); toast(t('outOfOrder', { name: n.name, next: nx.name, hill: nx.hill })); } continue; }
+    if (n.stage === 2 && !stage1Done()) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; toast(t('stage2', { name: n.name })); } continue; }
+    if (n.stage === 2 && G.realm < REQ) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); toast(t('needRealm', { name: n.name, realm: REALMS[REQ], now: REALMS[G.realm] })); } continue; }
+    if (!canOpen(n)) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); const nx = nextGate(); toast(t('outOfOrder', { name: n.name, next: nx.name, hill: nx.hill })); } continue; }
     if (d < 2.6 && Math.abs(P.y - n.pos[1]) < 3) {
       if (avail() >= COST) {
         n.charge += dt / 1.6; charging = n;
@@ -729,7 +767,7 @@ function drawRadar() {
 function encounter(s) {
   closeRadar(); breakthrough();
   if (s.id === 'venue') {
-    const left = S1.filter(n => !n.awake).map(n => `${n.name} (${placeOf(n)})`);
+    const left = (stage1Done() ? S2 : S1).filter(n => !n.awake).map(n => `${n.name} (${placeOf(n)})`);
     if (G.gateOpen) {
       P.x = GATE[0] + 0.5; P.z = GATE[2] - 4; P.y = P.ry = footGround(P.x, P.z); cam.yaw = 0; cam.tx = P.x; cam.tz = P.z;
       G.state = 'talk'; say(t('venueOpen'), () => { G.state = 'play'; });
@@ -745,7 +783,11 @@ function encounter(s) {
     cam.yaw = Math.PI; cam.tx = P.x; cam.tz = P.z; cam.ty = P.y + 1.6;
     G.state = 'talk';
     const nx = nextGate();
-    if (!node.awake && node !== nx) {
+    if (!node.awake && node.stage === 2 && stage1Done() && G.realm < REQ) {
+      say([t('shadow', { icon: node.icon, name: node.name }), t('needRealm', { name: node.name, realm: REALMS[REQ], now: REALMS[G.realm] })], () => { G.state = 'play'; setTimeout(() => showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('needRealmShort', { realm: REALMS[REQ], now: REALMS[G.realm] }), s.id), 400); });
+      return;
+    }
+    if (!node.awake && !canOpen(node)) {
       G.bonus += 1;
       say([t('shadow', { icon: node.icon, name: node.name }), t('goFirst', { next: nx.name, place: placeOf(nx) })], () => { G.state = 'play'; setTimeout(() => showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('sealWait', { seal: node.seal }), s.id), 400); });
       return;
@@ -878,7 +920,7 @@ function frame(dt) {
     r.box(m.x, y, m.z, 0.8, 0.8, 0.8, [0.4, 0.85, 1], 1, vis * 0.25, -G.t + m.ph);
   }
   for (const n of NODES) {
-    const bright = n.stage === 2 ? 0.05 : n.awake ? 0.22 : n !== nextGate() ? 0.06 : 0.14 + (G.sense > 0 ? 0.25 : 0) + n.charge * 0.3;
+    const bright = n.stage === 2 && !stage1Done() ? 0.05 : n.awake ? 0.22 : !canOpen(n) ? 0.06 : 0.14 + (G.sense > 0 ? 0.25 : 0) + n.charge * 0.3;
     r.box(n.pos[0], n.pos[1] + 40, n.pos[2], 0.6, 80, 0.6, n.awake ? C.gold : n.col, 1, bright);
     r.box(n.pos[0], n.pos[1] + 40, n.pos[2], 1.6, 80, 1.6, n.awake ? C.gold : n.col, 1, bright * 0.25);
     if (n.flash > 0) r.box(n.pos[0], n.pos[1] + 2, n.pos[2], 6 * (2 - n.flash), 0.2, 6 * (2 - n.flash), C.gold, 1, n.flash);
@@ -920,7 +962,9 @@ requestAnimationFrame(loop);
 // 測試用：?play 跳過片頭，?awake=n 直接喚醒 n 處，?at=sea|peak|city|gate 傳送
 if (params.has('play') || params.has('at') || params.has('awake') || params.has('geo')) {
   start(params.has('geo') ? 'geo' : 'island'); while (talk) nextLine();
-  const a = +params.get('awake') || 0; G.collected = COST * a;
+  // ?realm=n 直接設定境界；?awake=n 直接喚醒前 n 處（第一階 4 處、第二階 3 處）
+  if (params.has('realm')) G.realm = Math.min(4, +params.get('realm') || 0);
+  const a = Math.min(NODES.length, +params.get('awake') || 0); G.collected = COST * a;
   for (let i = 0; i < a; i++) awaken(NODES[i]);
   const to = params.get('at');
   if (to) { const p = to === 'gate' ? GATE : NODES.find(n => n.id === to)?.pos; if (p) { P.x = p[0] - 3; P.z = p[2] - 3; P.y = P.ry = footGround(P.x, P.z) + 0.5; cam.tx = P.x; cam.tz = P.z; } }

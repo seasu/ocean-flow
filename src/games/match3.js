@@ -1,17 +1,17 @@
 // 三消（獅門・威勢）：交換相鄰兩格，連成三個以上就消除，消掉的元素化成光打向濁流
 // 連四個會留下「流眼」，消掉時清空整排整列；濁流每隔幾步把格子染成濁塊，在旁邊消除就能洗掉；步數用完就重來
-const C = 6, R = 6, KINDS = 5, MURK = -1;
-const STYLE = {
-  elephant: { moves: 14, gain: 2.2, murkEvery: 0, murkN: 0, eyes: 0, chain: 0.25 },
-  tiger: { moves: 12, gain: 1.7, murkEvery: 4, murkN: 2, eyes: 0, chain: 0.6 },
-  leopard: { moves: 12, gain: 1.6, murkEvery: 3, murkN: 2, eyes: 3, chain: 0.25 },
-  lion: { moves: 12, gain: 1.6, murkEvery: 2, murkN: 2, eyes: 0, chain: 0.3 },
+const C = 6, R = 6, MURK = -1;
+// 星等：元素種類越多越難連、濁塊越頻繁、每次淨化越少
+const LEVEL = {
+  1: { kinds: 4, moves: 12, gain: 1.4, murkEvery: 0, murkN: 0, chain: 0.25 },
+  2: { kinds: 5, moves: 12, gain: 1.6, murkEvery: 2, murkN: 2, chain: 0.3 },
+  3: { kinds: 5, moves: 12, gain: 1.3, murkEvery: 2, murkN: 3, chain: 0.3 },
 };
 
-export function match3(A, { lv, ease }) {
-  const st = { ...STYLE[A.node().id] || STYLE.lion };
-  // 輸過一次：多三步、每次淨化多一點；每一境界多一步
-  st.moves += ease * 3 + lv; st.gain *= 1 + ease * 0.15;
+export function match3(A, { star, ease }) {
+  const st = { ...LEVEL[star] || LEVEL[1] }, KINDS = st.kinds;
+  // 輸過一次：多三步、每次淨化多一點
+  st.moves += ease * 3; st.gain *= 1 + ease * 0.15;
   let uid = 0;
   const B = { moves: st.moves, turn: 0, grid: [], phase: 'idle', timer: 0, chain: 0, sel: -1, swapA: -1, swapB: -1 };
   const cell = k => ({ k, s: 0, id: uid++, ox: 0, oy: 0, sc: 1, die: 0 });
@@ -100,7 +100,7 @@ export function match3(A, { lv, ease }) {
   }
   function endTurn() {
     B.moves--; B.turn++; B.phase = 'idle'; info();
-    if (A.pur >= 100) return;
+    if (A.pur >= 99.99) return;
     if (st.murkEvery && B.turn % st.murkEvery === 0) enemyTurn();
     if (B.moves <= 0) return A.lose();
     if (!hasMove()) { do { for (const x of B.grid) if (x.k !== MURK) x.k = (Math.random() * KINDS) | 0; } while (runs().length || !hasMove()); }
@@ -117,7 +117,6 @@ export function match3(A, { lv, ease }) {
   }
 
   do { fill(); } while (!hasMove());
-  for (let k = 0; k < st.eyes; k++) B.grid[(Math.random() * C * R) | 0].s = 1;
   info();
 
   let down = null;
@@ -179,4 +178,3 @@ export function match3(A, { lv, ease }) {
   };
 }
 match3.key = 'match3';
-match3.bonus = lv => lv;

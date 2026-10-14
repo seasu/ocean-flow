@@ -8,13 +8,14 @@ import { taphero } from './games/taphero.js';
 import { sigil } from './games/sigil.js';
 import { match3 } from './games/match3.js';
 
-const GAMES = { elephant: sudoku, tiger: taphero, leopard: sigil, lion: match3 };
+// 第二階：城之回聲連點（城市的節奏）、海之流痕畫符（描出洋流）、山之鐘聲數獨（山的記憶）
+const GAMES = { elephant: sudoku, tiger: taphero, leopard: sigil, lion: match3, city: taphero, sea: sigil, peak: sudoku };
 // 測試用：?game=sudoku|taphero|sigil|match3 讓每一門都用同一種玩法
 const FORCE = { sudoku, taphero, sigil, match3 }[new URLSearchParams(location.search).get('game')];
 const gameOf = node => FORCE || GAMES[node.id] || match3;
 
 // 方塊元素：海、山、花、陽、石（顏色之外再用形狀區分），數獨與三消共用
-export const TILE = [['#3d8bff', 'wave'], ['#45b36b', 'tri'], ['#ff7aa8', 'flower'], ['#ffc93c', 'sun'], ['#b9c6d6', 'square']];
+export const TILE = [['#3d8bff', 'wave'], ['#45b36b', 'tri'], ['#ff7aa8', 'flower'], ['#ffc93c', 'sun'], ['#b9c6d6', 'square'], ['#9b7bff', 'moon']];
 
 const el = document.createElement('div');
 el.id = 'battle';
@@ -29,15 +30,15 @@ const msg = el.querySelector('.msg'), msgH = msg.querySelector('h3'), msgP = msg
 let S = null, raf = 0, last = 0;
 const tries = {};
 
-// lv：走路修行的境界（每一境讓這一戰從容一點）；realm：境界名稱
+// 星等（node.star）決定這一戰多難，每種玩法各自調整；lv：走路修行的境界，每一境淨化力 +20%；realm：境界名稱
 export function battle(node, lv = 0, realm = '') {
   return new Promise(resolve => {
     tries[node.id] = tries[node.id] || 0;
     el.classList.add('show');
-    el.querySelector('header b').textContent = `${node.icon} ${node.name}`;
+    el.querySelector('header b').textContent = `${node.icon} ${node.name} ${'★'.repeat(node.star || 1)}`;
     start(node, lv, resolve);
     const make = gameOf(node);
-    const note = lv ? '\n' + t('realm_' + make.key, { realm, n: make.bonus(lv) }) : '';
+    const note = lv ? '\n' + t('realmPower', { realm, p: lv * 20 }) : '';
     showMsg(t('battleTitle', { name: node.name }), t('battleTip_' + node.id) + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
     cancelAnimationFrame(raf); last = performance.now(); raf = requestAnimationFrame(tick);
   });
@@ -46,7 +47,7 @@ export function battle(node, lv = 0, realm = '') {
 function start(node, lv, done) {
   S = { node, lv, done, run: false, t: 0, pur: 0, fx: [], shots: [], hitT: 0, shake: 0, win: 0, lay: null, game: null };
   size();
-  S.game = gameOf(node)(api, { lv, ease: Math.min(2, tries[node.id] || 0) });
+  S.game = gameOf(node)(api, { star: node.star || 1, ease: Math.min(2, tries[node.id] || 0) });
   bar.style.width = '0%';
 }
 
@@ -63,7 +64,7 @@ const api = {
   get time() { return S.t; },
   get pur() { return S.pur; },
   node: () => S.node,
-  add(n) { S.pur += n; },
+  add(n) { S.pur += n * (1 + 0.2 * S.lv); },
   info(s) { hpEl.textContent = s; },
   shoot(x, y, col) { S.shots.push({ x, y, x0: x, y0: y, t: 0, d: 0.35 + Math.random() * 0.2, col }); },
   burst(x, y, col, n = 14, sp = 160) {
@@ -100,7 +101,7 @@ function tick(now) {
   const L = size();
   S.t += dt;
   if (S.run) S.game.tick(dt);
-  if (S.run && S.pur >= 100 && !S.game.busy?.()) win();
+  if (S.run && S.pur >= 99.99 && !S.game.busy?.()) win();   // 留一點誤差：100/格數 加總可能差一點點才滿
   for (const s of S.shots) {
     s.t += dt; const k = Math.min(1, s.t / s.d), e = k * k;
     s.x = s.x0 + (L.ex - s.x0) * e + Math.sin(k * 3.14) * (s.x0 < L.ex ? -30 : 30); s.y = s.y0 + (L.ey - s.y0) * e;
@@ -127,7 +128,7 @@ function lose() {
   if (!S.run) return;
   S.run = false; sfx.deny();
   const { node, lv, done } = S; tries[node.id]++;
-  showMsg(t('battleLose'), t('lose_' + gameOf(node).key), t('battleRetry'), () => { start(node, lv, done); S.run = true; });
+  showMsg(t('battleLose'), t('lose_' + gameOf(node).key) + '\n' + t('loseWalk'), t('battleRetry'), () => { start(node, lv, done); S.run = true; });
 }
 
 // ---------- 繪製 ----------
@@ -187,6 +188,7 @@ function tile(x, y, z, k, o = {}) {
   else if (shape === 'tri') { g.moveTo(x, y - q * 1.1); g.lineTo(x + q * 1.1, y + q * 0.8); g.lineTo(x - q * 1.1, y + q * 0.8); g.closePath(); g.fill(); }
   else if (shape === 'flower') { for (let a = 0; a < 5; a++) { const an = a / 5 * 6.283 + 0.3; g.moveTo(x, y); g.arc(x + Math.cos(an) * q * 0.6, y + Math.sin(an) * q * 0.6, q * 0.45, 0, 6.283); } g.fill(); }
   else if (shape === 'sun') { g.arc(x, y, q * 0.6, 0, 6.283); g.fill(); g.beginPath(); for (let a = 0; a < 8; a++) { const an = a / 8 * 6.283; g.moveTo(x + Math.cos(an) * q * 0.85, y + Math.sin(an) * q * 0.85); g.lineTo(x + Math.cos(an) * q * 1.25, y + Math.sin(an) * q * 1.25); } g.stroke(); }
+  else if (shape === 'moon') { g.arc(x, y, q, 0.6, 5.7); g.arc(x + q * 0.55, y, q * 0.75, 5.0, 1.3, true); g.closePath(); g.fill(); }
   else { g.rect(x - q * 0.8, y - q * 0.8, q * 1.6, q * 1.6); g.fill(); }
   if (o.special) { // 流眼
     g.strokeStyle = '#7fe8ff'; g.lineWidth = 3; g.beginPath(); g.arc(x, y, h * 0.92, S.t * 3, S.t * 3 + 4.6); g.stroke();
