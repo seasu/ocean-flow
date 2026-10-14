@@ -92,6 +92,14 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
   background:rgba(14,24,40,.6);border:1px solid rgba(255,207,90,.5);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
   opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s;pointer-events:none}
 #near.show{opacity:1;transform:none}
+/* 走到靈門前：先提示，按了才開始 */
+#act{position:absolute;left:50%;bottom:calc(176px + var(--sb));transform:translate(-50%,8px);width:min(360px,calc(100% - 32px));display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 10px 10px 18px;border-radius:20px;background:rgba(14,24,40,.66);border:1px solid rgba(255,207,90,.6);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:6}
+#act.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#act p{margin:0;font-size:16px;font-weight:700;color:#fff;line-height:1.35}
+#act button{flex:none;height:44px;padding:0 18px;border-radius:999px;font-size:16px;font-weight:800;color:#2a1a00;background:var(--gold);border:0}
+#act.show~#near{opacity:0}
 #near .arrow{flex:none;width:32px;height:32px;border-radius:50%;background:rgba(255,207,90,.2);border:1.5px solid var(--gold);display:grid;place-items:center}
 #near .arrow i{width:12px;height:15px;background:var(--gold);clip-path:polygon(50% 0,100% 100%,50% 76%,0 100%);transition:transform .15s linear}
 #near p{margin:0;font-size:15px;font-weight:900;color:var(--gold);white-space:nowrap}
@@ -458,6 +466,7 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
       </div>
     </div>
   </div>
+  <div id="act"><p></p><button></button></div>
   <div id="near"><span class="arrow"><i></i></span><p></p></div>
   <div id="guide" role="button"><span class="arrow"><i></i></span><p></p><button class="x" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div id="pop"></div>
