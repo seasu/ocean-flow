@@ -4,15 +4,16 @@ import { mkdir, writeFile, readdir, rm } from 'node:fs/promises';
 
 // 遊戲裡的 id → 中文維基百科條目（依序嘗試）
 const WANT = {
-  leopard: ['豹山 (臺北市)', '四獸山'], lion: ['獅山 (臺北市)', '四獸山'],
-  city: ['臺北府城', '北門 (臺北)'], sea: ['龜山島'], peak: ['玉山'],
-  shandao: ['善導寺 (臺北市)', '善導寺 (台北市)'], controlyuan: ['監察院大樓', '監察院'], jinan: ['濟南基督長老教會'],
-  guanghua: ['光華商場'],
-  turtle: ['龜山島'], kuroshio: ['黑潮'], taroko: ['太魯閣峽谷', '太魯閣國家公園'], sunmoon: ['日月潭'],
-  yushan: ['玉山'], alishan: ['阿里山神木', '阿里山國家森林遊樂區'], kenting: ['鵝鑾鼻燈塔'],
+  leopard: [['四獸山'], 'Leopard Mountain Taipei hiking trail'], lion: [['四獸山'], 'Lion Mountain Taipei Xinyi trail'],
+  city: [['北門 (臺北)', '臺北府城'], 'Beimen Taipei North Gate'], sea: [['龜山島'], 'Guishan Island Yilan'], peak: [['玉山'], 'Yushan main peak'],
+  shandao: [['善導寺 (臺北市)'], 'Shandao Temple Taipei'], controlyuan: [['監察院大樓', '監察院'], 'Control Yuan building Taipei'],
+  jinan: [['濟南基督長老教會'], 'Jinan Presbyterian Church Taipei'], guanghua: [['光華商場'], 'Guanghua Digital Plaza'],
+  turtle: [['龜山島'], 'Guishan Island Yilan'], kuroshio: [['黑潮'], 'Pacific Ocean east coast Taiwan Hualien sea'],
+  taroko: [['太魯閣峽谷', '太魯閣國家公園'], 'Taroko Gorge'], sunmoon: [['日月潭'], 'Sun Moon Lake'],
+  yushan: [['玉山'], 'Yushan main peak'], alishan: [['阿里山神木', '阿里山國家森林遊樂區'], 'Alishan giant tree'], kenting: [['鵝鑾鼻燈塔'], 'Eluanbi Lighthouse'],
 };
 const MAX = 3, UA = 'ocean-flow-prototype/1.0 (https://github.com/seasu/ocean-flow)';
-const SKIP = /logo|map|flag|icon|locator|location|seal|emblem|coat|diagram|chart|關係|位置|地圖|標誌|\.svg$|\.gif$/i;
+const SKIP = /總統|president|典禮|ceremony|election|選舉|campaign|parade|logo|map|flag|icon|locator|location|seal|emblem|coat|diagram|chart|關係|位置|地圖|標誌|\.svg$|\.gif$/i;
 
 async function api(host, params) {
   const u = `https://${host}/w/api.php?` + new URLSearchParams({ format: 'json', formatversion: '2', origin: '*', ...params });
@@ -28,16 +29,18 @@ const strip = s => String(s || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').
 await mkdir('data/photos', { recursive: true });
 for (const f of await readdir('data/photos')) if (f.startsWith('c-')) await rm('data/photos/' + f);
 const spots = {};
-for (const [id, titles] of Object.entries(WANT)) {
+for (const [id, [titles, q]] of Object.entries(WANT)) {
   let page = null;
   for (const title of titles) {
-    const j = await api('zh.wikipedia.org', { action: 'query', titles: title, redirects: '1', prop: 'pageimages|images|info', piprop: 'name', imlimit: '60', inprop: 'url' });
+    const j = await api('zh.wikipedia.org', { action: 'query', titles: title, redirects: '1', prop: 'pageimages|info', piprop: 'name', inprop: 'url' });
     const p = j.query?.pages?.[0];
     if (p && !p.missing) { page = p; break; }
   }
   if (!page) { console.log('沒找到條目', id, titles.join('/')); continue; }
-  const names = [...new Set([page.pageimage && 'File:' + page.pageimage, ...(page.images || []).map(i => i.title)].filter(Boolean))]
-    .map(n => n.replace(/^(檔案|文件|Image):/, 'File:')).filter(n => !SKIP.test(n));
+  // 條目首圖優先，其餘用 Commons 搜尋（依相關度排序）
+  const sr = await api('commons.wikimedia.org', { action: 'query', list: 'search', srnamespace: '6', srsearch: q + ' filetype:bitmap', srlimit: '20' });
+  const names = [...new Set([page.pageimage && 'File:' + page.pageimage.replace(/_/g, ' '), ...(sr.query?.search || []).map(i => i.title)].filter(Boolean))]
+    .filter(n => !SKIP.test(n));
   const images = [];
   for (let k = 0; k < names.length && images.length < MAX; k += 20) {
     const j = await api('commons.wikimedia.org', { action: 'query', titles: names.slice(k, k + 20).join('|'), prop: 'imageinfo', iiprop: 'url|size|mime|extmetadata', iiurlwidth: '1280' });
