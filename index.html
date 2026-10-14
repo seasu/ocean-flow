@@ -330,6 +330,7 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
 .screen .en{font-size:13px;letter-spacing:.4em;color:var(--cyan);font-weight:500}
 .screen .tag{font-size:15px;color:#d8e6f2;font-weight:500;max-width:22em;line-height:1.7}
 /* 按鈕：和影片「略過」同一套半透明毛玻璃樣式；主按鈕較大、邊框較亮 */
+.ver{position:absolute;left:0;right:0;bottom:calc(14px + var(--sb));font-size:12px;font-weight:500;color:rgba(255,255,255,.35);letter-spacing:.06em;font-variant-numeric:tabular-nums}
 .start{margin-top:10px;font-size:20px;font-weight:900;padding:15px 48px;border-radius:999px;color:#fff;letter-spacing:.12em;
   background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.45);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
   box-shadow:0 8px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.25);text-shadow:0 1px 8px rgba(6,16,30,.5);transition:transform .15s,background .15s}
@@ -473,6 +474,7 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
   <h1>洋流</h1>
   <div class="tag fold" data-i18n="tagline">走出去，遇見你的機緣。</div>
   <button class="start" data-i18n="startGeo">啟程</button>
+  <small class="ver" data-v="__VERSION__"></small>
 </div>
 </div>
 <div class="screen" id="ending">
