@@ -2,7 +2,7 @@
   "source": "Wikimedia Commons（照片取自中文維基百科條目）",
   "sourceUrl": "https://commons.wikimedia.org/",
   "license": "各照片依其標示的自由授權使用（作者與授權見 images[].author / license）",
-  "fetchedAt": "2026-10-14T09:08:30.889Z",
+  "fetchedAt": "2026-10-14T09:09:35.630Z",
   "spots": {
     "leopard": {
       "src": "commons",
@@ -15,6 +15,20 @@
           "author": "Lord Koxinga",
           "license": "CC BY-SA 3.0",
           "page": "https://commons.wikimedia.org/wiki/File:2010_07_22210_6931_Xinyi_District,_Taipei,_Buildings_in_Taipei,_Taipei_101,_Streets_in_Taipei,_Taiwan.JPG"
+        },
+        {
+          "file": "data/photos/c-leopard-2.jpg",
+          "subject": "Taipei View from Four Beasts Scenic Area 20250301",
+          "author": "Heeheemalu",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_View_from_Four_Beasts_Scenic_Area_20250301.jpg"
+        },
+        {
+          "file": "data/photos/c-leopard-3.jpg",
+          "subject": "Taipei Skyline 2023-03-19",
+          "author": "Tzuhsun Hsu",
+          "license": "CC BY-SA 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Skyline_2023-03-19.jpg"
         }
       ]
     },
@@ -29,6 +43,20 @@
           "author": "Lord Koxinga",
           "license": "CC BY-SA 3.0",
           "page": "https://commons.wikimedia.org/wiki/File:2010_07_22210_6931_Xinyi_District,_Taipei,_Buildings_in_Taipei,_Taipei_101,_Streets_in_Taipei,_Taiwan.JPG"
+        },
+        {
+          "file": "data/photos/c-lion-2.jpg",
+          "subject": "Taipei night skyline from Elephant Mountain May 2025 2",
+          "author": "4300streetcar",
+          "license": "CC BY 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_night_skyline_from_Elephant_Mountain_May_2025_2.jpg"
+        },
+        {
+          "file": "data/photos/c-lion-3.jpg",
+          "subject": "View of Taipei from Elephant Mountain (象山)",
+          "author": "Любарский Сергей Николаевич",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:View_of_Taipei_from_Elephant_Mountain_(%E8%B1%A1%E5%B1%B1).jpg"
         }
       ]
     },
@@ -165,10 +193,10 @@
         },
         {
           "file": "data/photos/c-jinan-3.jpg",
-          "subject": "Taipei Jinan church in May 2024 protests",
-          "author": "Yu tptw",
+          "subject": "Taipei Jinan Presbyterian Church 20240921",
+          "author": "阿道",
           "license": "CC BY-SA 4.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Jinan_church_in_May_2024_protests.jpg"
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Jinan_Presbyterian_Church_20240921.jpg"
         }
       ]
     },
@@ -232,7 +260,29 @@
       "src": "commons",
       "name": "黑潮",
       "url": "https://zh.wikipedia.org/wiki/%E9%BB%91%E6%BD%AE",
-      "images": []
+      "images": [
+        {
+          "file": "data/photos/c-kuroshio-1.jpg",
+          "subject": "Canoe class in Qingshui Cliff",
+          "author": "國立東華大學 National Dong Hwa University",
+          "license": "Attribution",
+          "page": "https://commons.wikimedia.org/wiki/File:Canoe_class_in_Qingshui_Cliff.jpg"
+        },
+        {
+          "file": "data/photos/c-kuroshio-2.jpg",
+          "subject": "清水断崖 - Qingshui Cliff - 2012.02 - panoramio",
+          "author": "rheins",
+          "license": "CC BY 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:%E6%B8%85%E6%B0%B4%E6%96%AD%E5%B4%96_-_Qingshui_Cliff_-_2012.02_-_panoramio.jpg"
+        },
+        {
+          "file": "data/photos/c-kuroshio-3.jpg",
+          "subject": "Qingshui Cliff 清水斷崖 - panoramio",
+          "author": "lienyuan lee",
+          "license": "CC BY 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Qingshui_Cliff_%E6%B8%85%E6%B0%B4%E6%96%B7%E5%B4%96_-_panoramio.jpg"
+        }
+      ]
     },
     "taroko": {
       "src": "commons",
@@ -248,10 +298,10 @@
         },
         {
           "file": "data/photos/c-taroko-2.jpg",
-          "subject": "Taroko-Gorge Hualien Taiwan Pudu-Bridge-at-Taroko-National-Park-02",
+          "subject": "Taroko-Gorge Hualien Taiwan Cihmu-Bridge-at-Taroko-National-Park-01",
           "author": "CEphoto, Uwe Aranas",
           "license": "CC BY-SA 3.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Taroko-Gorge_Hualien_Taiwan_Pudu-Bridge-at-Taroko-National-Park-02.jpg"
+          "page": "https://commons.wikimedia.org/wiki/File:Taroko-Gorge_Hualien_Taiwan_Cihmu-Bridge-at-Taroko-National-Park-01.jpg"
         },
         {
           "file": "data/photos/c-taroko-3.jpg",
@@ -269,24 +319,24 @@
       "images": [
         {
           "file": "data/photos/c-sunmoon-1.jpg",
-          "subject": "Sun and Moon Pagodas Guilin November 2017 HDR",
-          "author": "King of Hearts",
-          "license": "CC BY-SA 4.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Sun_and_Moon_Pagodas_Guilin_November_2017_HDR.jpg"
+          "subject": "Nantou-County Taiwan Sun-Moon-Lake-Ropeway-02",
+          "author": "CEphoto, Uwe Aranas",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Nantou-County_Taiwan_Sun-Moon-Lake-Ropeway-02.jpg"
         },
         {
           "file": "data/photos/c-sunmoon-2.jpg",
-          "subject": "日月潭水社碼頭 View of Shuishe Pier from Sun Moon Lake 20151213",
-          "author": "LowensteinYang",
-          "license": "CC BY-SA 4.0",
-          "page": "https://commons.wikimedia.org/wiki/File:%E6%97%A5%E6%9C%88%E6%BD%AD%E6%B0%B4%E7%A4%BE%E7%A2%BC%E9%A0%AD_View_of_Shuishe_Pier_from_Sun_Moon_Lake_20151213.jpg"
+          "subject": "Nantou-County Taiwan Sun-Moon-Lake-Ropeway-03",
+          "author": "CEphoto, Uwe Aranas",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Nantou-County_Taiwan_Sun-Moon-Lake-Ropeway-03.jpg"
         },
         {
           "file": "data/photos/c-sunmoon-3.jpg",
-          "subject": "Sun Moon Lake, 2016-09-11",
-          "author": "Alankang",
-          "license": "CC BY-SA 4.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Sun_Moon_Lake,_2016-09-11.jpg"
+          "subject": "Nantou-County Taiwan Sun-Moon-Lake-Ropeway-01",
+          "author": "CEphoto, Uwe Aranas",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Nantou-County_Taiwan_Sun-Moon-Lake-Ropeway-01.jpg"
         }
       ]
     },
@@ -360,10 +410,10 @@
         },
         {
           "file": "data/photos/c-kenting-3.jpg",
-          "subject": "Hengchun-Township Taiwan Eluanbi-Lighthouse-04",
+          "subject": "Hengchun-Township Taiwan Eluanbi-Lighthouse-01",
           "author": "CEphoto, Uwe Aranas",
           "license": "CC BY-SA 3.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Hengchun-Township_Taiwan_Eluanbi-Lighthouse-04.jpg"
+          "page": "https://commons.wikimedia.org/wiki/File:Hengchun-Township_Taiwan_Eluanbi-Lighthouse-01.jpg"
         }
       ]
     }
