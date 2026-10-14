@@ -26,16 +26,18 @@ const cv = el.querySelector('canvas'), g = cv.getContext('2d');
 const bar = el.querySelector('.bar i'), hpEl = el.querySelector('.hp');
 const msg = el.querySelector('.msg'), msgH = msg.querySelector('h3'), msgP = msg.querySelector('p'), msgB = msg.querySelector('button');
 
-let B = null, raf = 0, last = 0, uid = 0;
+let B = null, raf = 0, last = 0, uid = 0, bonus = 0;
 const tries = {};
 
-export function battle(node) {
+// extra：走路修行的境界加成步數；note：開場說明多一行
+export function battle(node, extra = 0, note = '') {
   return new Promise(resolve => {
+    bonus = extra;
     tries[node.id] = tries[node.id] || 0;
     el.classList.add('show');
     el.querySelector('header b').textContent = `${node.icon} ${node.name}`;
     B = fresh(node); B.done = resolve; setHud();
-    showMsg(t('battleTitle', { name: node.name }), t('battleTip_' + node.id) + '\n' + t('battleHow'), t('battleGo'), () => { B.run = true; });
+    showMsg(t('battleTitle', { name: node.name }), t('battleTip_' + node.id) + (note ? '\n' + note : '') + '\n' + t('battleHow'), t('battleGo'), () => { B.run = true; });
     cancelAnimationFrame(raf); last = performance.now(); raf = requestAnimationFrame(tick);
   });
 }
@@ -43,7 +45,7 @@ export function battle(node) {
 function fresh(node) {
   const ease = Math.min(2, tries[node.id] || 0), st = { ...STYLE[node.id] };
   // 輸過一次：步數多三步、每次淨化多一點
-  st.moves += ease * 3; st.gain *= 1 + ease * 0.15;
+  st.moves += ease * 3 + bonus; st.gain *= 1 + ease * 0.15;
   const b = { node, st, run: false, t: 0, pur: 0, moves: st.moves, turn: 0, grid: [], phase: 'idle', timer: 0, chain: 0, sel: -1, swapA: -1, swapB: -1,
     fx: [], shots: [], hitT: 0, win: 0, shake: 0, lay: null, done: null };
   B = b;

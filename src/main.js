@@ -167,16 +167,54 @@ document.addEventListener('gesturestart', e => e.preventDefault());
 
 // ---------- HUD ----------
 const pop = (text, kind = '') => { const el = $('#pop'); el.textContent = text; el.className = 'show ' + kind; clearTimeout(pop.t); pop.t = setTimeout(() => el.className = '', 2600); };
+// ---------- 走路修行：走的路轉成修為，修為滿了到機緣點突破境界 ----------
+// 現地模式算真實走的公尺數（模擬定位也算），島上算角色走的步數；每升一境，淨化之戰多一步
+const REALMS = t('realms'), NEED = [150, 200, 250, 300];
+G.realm = 0; G.xiu = 0; G.walked = 0;
+const xiuFull = () => G.realm < NEED.length && G.xiu >= NEED[G.realm];
+function gainXiu(m) {
+  G.walked += m;
+  if (G.realm >= NEED.length || xiuFull()) return;
+  G.xiu = Math.min(NEED[G.realm], G.xiu + m);
+  if (xiuFull()) { toast(t('xiuFull')); sfx.sense(); }
+}
+function breakthrough() {
+  if (!xiuFull()) return;
+  G.realm++; G.xiu = 0;
+  setTimeout(() => {
+    pop(t('breakthrough', { realm: REALMS[G.realm] }), 'gold'); sfx.purify();
+    burst(P.x, P.y + 1.2, P.z, [1, 0.9, 0.5], 60, 7);
+    try { navigator.vibrate && navigator.vibrate([30, 40, 30, 40, 90]); } catch { }
+  }, 300);
+}
+function xiuLine() {
+  if (G.realm >= NEED.length) return t('xiuMax', { realm: REALMS[G.realm] });
+  if (xiuFull()) return t('xiuReady');
+  return t(G.geo ? 'xiuLeftGeo' : 'xiuLeftIsland', { n: Math.ceil(NEED[G.realm] - G.xiu), next: REALMS[G.realm + 1] });
+}
+let anchor = null;
+geo.on(p => {
+  if (!G.geo || G.state === 'title') return;
+  const acc = geo.sim ? 0 : (geo.acc || 50), now = performance.now();
+  if (acc > 40) return;   // 定位太飄就不算
+  if (!anchor) { anchor = { ...p, ts: now }; return; }
+  const d = meters(anchor, p);
+  if (d < Math.max(4, acc * 0.5)) return;
+  // 真實定位時速度超過每秒 3.5 公尺（騎車、搭車）不算修為
+  if (geo.sim || d / ((now - anchor.ts) / 1000) < 3.5) gainXiu(d);
+  anchor = { ...p, ts: now };
+});
+
 const toast = text => { const el = $('#toast'); el.textContent = text; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); };
 const avail = () => G.collected + (G.bonus || 0) - G.spent;
 let hudKey = '';
 function hud() {
-  const lv = 1 + Math.floor(G.collected / 5);
   const found = SPOTS.filter(sp => sp.found).length;
-  const key = [visited.size, G.geo, G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, lv, found].join();
+  const key = [visited.size, G.geo, G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, G.realm, Math.ceil(G.xiu), found].join();
   if (key !== hudKey) {
     hudKey = key;
-    $('#lv').textContent = 'Lv.' + lv;
+    $('#lv').textContent = REALMS[G.realm];
+    $('#xbar').style.width = (G.realm >= NEED.length ? 100 : G.xiu / NEED[G.realm] * 100) + '%'; $('#xbar').parentNode.classList.toggle('full', xiuFull());
     $('#dexBtn').textContent = t('dexBtn', { n: found, m: SPOTS.length });
     $('#dexList').innerHTML = `<li class="sec">${t('secMountain')}</li>`
       + S1.map(n => n.awake ? `<li><b>${n.icon} ${n.name}${t('sep')}${n.hill}</b><small>${n.seal}${t('sep')}${n.virtue}</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`).join('')
@@ -189,7 +227,7 @@ function hud() {
       $('#qtitle').textContent = t('questTitle', { n: G.awakened });
       $('#qchips').innerHTML = S1.map(n => `<span class="${n.awake ? 'done' : ''}">${n.icon}${n.awake ? '✓' : ''}</span>`).join('');
       $('#qlist').innerHTML = S1.map(n => `<li class="${n.awake ? 'done' : n === nextGate() ? '' : 'wait'}"><span>${n.awake ? '✓' : n.icon}</span>${n.seal}${t('sep')}${n.name}<small>${n.awake ? n.virtue : n !== nextGate() ? t('waitPrev') : G.geo ? t('questGeo', { place: placeOf(n), hill: n.hill }) : n.hint + t('sep') + n.hill}</small></li>`).join('')
-        + `<li class="note">${t('questNote', { cost: COST })}</li>`;
+        + `<li class="note">${t('questNote', { cost: COST })}</li><li class="note">${xiuLine()}</li>`;
     } else {
       $('#qtitle').textContent = t('questDone');
       $('#qchips').innerHTML = '<span class="done">⛩</span>';
@@ -305,7 +343,7 @@ function start(mode) {
   if (G.geo) geo.start();
   say(G.geo ? GEO_LINES : LINES, () => {
     G.state = 'play'; $('#hud').classList.add('play'); XI.wave = false;
-    pop(t('firstSeal'), 'gold');
+    pop(t('firstSeal'), 'gold'); setTimeout(() => toast(t('xiuIntro')), 2600);
     if (G.geo) openRadar();
   });
   try { if (matchMedia('(pointer: coarse)').matches && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => { }); } catch { }
@@ -321,9 +359,21 @@ function closeFilm() {
   video.pause(); film.classList.remove('show', 'muted');
   try { localStorage.setItem(FILM_KEY, '1'); } catch { }
 }
+// 手機直拿播直式（9:16），橫拿或電腦播橫式；播放中轉向就換檔、接著同一秒播
+const tall = matchMedia('(orientation: portrait)');
+function filmSrc() {
+  const v = tall.matches ? 'video/intro-portrait' : 'video/intro';
+  if (video.dataset.v === v) return false;
+  video.dataset.v = v; video.poster = v + '-poster.jpg'; video.src = v + '.mp4'; return true;
+}
+tall.addEventListener('change', () => {
+  if (!film.classList.contains('show')) return;
+  const at = video.currentTime, playing = !video.paused;
+  if (filmSrc()) video.addEventListener('loadedmetadata', () => { video.currentTime = at; if (playing) video.play().catch(() => { }); }, { once: true });
+});
 function openFilm() {
   film.classList.add('show'); film.classList.remove('muted');
-  video.muted = false; video.currentTime = 0;
+  filmSrc(); video.muted = false; video.currentTime = 0;
   // 瀏覽器常擋有聲自動播放：擋了就先靜音播放，顯示「點一下開聲音」
   video.play().catch(() => { video.muted = true; film.classList.add('muted'); video.play().catch(() => { video.controls = true; }); });
 }
@@ -367,10 +417,11 @@ function buildVein(n) {
 function fight(n, then) {
   if (params.has('nobattle')) return then();
   G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show');
-  battle(n).then(() => { G.state = 'play'; $('#hud').classList.add('play', 'on'); then(); });
+  battle(n, G.realm, G.realm ? t('battleRealm', { realm: REALMS[G.realm], n: G.realm }) : '').then(() => { G.state = 'play'; $('#hud').classList.add('play', 'on'); then(); });
 }
 
 function awaken(n) {
+  breakthrough();
   n.awake = true; n.flash = 1; G.spent += COST; G.awakened++;
   sfx.bell(n.bell || 196);
   pop(t('gateOpened', { seal: n.seal, icon: n.icon, name: n.name }), 'gold');
@@ -454,14 +505,14 @@ function updatePlayer(dt) {
 }
 
 function updateGame(dt) {
+  if (!G.geo) gainXiu(Math.hypot(P.vx, P.vz) * dt * 2);   // 走路修行：島上半單位算一步
   // 靈光
   for (const m of motes) {
     if (m.taken) continue;
     if (Math.hypot(m.x - P.x, m.z - P.z) < 1.4 && Math.abs(P.y + 0.9 - m.y) < 2) {
       m.taken = true; G.collected++; sfx.pick();
       burst(m.x, m.y, m.z, [0.6, 0.95, 1], 16, 3);
-      if (G.collected % 5 === 0) pop(t('levelUp', { lv: 1 + G.collected / 5 }), 'gold');
-      else toast(t('plusOne', { n: avail() }));
+      toast(t('plusOne', { n: avail() }));
     }
   }
   // 靈脈節點
@@ -499,6 +550,7 @@ function updateGame(dt) {
 }
 
 function discover(sp) {
+  breakthrough();
   sp.found = true; G.bonus = (G.bonus || 0) + 1; sfx.pick(); setTimeout(() => sfx.pick(), 120);
   showCard(sp.name, sp.area, sp.text, t('discovered', { n: SPOTS.filter(s => s.found).length, m: SPOTS.length }), sp.id);
 }
@@ -615,7 +667,7 @@ function drawRadar() {
 }
 
 function encounter(s) {
-  closeRadar();
+  closeRadar(); breakthrough();
   if (s.id === 'venue') {
     const left = S1.filter(n => !n.awake).map(n => `${n.name} (${placeOf(n)})`);
     if (G.gateOpen) {
@@ -663,7 +715,8 @@ $('#dex').addEventListener('pointerdown', e => { e.preventDefault(); $('#dex').c
 function ending() {
   G.state = 'ending'; G.spiritTarget = 1; setSpirit(1); sfx.gate(); sfx.ending();
   const s = Math.round(G.playT), mm = String(Math.floor(s / 60)).padStart(2, '0'), ss = String(s % 60).padStart(2, '0');
-  $('#stats').textContent = t('stats', { time: `${mm}:${ss}`, qi: G.collected, qim: motes.length, b: SPOTS.filter(s => s.found).length, bm: SPOTS.length });
+  $('#stats').textContent = t('stats', { time: `${mm}:${ss}`, qi: G.collected, qim: motes.length, b: SPOTS.filter(s => s.found).length, bm: SPOTS.length })
+    + '\n' + t('statsWalk', { realm: REALMS[G.realm], d: G.geo ? fmt(G.walked) : t('stepsN', { n: Math.round(G.walked) }) });
   setTimeout(() => $('#ending').classList.add('show'), 600);
   $('#hud').classList.remove('play');
 }
@@ -814,4 +867,4 @@ if (params.has('play') || params.has('at') || params.has('awake') || params.has(
   if (params.has('yaw')) cam.yaw = +params.get('yaw');
   if (params.has('pitch')) cam.pitch = +params.get('pitch');
 }
-window.__game = { fight, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
+window.__game = { fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };

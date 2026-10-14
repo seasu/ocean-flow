@@ -28,6 +28,8 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 .plate{position:absolute;left:calc(12px + var(--sl));top:calc(10px + var(--st));display:flex;gap:8px;align-items:center;background:var(--panel);
   border-radius:10px;padding:6px 10px;font-size:14px}
 .lv{background:var(--gold);color:#2a1c00;border-radius:6px;padding:0 6px}
+.xb{width:44px;height:6px;background:rgba(0,0,0,.45);border-radius:6px;overflow:hidden}.xb i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
+.xb.full{box-shadow:0 0 8px var(--gold)}
 .qi{position:absolute;left:calc(12px + var(--sl));top:calc(46px + var(--st));display:flex;gap:6px;align-items:center;font-size:12px;color:var(--cyan);text-shadow:0 1px 0 #000}
 .qi .bar{width:84px;height:8px;background:rgba(0,0,0,.45);border-radius:8px;overflow:hidden}
 .qi .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#5cc8ff,#ffcf5a);transition:width .3s}
@@ -194,7 +196,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 <body>
 <canvas id="c"></canvas>
 <div id="hud">
-  <div class="plate"><span class="lv" id="lv">Lv.1</span><span data-i18n="traveler">旅人・阿流</span></div>
+  <div class="plate"><span class="lv" id="lv">感流境</span><span data-i18n="traveler">旅人・阿流</span><span class="xb"><i id="xbar"></i></span></div>
   <div class="qi playonly"><span class="bar"><i id="qibar"></i></span><span id="qi">靈光 0</span></div>
   <button class="playonly" id="radarBtn" data-i18n="radar">📍 現世</button>
   <button class="playonly" id="dexBtn">📖 台灣之美 0/8</button>
@@ -240,7 +242,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
   <div class="langs"></div>
   <button class="start" id="again" data-i18n="again">再走一次</button>
 </div>
-<div id="film"><video playsinline preload="none" poster="video/intro-poster.jpg"><source src="video/intro.mp4" type="video/mp4"></video>
+<div id="film"><video playsinline preload="none"></video>
   <button class="sound" data-i18n="tapSound">🔊 點一下開聲音</button>
   <button class="skip" data-i18n="skip">略過 ▸</button></div>
 <script type="module" src="src/main.js"></script>
