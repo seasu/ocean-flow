@@ -149,27 +149,41 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
   padding:calc(12px + var(--st)) 16px calc(16px + var(--sb));overflow:auto;font-weight:500}
 #radar.show{display:flex}
 #radar header{width:min(520px,100%);display:flex;justify-content:space-between;align-items:center;gap:8px}
-#radar header b{display:block;font-size:17px;font-weight:900;letter-spacing:.08em}
-#radar header small{display:block;color:var(--cyan);font-size:12px}
+#radar header b{display:block;font-size:19px;font-weight:900;letter-spacing:.08em}
+#radar header small{display:block;color:var(--cyan);font-size:14px}
 #radar header small.trail{color:var(--gold)}
 #rClose{padding:0 16px;height:40px;font-size:15px;white-space:nowrap}
 #rClose::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E")}
-#rcv{width:min(360px,calc(100vw - 32px),48vh);aspect-ratio:1;max-width:100%;flex:none;touch-action:manipulation}
+#radar .rwrap{position:relative;flex:none;width:min(380px,calc(100vw - 32px),52vh);max-width:100%}
+#rcv{display:block;width:100%;aspect-ratio:1;touch-action:none}
+/* 縮放：雙指或按鈕；準星按鈕回到「我＋目的地」 */
+.rbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;min-height:46px}
+.rzoom{display:flex;gap:8px;flex:none}
+.rzoom button{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.4);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:transform .12s,background .12s}
+.rzoom button:active{transform:scale(.95);background:rgba(255,255,255,.28)}
+.rzoom button.on{border-color:rgba(255,207,90,.8);color:var(--gold)}
+.rzoom svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.rtarget{min-width:0;font-size:16px;font-weight:900;color:var(--gold);background:rgba(14,24,40,.7);border:1px solid rgba(255,207,90,.45);
+  border-radius:14px;padding:6px 12px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.rtarget:empty{display:none}
+.rtarget small{display:block;font-size:14px;font-weight:500;color:#dbe6f0}
 #enc{display:none;width:min(520px,100%);align-items:center;justify-content:space-between;gap:10px;background:rgba(14,24,40,.62);color:#fff;border:1px solid rgba(255,207,90,.55);
   border-radius:20px;padding:12px 12px 12px 18px;font-weight:900;font-size:16px;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 8px 30px rgba(0,0,0,.3);animation:glow 1.2s ease-in-out infinite alternate}
 #enc.show{display:flex}
 #enc button{padding:0 18px;height:42px;font-size:16px;white-space:nowrap}
 @keyframes glow{to{box-shadow:0 4px 0 #b9771a,0 0 22px rgba(255,207,90,.7)}}
-#rlist{list-style:none;margin:0;padding:0;width:min(520px,100%);display:grid;gap:6px}
-#rlist li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:rgba(255,255,255,.06);border-radius:10px;padding:8px 12px;cursor:pointer}
+#rlist{list-style:none;margin:0;padding:0;width:min(520px,100%);display:grid;gap:8px}
+#rlist li{display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:14px;padding:10px 14px;cursor:pointer}
 #rlist li > div{min-width:0}
-#rlist li b{font-size:15px}#rlist li small{display:block;color:var(--dim);font-size:11px}
-#rlist li span{text-align:right;font-size:12px;color:#cfe0ee;white-space:nowrap}
-#rlist li em{display:block;font-style:normal;font-size:11px;color:var(--dim)}
+#rlist li b{font-size:17px}#rlist li small{display:block;color:var(--dim);font-size:14px}
+#rlist li span{text-align:right;font-size:14px;color:#cfe0ee;white-space:nowrap}
+#rlist li em{display:block;font-style:normal;font-size:13px;color:var(--dim)}
 #rlist li.key em{color:var(--cyan)}#rlist li.done em{color:var(--gold)}
 #rlist li.near{outline:2px solid var(--gold)}
+#rlist li.target{background:rgba(255,207,90,.12);box-shadow:inset 3px 0 0 var(--gold)}
 #rlist li button{background:var(--gold);color:#3a2300;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:900}
-#radar footer{width:min(520px,100%);display:grid;gap:6px;font-size:12px;color:var(--dim)}
+#radar footer{width:min(520px,100%);display:grid;gap:8px;font-size:14px;color:var(--dim)}
 #radar footer label{display:flex;gap:6px;align-items:center;color:var(--ink)}
 #radar footer small{color:#ffb4a0}
 #calOut{white-space:pre-wrap;word-break:break-all;font-size:10px;margin:0;user-select:text;-webkit-user-select:text}
@@ -312,7 +326,8 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 <div id="dex"><h3 data-i18n="dexTitle">台灣之美 圖鑑</h3><ul id="dexList"></ul><small data-i18n="tapClose">點一下關閉</small></div>
 <div id="radar">
   <header><div><b data-i18n="radarTitle">現世・靈脈雷達</b><small class="trail" data-i18n="trail">文化徑 × 山林徑・走一條路，認識台北這座城</small><small id="gstat"></small></div><button id="rClose" data-i18n="backSpirit">回到靈界 ✕</button></header>
-  <canvas id="rcv"></canvas>
+  <div class="rwrap"><canvas id="rcv"></canvas>
+    <div class="rbar"><div class="rtarget" id="rtarget"></div><div class="rzoom"><button data-z="in" aria-label="zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><button data-z="out" aria-label="zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><button data-z="fit" aria-label="fit" data-i18n-label="fitTarget"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button></div></div></div>
   <div id="enc"><span></span><button data-i18n="enter">進入機緣</button></div>
   <ul id="rlist"></ul>
   <footer><label><input type="checkbox" id="simT"> <span data-i18n="simLabel">模擬定位：點雷達或清單就走過去（展示用）</span></label>

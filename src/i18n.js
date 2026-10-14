@@ -38,6 +38,8 @@ const S = {
   orIsland: ['或島上的{hill}', 'or {hill} on the island', 'または島の{hill}'],
   qiOf: ['靈光 {n}/{cost}', 'Spirit Light {n}/{cost}', '霊光 {n}/{cost}'],
   more2: ['更多', 'More', 'その他'],
+  fitTarget: ['回到目的地', 'Fit destination', '目的地に合わせる'],
+  rTarget: ['目的地：{name}', 'Destination: {name}', '目的地：{name}'],
   qi: ['靈光 {n}', 'Spirit Light {n}', '霊光 {n}'],
   radar: ['現世', 'Real World', '現世'],
   beauty: ['台灣之美', 'Beauty of Taiwan', '台湾の美'],

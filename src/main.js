@@ -726,7 +726,30 @@ const visited = new Set();
 const radar = $('#radar'), rcv = $('#rcv'), rg = rcv.getContext('2d');
 const calib = params.has('calib');
 let radarOpen = false, encSpot = null;
-function openRadar() { if (G.state !== 'play' && G.state !== 'ending') return; radarOpen = true; radar.classList.add('show'); geo.start(); renderList(); }
+// 雷達縮放：zoom = null 時自動框住「我＋目的地」；手動縮放後記住範圍（公尺），按準星回到自動
+let zoom = null, pinch = null, noClick = 0;
+function radarTarget() {
+  if (G.gateOpen || !nextGate()) return REAL.find(s => s.id === 'venue');
+  const nodes = stage1Done() ? S2.filter(n => !n.awake) : [nextGate()];
+  return REAL.filter(s => nodes.some(n => n.id === s.node)).sort((a, b) => meters(geo.pos, a) - meters(geo.pos, b))[0];
+}
+const clampR = r => Math.max(80, Math.min(4000, r));
+function setZoom(r) { zoom = r == null ? null : clampR(r); $('.rzoom [data-z="fit"]').classList.toggle('on', zoom === null); }
+$('.rzoom').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return; e.stopPropagation();
+  const cur = drawRadar.range || 500;
+  setZoom(b.dataset.z === 'in' ? cur / 1.6 : b.dataset.z === 'out' ? cur * 1.6 : null);
+});
+const ptrs = new Map();
+rcv.addEventListener('pointerdown', e => { ptrs.set(e.pointerId, [e.clientX, e.clientY]); if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), r: drawRadar.range || 500 }; } });
+rcv.addEventListener('pointermove', e => {
+  if (!ptrs.has(e.pointerId)) return; ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+  if (pinch && ptrs.size === 2) { const [a, b] = [...ptrs.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (d > 10) { setZoom(pinch.r * pinch.d / d); noClick = performance.now() + 400; } }
+});
+const ptrUp = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null; };
+rcv.addEventListener('pointerup', ptrUp); rcv.addEventListener('pointercancel', ptrUp);
+rcv.addEventListener('wheel', e => { e.preventDefault(); setZoom((drawRadar.range || 500) * (e.deltaY > 0 ? 1.15 : 1 / 1.15)); }, { passive: false });
+function openRadar() { if (G.state !== 'play' && G.state !== 'ending') return; radarOpen = true; radar.classList.add('show'); setZoom(null); geo.start(); renderList(); }
 function closeRadar() { radarOpen = false; radar.classList.remove('show'); }
 $('#radarBtn').addEventListener('pointerdown', e => { e.preventDefault(); openRadar(); });
 $('#rClose').addEventListener('click', closeRadar);
@@ -737,11 +760,11 @@ function inRange() {
 }
 function fmt(d) { return d < 1000 ? t('meters', { n: Math.round(d) }) : t('km', { n: (d / 1000).toFixed(1) }); }
 function renderList() {
-  const items = REAL.map(s => ({ s, d: meters(geo.pos, s) })).sort((a, b) => a.d - b.d);
+  const items = REAL.map(s => ({ s, d: meters(geo.pos, s) })).sort((a, b) => a.d - b.d), tg = radarTarget();
   $('#rlist').innerHTML = items.map(({ s, d }) => {
     const done = visited.has(s.id), node = s.node ? NODES.find(n => n.id === s.node) : null;
     const tag = s.id === 'venue' ? (G.gateOpen ? t('canOpen') : t('startEnd')) : node ? (node.awake ? t('opened', { icon: node.icon, name: node.name }) : node === nextGate() ? `${node.seal}${t('sep')}${node.icon} ${node.name}` : node.seal + t('sep') + node.name) : done ? t('bound') : t('chance');
-    return `<li data-id="${s.id}" class="${done ? 'done' : ''} ${d <= s.r ? 'near' : ''} ${node ? 'key' : ''}"><div><b>${s.name}</b><small>${s.sub}</small></div>`
+    return `<li data-id="${s.id}" class="${done ? 'done' : ''} ${d <= s.r ? 'near' : ''} ${node ? 'key' : ''} ${s === tg ? 'target' : ''}"><div><b>${s.name}</b><small>${s.sub}</small></div>`
       + `<span><em>${tag}</em>${t('distDir', { d: fmt(d), dir: dirFor(s) })}</span>`
       + (calib ? `<button data-cal="${s.id}">${t('setHere')}</button>` : '') + `</li>`;
   }).join('');
@@ -755,7 +778,7 @@ $('#rlist').addEventListener('click', e => {
   if (geo.sim) geo.walkTo(s); else toast(t('walkThere', { name: s.name, dir: dirFor(s), d: fmt(meters(geo.pos, s)) }));
 });
 rcv.addEventListener('click', e => {
-  if (!geo.sim) return;
+  if (!geo.sim || performance.now() < noClick) return;
   const rect = rcv.getBoundingClientRect(), x = e.clientX - rect.left - rect.width / 2, y = e.clientY - rect.top - rect.height / 2;
   const sc = drawRadar.scale; if (!sc) return;
   const hit = REAL.find(s => { const [ox, oy] = offset(geo.pos, s); return Math.hypot(ox * sc - x, -oy * sc - y) < 22; });
@@ -772,32 +795,54 @@ geo.on(() => {
 function drawRadar() {
   const css = rcv.clientWidth, d = Math.min(devicePixelRatio || 1, 2), W = Math.round(css * d);
   if (rcv.width !== W) { rcv.width = rcv.height = W; }
-  const g = rg, c = W / 2;
+  const g = rg, c = W / 2, tg = radarTarget(), td = tg ? meters(geo.pos, tg) : 300;
+  const want = zoom ?? clampR(Math.max(150, td * 1.6));
+  drawRadar.range = drawRadar.range ? lerp(drawRadar.range, want, 0.2) : want; // 平滑縮放
+  const range = drawRadar.range, sc = (c - 18 * d) / range; drawRadar.scale = sc / d;
   g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, W);
-  const far = Math.max(...REAL.map(s => meters(geo.pos, s)));
-  const range = Math.min(1500, Math.max(250, far * 1.08));
-  const sc = (c - 18 * d) / range; drawRadar.scale = sc / d;
-  g.fillStyle = '#0b1a2c'; g.beginPath(); g.arc(c, c, c - 2, 0, 7); g.fill();
-  const step = range > 900 ? 500 : range > 400 ? 200 : 100;
-  g.strokeStyle = 'rgba(111,227,255,.18)'; g.lineWidth = d; g.fillStyle = 'rgba(159,176,194,.8)'; g.font = `${10 * d}px sans-serif`; g.textAlign = 'left';
-  for (let m = step; m < range; m += step) { g.beginPath(); g.arc(c, c, m * sc, 0, 7); g.stroke(); g.fillText(m + 'm', c + 3 * d, c - m * sc - 3 * d); }
+  g.save(); g.beginPath(); g.arc(c, c, c - 2, 0, 7); g.clip();
+  g.fillStyle = '#0b1a2c'; g.fillRect(0, 0, W, W);
+  const step = [50, 100, 200, 250, 500, 1000, 2000].find(v => range / v <= 4) || 2000;
+  g.strokeStyle = 'rgba(111,227,255,.18)'; g.lineWidth = d; g.fillStyle = 'rgba(159,176,194,.85)'; g.font = `${12 * d}px sans-serif`; g.textAlign = 'left';
+  for (let m = step; m < range; m += step) { g.beginPath(); g.arc(c, c, m * sc, 0, 7); g.stroke(); if (m * sc < c - 34 * d) g.fillText(fmt(m), c + 4 * d, c - m * sc - 4 * d); }
   // 掃描線
   const a = G.t * 1.6; const grd = g.createConicGradient ? g.createConicGradient(a, c, c) : null;
-  if (grd) { grd.addColorStop(0, 'rgba(111,227,255,.22)'); grd.addColorStop(0.12, 'rgba(111,227,255,0)'); grd.addColorStop(1, 'rgba(111,227,255,0)'); g.fillStyle = grd; g.beginPath(); g.arc(c, c, c - 2, 0, 7); g.fill(); }
-  g.fillStyle = '#ffcf5a'; g.font = `900 ${12 * d}px sans-serif`; g.textAlign = 'center'; g.fillText(t('north'), c, 14 * d);
+  if (grd) { grd.addColorStop(0, 'rgba(111,227,255,.22)'); grd.addColorStop(0.12, 'rgba(111,227,255,0)'); grd.addColorStop(1, 'rgba(111,227,255,0)'); g.fillStyle = grd; g.fillRect(0, 0, W, W); }
+  g.fillStyle = '#ffcf5a'; g.font = `900 ${13 * d}px sans-serif`; g.textAlign = 'center'; g.fillText(t('north'), c, 16 * d);
+  const P2 = s => { const [ox, oy] = offset(geo.pos, s); return [c + ox * sc, c - oy * sc]; };
+  const edge = (x, y) => { const dx = x - c, dy = y - c, L = Math.hypot(dx, dy), max = c - 22 * d; return L > max ? [c + dx / L * max, c + dy / L * max, true] : [x, y, false]; };
+  // 往目的地的虛線
+  if (tg) {
+    const [x, y] = edge(...P2(tg));
+    g.setLineDash([6 * d, 6 * d]); g.strokeStyle = 'rgba(255,207,90,.7)'; g.lineWidth = 2 * d; g.beginPath(); g.moveTo(c, c); g.lineTo(x, y); g.stroke(); g.setLineDash([]);
+  }
+  // 範圍拉遠時，不重要的機緣點縮小、拿掉名字，畫面才不會擠
+  const crowd = range > 700;
   for (const s of REAL) {
-    const [ox, oy] = offset(geo.pos, s), x = c + ox * sc, y = c - oy * sc, near = meters(geo.pos, s) <= s.r;
+    if (s === tg) continue;
+    const [x, y] = P2(s), near = meters(geo.pos, s) <= s.r, key = s.node || s.id === 'venue';
     const done = visited.has(s.id) || (s.node && NODES.find(n => n.id === s.node).awake);
-    g.globalAlpha = near ? 0.35 + 0.25 * Math.sin(G.t * 6) : 0.18;
+    g.globalAlpha = near ? 0.35 + 0.25 * Math.sin(G.t * 6) : 0.14;
     g.fillStyle = s.id === 'venue' ? '#ffcf5a' : s.node ? '#6fe3ff' : '#ffffff';
-    g.beginPath(); g.arc(x, y, s.r * sc, 0, 7); g.fill(); g.globalAlpha = 1;
-    g.beginPath(); g.arc(x, y, (s.node || s.id === 'venue' ? 6 : 4.5) * d, 0, 7); g.fill();
+    g.beginPath(); g.arc(x, y, s.r * sc, 0, 7); g.fill();
+    g.globalAlpha = crowd && !key ? 0.5 : 0.85;
+    g.beginPath(); g.arc(x, y, (key ? 5 : 3.5) * d, 0, 7); g.fill(); g.globalAlpha = 1;
     if (done) { g.strokeStyle = '#ffcf5a'; g.lineWidth = 2 * d; g.stroke(); }
-    g.fillStyle = '#eef3f8'; g.font = `${(s.node ? 12 : 11) * d}px sans-serif`; g.fillText((s.node ? NODES.find(n => n.id === s.node).icon + ' ' : '') + s.name, x, y - 9 * d);
+    if (!crowd || s.id === 'venue') { g.fillStyle = 'rgba(238,243,248,.75)'; g.font = `${12 * d}px sans-serif`; g.fillText(s.name, x, y - 9 * d); }
+  }
+  // 目的地：金色、脈動、名字放大；超出範圍就貼在邊緣
+  if (tg) {
+    const [x, y, out] = edge(...P2(tg)), pr = (10 + 4 * Math.sin(G.t * 4)) * d;
+    g.strokeStyle = 'rgba(255,207,90,.55)'; g.lineWidth = 3 * d; g.beginPath(); g.arc(x, y, pr + 6 * d, 0, 7); g.stroke();
+    g.fillStyle = '#ffcf5a'; g.strokeStyle = '#fff'; g.lineWidth = 2 * d; g.beginPath(); g.arc(x, y, 8 * d, 0, 7); g.fill(); g.stroke();
+    if (!out) { g.font = `900 ${15 * d}px sans-serif`; g.lineWidth = 4 * d; g.strokeStyle = 'rgba(6,14,26,.85)'; g.strokeText(tg.name, x, y - 18 * d); g.fillStyle = '#ffcf5a'; g.fillText(tg.name, x, y - 18 * d); }
   }
   // 玩家
   if (geo.acc && geo.acc < 300) { g.fillStyle = 'rgba(88,176,234,.18)'; g.beginPath(); g.arc(c, c, geo.acc * sc, 0, 7); g.fill(); }
   g.fillStyle = '#58b0ea'; g.strokeStyle = '#fff'; g.lineWidth = 2 * d; g.beginPath(); g.arc(c, c, 7 * d, 0, 7); g.fill(); g.stroke();
+  g.restore();
+  const rt = $('#rtarget'), html = tg ? `${t('rTarget', { name: tg.name })}<small>${t('distDir', { d: fmt(td), dir: dirFor(tg) })}</small>` : '';
+  if (rt.innerHTML !== html) rt.innerHTML = html;
   // 狀態列與機緣按鈕
   $('#gstat').textContent = geo.sim ? t('simStat', { err: geo.error ? t('sep') + geo.error : '' }) : t('gpsStat', { n: Math.round(geo.acc || 0) });
   $('#simT').checked = geo.sim;
