@@ -79,6 +79,14 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #guide{position:absolute;right:16px;bottom:calc(176px + var(--sb));display:none;align-items:center;gap:8px;
   background:rgba(14,24,40,.6);border:1px solid rgba(255,207,90,.4);border-radius:999px;padding:4px 4px 4px 4px;pointer-events:auto;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 #guide.show{display:flex}
+/* 附近有台灣之美：左下浮出的小提示，箭頭指向景點 */
+#near{position:absolute;left:calc(16px + var(--sl));bottom:calc(176px + var(--sb));display:flex;align-items:center;gap:8px;padding:4px 14px 4px 4px;border-radius:999px;
+  background:rgba(14,24,40,.6);border:1px solid rgba(255,207,90,.5);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s;pointer-events:none}
+#near.show{opacity:1;transform:none}
+#near .arrow{flex:none;width:32px;height:32px;border-radius:50%;background:rgba(255,207,90,.2);border:1.5px solid var(--gold);display:grid;place-items:center}
+#near .arrow i{width:12px;height:15px;background:var(--gold);clip-path:polygon(50% 0,100% 100%,50% 76%,0 100%);transition:transform .15s linear}
+#near p{margin:0;font-size:15px;font-weight:900;color:var(--gold);white-space:nowrap}
 #guide .arrow{flex:none;width:36px;height:36px;border-radius:50%;background:var(--gold);display:grid;place-items:center}
 #guide .arrow i{width:14px;height:18px;background:#3a2300;clip-path:polygon(50% 0,100% 100%,50% 76%,0 100%);transition:transform .15s linear}
 #guide.nodir .arrow i{clip-path:circle(35%)}
@@ -441,6 +449,7 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
       </div>
     </div>
   </div>
+  <div id="near"><span class="arrow"><i></i></span><p></p></div>
   <div id="guide" role="button"><span class="arrow"><i></i></span><p></p><button class="x" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div id="pop"></div>
   <div id="toast"></div>

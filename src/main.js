@@ -725,11 +725,30 @@ function updateGame(dt) {
   G.sense = Math.max(0, G.sense - dt); G.senseCd = Math.max(0, G.senseCd - dt);
   if (G.pulse[3] > 0) { G.pulse[2] += dt * 34; G.pulse[3] = Math.max(0, 1 - G.pulse[2] / 70); }
   // 台灣之美
+  let near = null, nd = 1e9;
+  G.sparkT = (G.sparkT || 0) - dt;
+  const spark = G.sparkT <= 0; if (spark) G.sparkT = 0.45;
   for (const sp of SPOTS) {
     if (sp.found) continue;
-    const hit = sp.id === 'kuroshio' ? G.riding : Math.hypot(sp.pos[0] + 0.5 - P.x, sp.pos[1] + 0.5 - P.z) < sp.r;
-    if (hit) discover(sp);
+    const d = Math.hypot(sp.pos[0] + 0.5 - P.x, sp.pos[1] + 0.5 - P.z);
+    const hit = sp.id === 'kuroshio' ? G.riding : d < sp.r;
+    if (hit) { discover(sp); continue; }
+    if (!sp.r) continue;
+    // 遠處：景點上空冒金色光點；近處：震一下、響一聲，畫面浮出方向提示
+    if (spark && d < 45) { const i = sp.pos[1] * N + sp.pos[0]; burst(sp.pos[0] + 0.5, (world.H[i] || 2) + 2.5, sp.pos[1] + 0.5, [1, 0.85, 0.45], 5, 2.2); }
+    if (d < sp.r + 20 && d < nd) { near = sp; nd = d; }
   }
+  nearHint(near, nd);
+}
+const nearEl = $('#near'), nearArrow = nearEl.querySelector('i'), nearText = nearEl.querySelector('p');
+function nearHint(sp, d) {
+  const on = !!sp && G.state === 'play';
+  nearEl.classList.toggle('show', on);
+  if (!on) return;
+  if (!sp.hinted) { sp.hinted = true; sfx.sense(); try { navigator.vibrate && navigator.vibrate(40); } catch { } }
+  const [, , deg] = islandRel([sp.pos[0] + 0.5, 0, sp.pos[1] + 0.5]), text = t('nearSpot', { n: Math.max(1, Math.round(d - sp.r)) });
+  nearArrow.style.transform = `rotate(${deg.toFixed(0)}deg)`;
+  if (nearText.textContent !== text) nearText.textContent = text;
 }
 
 function discover(sp) {
