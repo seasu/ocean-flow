@@ -45,6 +45,8 @@ const S = {
   radarLabel: ['現世雷達', 'Real-world radar', '現世レーダー'],
   langLabel: ['語言', 'Language', '言語'],
   soundLabel: ['聲音', 'Sound', 'サウンド'],
+  verLabel: ['版本', 'Version', 'バージョン'],
+  verStale: ['請重新整理', 'please reload', '再読み込みしてください'],
   meSteps: ['走了', 'You have walked', '歩いた歩数'],
   meDist: ['約 {d}', 'About {d}', '約 {d}'],
   meSeals: ['印記', 'Seals', '印'],
