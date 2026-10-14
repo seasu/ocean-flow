@@ -162,7 +162,8 @@ export function match3(A, { star, ease }) {
     },
     draw() {
       const g = A.g, b = box(), s = b.s;
-      g.fillStyle = 'rgba(8,14,26,.55)'; A.rr(b.x - 6, b.y - 6, s * C + 12, s * R + 12, 12); g.fill();
+      g.fillStyle = 'rgba(255,255,255,.06)'; A.rr(b.x - 8, b.y - 8, s * C + 16, s * R + 16, 18); g.fill();
+      g.strokeStyle = 'rgba(255,255,255,.14)'; g.lineWidth = 1; g.stroke();
       g.save(); g.beginPath(); g.rect(b.x - 6, b.y - 6, s * C + 12, s * R + 12); g.clip();
       for (let i = 0; i < C * R; i++) {
         const x = B.grid[i]; if (!x) continue;

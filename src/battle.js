@@ -15,7 +15,8 @@ const FORCE = { sudoku, taphero, sigil, match3 }[new URLSearchParams(location.se
 const gameOf = node => FORCE || GAMES[node.id] || match3;
 
 // 方塊元素：海、山、花、陽、石（顏色之外再用形狀區分），數獨與三消共用
-export const TILE = [['#3d8bff', 'wave'], ['#45b36b', 'tri'], ['#ff7aa8', 'flower'], ['#ffc93c', 'sun'], ['#b9c6d6', 'square'], ['#9b7bff', 'moon']];
+// 配色跟整體的夜海色調一致：飽和度降一點，像透光的寶石，不用糖果色
+export const TILE = [['#4aa3d6', 'wave'], ['#45a884', 'tri'], ['#df86a6', 'flower'], ['#e3b452', 'sun'], ['#8fa3ba', 'square'], ['#8a7fd6', 'moon']];
 
 const el = document.createElement('div');
 el.id = 'battle';
@@ -167,35 +168,40 @@ function draw(L) {
   g.restore();
 }
 
-// 方塊元素；k = -1 是濁塊
+// 方塊元素；k = -1 是濁塊。毛玻璃寶石：半透明漸層、細白框、白色線條圖示
 function tile(x, y, z, k, o = {}) {
-  const h = z / 2;
+  const h = z / 2, r = z * 0.22;
+  g.globalAlpha = o.alpha ?? 1;
   if (k < 0) {
-    g.fillStyle = '#2b2440'; rr(x - h, y - h, z, z, z * 0.12); g.fill();
-    g.strokeStyle = '#8e7bb5'; g.lineWidth = 2; g.stroke();
-    g.fillStyle = 'rgba(142,123,181,.5)'; g.fillRect(x - h * 0.35, y - h * 0.35, h * 0.7, h * 0.7);
-    return;
+    g.fillStyle = 'rgba(30,22,48,.82)'; rr(x - h, y - h, z, z, r); g.fill();
+    g.strokeStyle = 'rgba(170,150,210,.55)'; g.lineWidth = 1.5; g.setLineDash([4, 4]); g.stroke(); g.setLineDash([]);
+    g.strokeStyle = 'rgba(170,150,210,.6)'; g.lineWidth = Math.max(1.5, z * 0.05); g.lineCap = 'round';
+    const q = z * 0.16; g.beginPath(); g.moveTo(x - q, y - q); g.lineTo(x + q, y + q); g.moveTo(x + q, y - q); g.lineTo(x - q, y + q); g.stroke();
+    g.globalAlpha = 1; return;
   }
   const [col, shape] = TILE[k];
-  g.globalAlpha = o.alpha ?? 1;
-  g.fillStyle = col; rr(x - h, y - h, z, z, z * 0.16); g.fill();
-  g.fillStyle = 'rgba(255,255,255,.28)'; g.fillRect(x - h + z * 0.12, y - h + z * 0.06, z * 0.76, z * 0.1);
-  g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(x - h + z * 0.12, y + h - z * 0.14, z * 0.76, z * 0.08);
-  g.fillStyle = 'rgba(255,255,255,.92)'; g.strokeStyle = 'rgba(255,255,255,.92)'; g.lineWidth = Math.max(2, z * 0.07);
+  const gr = g.createLinearGradient(x, y - h, x, y + h);
+  gr.addColorStop(0, col + 'e6'); gr.addColorStop(1, col + '8c');
+  g.fillStyle = gr; rr(x - h, y - h, z, z, r); g.fill();
+  const hl = g.createLinearGradient(x, y - h, x, y);
+  hl.addColorStop(0, 'rgba(255,255,255,.28)'); hl.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = hl; rr(x - h, y - h, z, z, r); g.fill();
+  g.strokeStyle = 'rgba(255,255,255,.4)'; g.lineWidth = 1.2; rr(x - h + 0.6, y - h + 0.6, z - 1.2, z - 1.2, r); g.stroke();
+  g.strokeStyle = 'rgba(255,255,255,.95)'; g.fillStyle = 'rgba(255,255,255,.95)'; g.lineWidth = Math.max(2, z * 0.065); g.lineCap = 'round'; g.lineJoin = 'round';
   const q = z * 0.22;
   g.beginPath();
-  if (shape === 'wave') { g.moveTo(x - q * 1.2, y + q * 0.2); g.bezierCurveTo(x - q * 0.6, y - q, x, y + q, x + q * 1.2, y - q * 0.3); g.stroke(); }
-  else if (shape === 'tri') { g.moveTo(x, y - q * 1.1); g.lineTo(x + q * 1.1, y + q * 0.8); g.lineTo(x - q * 1.1, y + q * 0.8); g.closePath(); g.fill(); }
-  else if (shape === 'flower') { for (let a = 0; a < 5; a++) { const an = a / 5 * 6.283 + 0.3; g.moveTo(x, y); g.arc(x + Math.cos(an) * q * 0.6, y + Math.sin(an) * q * 0.6, q * 0.45, 0, 6.283); } g.fill(); }
-  else if (shape === 'sun') { g.arc(x, y, q * 0.6, 0, 6.283); g.fill(); g.beginPath(); for (let a = 0; a < 8; a++) { const an = a / 8 * 6.283; g.moveTo(x + Math.cos(an) * q * 0.85, y + Math.sin(an) * q * 0.85); g.lineTo(x + Math.cos(an) * q * 1.25, y + Math.sin(an) * q * 1.25); } g.stroke(); }
-  else if (shape === 'moon') { g.arc(x, y, q, 0.6, 5.7); g.arc(x + q * 0.55, y, q * 0.75, 5.0, 1.3, true); g.closePath(); g.fill(); }
-  else { g.rect(x - q * 0.8, y - q * 0.8, q * 1.6, q * 1.6); g.fill(); }
+  if (shape === 'wave') { for (const dy of [-0.35, 0.45]) { g.moveTo(x - q * 1.2, y + q * dy); g.bezierCurveTo(x - q * 0.6, y + q * (dy - 0.7), x, y + q * (dy + 0.7), x + q * 1.2, y + q * dy); } g.stroke(); }
+  else if (shape === 'tri') { g.moveTo(x - q * 1.2, y + q * 0.8); g.lineTo(x - q * 0.2, y - q * 0.9); g.lineTo(x + q * 0.35, y); g.lineTo(x + q * 0.6, y - q * 0.4); g.lineTo(x + q * 1.2, y + q * 0.8); g.stroke(); }
+  else if (shape === 'flower') { for (let a = 0; a < 5; a++) { const an = a / 5 * 6.283 - 1.57, cx = x + Math.cos(an) * q * 0.62, cy = y + Math.sin(an) * q * 0.62; g.moveTo(cx + q * 0.42, cy); g.arc(cx, cy, q * 0.42, 0, 6.283); } g.stroke(); g.beginPath(); g.arc(x, y, q * 0.18, 0, 6.283); g.fill(); }
+  else if (shape === 'sun') { g.arc(x, y, q * 0.5, 0, 6.283); for (let a = 0; a < 8; a++) { const an = a / 8 * 6.283; g.moveTo(x + Math.cos(an) * q * 0.85, y + Math.sin(an) * q * 0.85); g.lineTo(x + Math.cos(an) * q * 1.2, y + Math.sin(an) * q * 1.2); } g.stroke(); }
+  else if (shape === 'moon') { g.arc(x, y, q, 0.75, 5.53); g.arc(x + q * 0.6, y, q * 0.78, 4.4, 1.88, true); g.closePath(); g.stroke(); }
+  else { g.moveTo(x, y - q); g.lineTo(x + q, y); g.lineTo(x, y + q); g.lineTo(x - q, y); g.closePath(); g.stroke(); }
   if (o.special) { // 流眼
     g.strokeStyle = '#7fe8ff'; g.lineWidth = 3; g.beginPath(); g.arc(x, y, h * 0.92, S.t * 3, S.t * 3 + 4.6); g.stroke();
     g.strokeStyle = 'rgba(127,232,255,.4)'; g.beginPath(); g.arc(x, y, h * 1.02, 0, 6.283); g.stroke();
   }
-  if (o.sel) { g.strokeStyle = '#ffffff'; g.lineWidth = 3; rr(x - h - 2, y - h - 2, z + 4, z + 4, z * 0.18); g.stroke(); }
-  g.globalAlpha = 1;
+  if (o.sel) { g.strokeStyle = '#ffffff'; g.lineWidth = 3; rr(x - h - 3, y - h - 3, z + 6, z + 6, r + 3); g.stroke(); }
+  g.lineCap = 'butt'; g.lineJoin = 'miter'; g.globalAlpha = 1;
 }
 function rr(x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 const lerp = (a, b, k) => a + (b - a) * k;
