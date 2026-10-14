@@ -2,7 +2,7 @@
   "source": "Wikimedia Commons（照片取自中文維基百科條目）",
   "sourceUrl": "https://commons.wikimedia.org/",
   "license": "各照片依其標示的自由授權使用（作者與授權見 images[].author / license）",
-  "fetchedAt": "2026-10-14T09:09:35.630Z",
+  "fetchedAt": "2026-10-14T09:11:07.608Z",
   "spots": {
     "leopard": {
       "src": "commons",
@@ -298,10 +298,10 @@
         },
         {
           "file": "data/photos/c-taroko-2.jpg",
-          "subject": "Taroko-Gorge Hualien Taiwan Cihmu-Bridge-at-Taroko-National-Park-01",
+          "subject": "Taroko-Gorge Hualien Taiwan Pudu-Bridge-at-Taroko-National-Park-02",
           "author": "CEphoto, Uwe Aranas",
           "license": "CC BY-SA 3.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Taroko-Gorge_Hualien_Taiwan_Cihmu-Bridge-at-Taroko-National-Park-01.jpg"
+          "page": "https://commons.wikimedia.org/wiki/File:Taroko-Gorge_Hualien_Taiwan_Pudu-Bridge-at-Taroko-National-Park-02.jpg"
         },
         {
           "file": "data/photos/c-taroko-3.jpg",
@@ -319,24 +319,24 @@
       "images": [
         {
           "file": "data/photos/c-sunmoon-1.jpg",
-          "subject": "Nantou-County Taiwan Sun-Moon-Lake-Ropeway-02",
-          "author": "CEphoto, Uwe Aranas",
-          "license": "CC BY-SA 3.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Nantou-County_Taiwan_Sun-Moon-Lake-Ropeway-02.jpg"
+          "subject": "View of Sun Moon Lake near Lalu Island",
+          "author": "Dquai",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:View_of_Sun_Moon_Lake_near_Lalu_Island.jpg"
         },
         {
           "file": "data/photos/c-sunmoon-2.jpg",
-          "subject": "Nantou-County Taiwan Sun-Moon-Lake-Ropeway-03",
-          "author": "CEphoto, Uwe Aranas",
-          "license": "CC BY-SA 3.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Nantou-County_Taiwan_Sun-Moon-Lake-Ropeway-03.jpg"
+          "subject": "View on Sun Moon Lake, Taiwan",
+          "author": "M. Weitzel",
+          "license": "CC BY 2.5",
+          "page": "https://commons.wikimedia.org/wiki/File:View_on_Sun_Moon_Lake,_Taiwan.jpg"
         },
         {
           "file": "data/photos/c-sunmoon-3.jpg",
-          "subject": "Nantou-County Taiwan Sun-Moon-Lake-Ropeway-01",
-          "author": "CEphoto, Uwe Aranas",
-          "license": "CC BY-SA 3.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Nantou-County_Taiwan_Sun-Moon-Lake-Ropeway-01.jpg"
+          "subject": "Lalu Island 2015-02-10",
+          "author": "S099001",
+          "license": "CC0",
+          "page": "https://commons.wikimedia.org/wiki/File:Lalu_Island_2015-02-10.jpg"
         }
       ]
     },
@@ -410,10 +410,10 @@
         },
         {
           "file": "data/photos/c-kenting-3.jpg",
-          "subject": "Hengchun-Township Taiwan Eluanbi-Lighthouse-01",
+          "subject": "Hengchun-Township Taiwan Eluanbi-Lighthouse-04",
           "author": "CEphoto, Uwe Aranas",
           "license": "CC BY-SA 3.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Hengchun-Township_Taiwan_Eluanbi-Lighthouse-01.jpg"
+          "page": "https://commons.wikimedia.org/wiki/File:Hengchun-Township_Taiwan_Eluanbi-Lighthouse-04.jpg"
         }
       ]
     }
