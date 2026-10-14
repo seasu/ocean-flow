@@ -214,23 +214,26 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #battle .msg p{margin:0 0 14px;font-size:13px;line-height:1.7;font-weight:500;white-space:pre-line;color:#dbe6f0}
 #battle .msg button{background:var(--gold);color:#3a2300;border-radius:10px;padding:10px 22px;font-weight:900;font-size:15px}
 /* 開場：啟程前的提醒（點一下才能讓影片有聲播放）＋加到主畫面 */
-#launch{position:fixed;inset:0;z-index:30;display:none;flex-direction:column;align-items:center;gap:18px;text-align:center;
+#launch{position:fixed;inset:0;z-index:30;display:none;flex-direction:column;align-items:center;gap:28px;text-align:center;
   padding:calc(9vh + var(--st)) calc(20px + var(--sr)) calc(28px + var(--sb)) calc(20px + var(--sl));
   background:#06101e;overflow-y:auto;isolation:isolate}
 /* 背景：漩渦主視覺放大、霧化，再蓋一層深藍讓字清楚 */
-#launch::before{content:"";position:fixed;inset:-8%;z-index:-2;background:url(icons/icon-512.png) center 38%/cover no-repeat;filter:blur(8px) saturate(1.2);transform:scale(1.08);animation:swirl 40s linear infinite}
+#launch::before{content:"";position:fixed;inset:0;z-index:-2;background:#06101e url(icons/icon-512.png) center/auto 100% no-repeat;filter:blur(6px) saturate(1.15);animation:breathe 12s ease-in-out infinite alternate}
 #launch::after{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(6,16,30,.25),rgba(6,16,30,.45) 45%,rgba(6,16,30,.82))}
-@keyframes swirl{to{transform:scale(1.08) rotate(360deg)}}
+@keyframes breathe{to{filter:blur(6px) saturate(1.35) brightness(1.1)}}
 #launch.show{display:flex}
 #launch .head{display:flex;flex-direction:column;align-items:center;gap:12px}
 #launch h2{margin:0;font-size:clamp(36px,11vw,56px);font-weight:900;letter-spacing:.14em;text-shadow:0 4px 28px rgba(6,16,30,.7)}
-#launch .tips{width:100%;max-width:24em;margin:auto 0;padding:18px 18px 16px;border-radius:20px;text-align:left;
+#launch .tips{width:100%;max-width:27em;margin:auto 0;padding:24px 18px 10px;border-radius:24px;text-align:left;
   background:rgba(10,24,46,.42);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);border:1.5px solid rgba(255,207,90,.55);box-shadow:0 10px 40px rgba(0,0,0,.35)}
-#launch .tips h3{margin:0 0 12px;font-size:18px;font-weight:900;color:var(--gold);text-align:center;letter-spacing:.06em}
-#launch .tip{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid rgba(255,255,255,.1)}
-#launch .tip>i{font-style:normal;font-size:26px;line-height:1.2;flex:none}
-#launch .tip b{display:block;font-size:16px;font-weight:900;margin-bottom:2px}
-#launch .tip p{margin:0;font-size:14px;line-height:1.65;color:#d8e6f2;font-weight:500}
+#launch .tips h3{margin:0 0 10px;font-size:22px;font-weight:900;color:var(--gold);text-align:center;letter-spacing:.08em}
+#launch .tip{display:flex;gap:14px;align-items:flex-start;padding:18px 0;border-top:1px solid rgba(255,255,255,.1)}
+#launch .tip>i{flex:none;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;
+  background:linear-gradient(145deg,rgba(127,232,255,.32),rgba(46,110,178,.22));border:1px solid rgba(127,232,255,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 14px rgba(0,0,0,.25)}
+#launch .tip>i svg{width:26px;height:26px;stroke:#e8f8ff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#launch .tip b{display:block;font-size:19px;font-weight:900;margin-bottom:6px}
+#launch .tip p{margin:0;font-size:17px;line-height:1.7;color:#eef6fc;font-weight:500}
+#launch .tip p small{display:block;margin-top:4px;font-size:14px;color:#b9cde0}
 #launch .tip p b{display:inline;font-size:inherit;color:var(--ink)}
 #launch .ico{display:inline-block;padding:0 6px;border-radius:6px;background:rgba(111,227,255,.18);color:var(--cyan)}
 #launch .install{margin-top:8px;font-size:15px;font-weight:900;padding:9px 20px;border-radius:12px;background:rgba(111,227,255,.2);color:var(--cyan)}
@@ -302,8 +305,8 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
   <div class="head"><h2 data-i18n="title">洋流：起源</h2></div>
   <div class="tips">
     <h3 data-i18n="tipsTitle">✦ 啟程前的提醒 ✦</h3>
-    <div class="tip"><i>🔊</i><div><b data-i18n="tipSoundT">把聲音打開</b><p data-i18n="tipSound">出發前先看一段介紹影片，配樂和旁白都很重要喔！</p></div></div>
-    <div class="tip a2hs" hidden><i>📲</i><div><b data-i18n="tipHomeT">加到主畫面</b><p></p><button class="install" data-i18n="a2hsInstall" hidden>📲 加到主畫面</button></div></div>
+    <div class="tip"><i><svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></i><div><b data-i18n="tipSoundT">把聲音打開</b><p data-i18n="tipSound">出發前先看一段介紹影片，配樂和旁白都很重要喔！</p></div></div>
+    <div class="tip a2hs" hidden><i><svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M12 8.5v6M9 11.5h6"/><path d="M10.5 18.5h3"/></svg></i><div><b data-i18n="tipHomeT">加到主畫面</b><p></p><button class="install" data-i18n="a2hsInstall" hidden>📲 加到主畫面</button></div></div>
   </div>
   <div class="foot"><button class="start go" data-i18n="launchGo">啟程</button><div class="langs"></div></div>
 </div>
