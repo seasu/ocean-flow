@@ -167,16 +167,115 @@ document.addEventListener('gesturestart', e => e.preventDefault());
 
 // ---------- HUD ----------
 const pop = (text, kind = '') => { const el = $('#pop'); el.textContent = text; el.className = 'show ' + kind; clearTimeout(pop.t); pop.t = setTimeout(() => el.className = '', 2600); };
+// ---------- 路線導引：點任務的「帶我去」，用左右前後告訴你怎麼走（不講東南西北） ----------
+const REL = t('rel');
+const relWord = deg => REL[((Math.round(deg / 45) % 8) + 8) % 8];
+// 島上：以鏡頭朝向為前方；回傳 [方向詞, 步數, 角度（右為正）]
+function islandRel(pos) {
+  const dx = pos[0] - P.x, dz = pos[2] - P.z, s = Math.sin(cam.yaw), c = Math.cos(cam.yaw);
+  const deg = Math.atan2(-dx * c + dz * s, dx * s + dz * c) * 180 / Math.PI;
+  return [relWord(deg), Math.round(Math.hypot(dx, dz)), deg];
+}
+// 現地：手機指南針；沒有指南針時用最近走的方向當前方
+let heading = null, course = null, courseFrom = null, compassAsked = false;
+function onOrient(e) {
+  let h = e.webkitCompassHeading ?? (e.absolute && e.alpha != null ? 360 - e.alpha : null);
+  if (h == null) return;
+  heading = (h + (screen.orientation?.angle || 0)) % 360;
+}
+function askCompass() {
+  if (compassAsked) return; compassAsked = true;
+  const go = () => { addEventListener('deviceorientationabsolute', onOrient); addEventListener('deviceorientation', onOrient); };
+  try {
+    if (window.DeviceOrientationEvent?.requestPermission) DeviceOrientationEvent.requestPermission().then(r => { if (r === 'granted') go(); }).catch(() => { });
+    else go();
+  } catch { }
+}
+geo.on(p => {
+  if (!courseFrom) { courseFrom = { ...p }; return; }
+  if (meters(courseFrom, p) >= 8) { const [x, y] = offset(courseFrom, p); course = (Math.atan2(x, y) * 180 / Math.PI + 360) % 360; courseFrom = { ...p }; }
+});
+// 有指南針（或已經走出方向）就說左右前後，否則才退回東南西北
+function dirFor(s) {
+  const h = heading ?? course; if (h == null) return dirName(geo.pos, s);
+  const [x, y] = offset(geo.pos, s); return relWord(((Math.atan2(x, y) * 180 / Math.PI - h + 540) % 360) - 180);
+}
+let guideOn = false;
+const guideEl = $('#guide'), guideArrow = guideEl.querySelector('i'), guideText = guideEl.querySelector('p'), guideMap = guideEl.querySelector('a');
+function guideTarget() {
+  const n = nextGate();
+  if (G.geo) { const s = n ? REAL.find(r => r.node === n.id) : REAL.find(r => r.id === 'venue'); return { name: n ? `${n.icon} ${s.name}` : '⛩ ' + s.name, s }; }
+  return n ? { name: `${n.icon} ${n.name}`, pos: n.pos } : { name: '⛩ ' + t('gateName'), pos: GATE };
+}
+function updateGuide() {
+  if (!guideOn) return;
+  const g = guideTarget(); let deg = 0, text;
+  if (G.geo) {
+    const d = meters(geo.pos, g.s), [x, y] = offset(geo.pos, g.s), bearing = Math.atan2(x, y) * 180 / Math.PI, h = heading ?? course;
+    guideMap.href = `https://www.google.com/maps/dir/?api=1&destination=${g.s.lat},${g.s.lng}&travelmode=walking`;
+    if (d <= g.s.r) text = t('guideHere', { name: g.name });
+    else if (h == null) text = t('guideWalk', { name: g.name, d: fmt(d) });
+    else { deg = ((bearing - h + 540) % 360) - 180; text = t('guideGeo', { name: g.name, rel: relWord(deg), d: fmt(d) }); }
+    guideEl.classList.toggle('nodir', h == null && d > g.s.r);
+  } else {
+    const [rel, n, a] = islandRel(g.pos); deg = a;
+    text = n < 3 ? t('guideHereIsland', { name: g.name }) : t('guideIsland', { name: g.name, rel, n });
+  }
+  guideArrow.style.transform = `rotate(${deg.toFixed(0)}deg)`;
+  if (guideText.textContent !== text) guideText.textContent = text;
+}
+function openGuide() { guideOn = true; guideEl.classList.add('show'); guideEl.classList.toggle('geo', !!G.geo); if (G.geo) { askCompass(); geo.start(); } updateGuide(); sfx.sense(); }
+$('#guideBtn').addEventListener('click', e => { e.stopPropagation(); openGuide(); });
+guideEl.querySelector('.x').addEventListener('click', () => { guideOn = false; guideEl.classList.remove('show'); });
+
+// ---------- 走路修行：走的路轉成修為，修為滿了到機緣點突破境界 ----------
+// 現地模式算真實走的公尺數（模擬定位也算），島上算角色走的步數；每升一境，淨化之戰多一步
+const REALMS = t('realms'), NEED = [150, 200, 250, 300];
+G.realm = 0; G.xiu = 0; G.walked = 0;
+const xiuFull = () => G.realm < NEED.length && G.xiu >= NEED[G.realm];
+function gainXiu(m) {
+  G.walked += m;
+  if (G.realm >= NEED.length || xiuFull()) return;
+  G.xiu = Math.min(NEED[G.realm], G.xiu + m);
+  if (xiuFull()) { toast(t('xiuFull')); sfx.sense(); }
+}
+function breakthrough() {
+  if (!xiuFull()) return;
+  G.realm++; G.xiu = 0;
+  setTimeout(() => {
+    pop(t('breakthrough', { realm: REALMS[G.realm] }), 'gold'); sfx.purify();
+    burst(P.x, P.y + 1.2, P.z, [1, 0.9, 0.5], 60, 7);
+    try { navigator.vibrate && navigator.vibrate([30, 40, 30, 40, 90]); } catch { }
+  }, 300);
+}
+function xiuLine() {
+  if (G.realm >= NEED.length) return t('xiuMax', { realm: REALMS[G.realm] });
+  if (xiuFull()) return t('xiuReady');
+  return t(G.geo ? 'xiuLeftGeo' : 'xiuLeftIsland', { n: Math.ceil(NEED[G.realm] - G.xiu), next: REALMS[G.realm + 1] });
+}
+let anchor = null;
+geo.on(p => {
+  if (!G.geo || G.state === 'title') return;
+  const acc = geo.sim ? 0 : (geo.acc || 50), now = performance.now();
+  if (acc > 40) return;   // 定位太飄就不算
+  if (!anchor) { anchor = { ...p, ts: now }; return; }
+  const d = meters(anchor, p);
+  if (d < Math.max(4, acc * 0.5)) return;
+  // 真實定位時速度超過每秒 3.5 公尺（騎車、搭車）不算修為
+  if (geo.sim || d / ((now - anchor.ts) / 1000) < 3.5) gainXiu(d);
+  anchor = { ...p, ts: now };
+});
+
 const toast = text => { const el = $('#toast'); el.textContent = text; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); };
 const avail = () => G.collected + (G.bonus || 0) - G.spent;
 let hudKey = '';
 function hud() {
-  const lv = 1 + Math.floor(G.collected / 5);
   const found = SPOTS.filter(sp => sp.found).length;
-  const key = [visited.size, G.geo, G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, lv, found].join();
+  const key = [visited.size, G.geo, G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, G.realm, Math.ceil(G.xiu), found].join();
   if (key !== hudKey) {
     hudKey = key;
-    $('#lv').textContent = 'Lv.' + lv;
+    $('#lv').textContent = REALMS[G.realm];
+    $('#xbar').style.width = (G.realm >= NEED.length ? 100 : G.xiu / NEED[G.realm] * 100) + '%'; $('#xbar').parentNode.classList.toggle('full', xiuFull());
     $('#dexBtn').textContent = t('dexBtn', { n: found, m: SPOTS.length });
     $('#dexList').innerHTML = `<li class="sec">${t('secMountain')}</li>`
       + S1.map(n => n.awake ? `<li><b>${n.icon} ${n.name}${t('sep')}${n.hill}</b><small>${n.seal}${t('sep')}${n.virtue}</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`).join('')
@@ -189,7 +288,7 @@ function hud() {
       $('#qtitle').textContent = t('questTitle', { n: G.awakened });
       $('#qchips').innerHTML = S1.map(n => `<span class="${n.awake ? 'done' : ''}">${n.icon}${n.awake ? '✓' : ''}</span>`).join('');
       $('#qlist').innerHTML = S1.map(n => `<li class="${n.awake ? 'done' : n === nextGate() ? '' : 'wait'}"><span>${n.awake ? '✓' : n.icon}</span>${n.seal}${t('sep')}${n.name}<small>${n.awake ? n.virtue : n !== nextGate() ? t('waitPrev') : G.geo ? t('questGeo', { place: placeOf(n), hill: n.hill }) : n.hint + t('sep') + n.hill}</small></li>`).join('')
-        + `<li class="note">${t('questNote', { cost: COST })}</li>`;
+        + `<li class="note">${t('questNote', { cost: COST })}</li><li class="note">${xiuLine()}</li>`;
     } else {
       $('#qtitle').textContent = t('questDone');
       $('#qchips').innerHTML = '<span class="done">⛩</span>';
@@ -305,7 +404,7 @@ function start(mode) {
   if (G.geo) geo.start();
   say(G.geo ? GEO_LINES : LINES, () => {
     G.state = 'play'; $('#hud').classList.add('play'); XI.wave = false;
-    pop(t('firstSeal'), 'gold');
+    pop(t('firstSeal'), 'gold'); setTimeout(() => toast(t('xiuIntro')), 2600);
     if (G.geo) openRadar();
   });
   try { if (matchMedia('(pointer: coarse)').matches && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => { }); } catch { }
@@ -321,9 +420,21 @@ function closeFilm() {
   video.pause(); film.classList.remove('show', 'muted');
   try { localStorage.setItem(FILM_KEY, '1'); } catch { }
 }
+// 手機直拿播直式（9:16），橫拿或電腦播橫式；播放中轉向就換檔、接著同一秒播
+const tall = matchMedia('(orientation: portrait)');
+function filmSrc() {
+  const v = tall.matches ? 'video/intro-portrait' : 'video/intro';
+  if (video.dataset.v === v) return false;
+  video.dataset.v = v; video.poster = v + '-poster.jpg'; video.src = v + '.mp4'; return true;
+}
+tall.addEventListener('change', () => {
+  if (!film.classList.contains('show')) return;
+  const at = video.currentTime, playing = !video.paused;
+  if (filmSrc()) video.addEventListener('loadedmetadata', () => { video.currentTime = at; if (playing) video.play().catch(() => { }); }, { once: true });
+});
 function openFilm() {
   film.classList.add('show'); film.classList.remove('muted');
-  video.muted = false; video.currentTime = 0;
+  filmSrc(); video.muted = false; video.currentTime = 0;
   // 瀏覽器常擋有聲自動播放：擋了就先靜音播放，顯示「點一下開聲音」
   video.play().catch(() => { video.muted = true; film.classList.add('muted'); video.play().catch(() => { video.controls = true; }); });
 }
@@ -341,9 +452,8 @@ function doSense() {
   if (G.state !== 'play' || G.senseCd > 0) return;
   G.sense = 6; G.senseCd = 9; G.pulse = [P.x, P.z, 0, 1]; sfx.sense();
   const target = nextGate() || { name: t('gateName'), pos: GATE };
-  const dx = target.pos[0] - P.x, dz = target.pos[2] - P.z;
-  const ang = Math.atan2(dx, -dz), dir = DIRS[(Math.round(ang / (Math.PI / 4)) + 8) % 8];
-  toast(t('senseToast', { name: target.name, dir, n: Math.round(Math.hypot(dx, dz)) }));
+  const [rel, n] = islandRel(target.pos);
+  toast(t('senseToast', { name: target.name, rel, n }));
 }
 
 function burst(x, y, z, col, n = 40, sp = 6) {
@@ -367,10 +477,11 @@ function buildVein(n) {
 function fight(n, then) {
   if (params.has('nobattle')) return then();
   G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show');
-  battle(n).then(() => { G.state = 'play'; $('#hud').classList.add('play', 'on'); then(); });
+  battle(n, G.realm, REALMS[G.realm]).then(() => { G.state = 'play'; $('#hud').classList.add('play', 'on'); then(); });
 }
 
 function awaken(n) {
+  breakthrough();
   n.awake = true; n.flash = 1; G.spent += COST; G.awakened++;
   sfx.bell(n.bell || 196);
   pop(t('gateOpened', { seal: n.seal, icon: n.icon, name: n.name }), 'gold');
@@ -454,14 +565,14 @@ function updatePlayer(dt) {
 }
 
 function updateGame(dt) {
+  if (!G.geo) gainXiu(Math.hypot(P.vx, P.vz) * dt * 2);   // 走路修行：島上半單位算一步
   // 靈光
   for (const m of motes) {
     if (m.taken) continue;
     if (Math.hypot(m.x - P.x, m.z - P.z) < 1.4 && Math.abs(P.y + 0.9 - m.y) < 2) {
       m.taken = true; G.collected++; sfx.pick();
       burst(m.x, m.y, m.z, [0.6, 0.95, 1], 16, 3);
-      if (G.collected % 5 === 0) pop(t('levelUp', { lv: 1 + G.collected / 5 }), 'gold');
-      else toast(t('plusOne', { n: avail() }));
+      toast(t('plusOne', { n: avail() }));
     }
   }
   // 靈脈節點
@@ -499,6 +610,7 @@ function updateGame(dt) {
 }
 
 function discover(sp) {
+  breakthrough();
   sp.found = true; G.bonus = (G.bonus || 0) + 1; sfx.pick(); setTimeout(() => sfx.pick(), 120);
   showCard(sp.name, sp.area, sp.text, t('discovered', { n: SPOTS.filter(s => s.found).length, m: SPOTS.length }), sp.id);
 }
@@ -545,7 +657,7 @@ function renderList() {
     const done = visited.has(s.id), node = s.node ? NODES.find(n => n.id === s.node) : null;
     const tag = s.id === 'venue' ? (G.gateOpen ? t('canOpen') : t('startEnd')) : node ? (node.awake ? t('opened', { icon: node.icon, name: node.name }) : node === nextGate() ? `${node.seal}${t('sep')}${node.icon} ${node.name}` : node.seal + t('sep') + node.name) : done ? t('bound') : t('chance');
     return `<li data-id="${s.id}" class="${done ? 'done' : ''} ${d <= s.r ? 'near' : ''} ${node ? 'key' : ''}"><div><b>${s.name}</b><small>${s.sub}</small></div>`
-      + `<span><em>${tag}</em>${t('distDir', { d: fmt(d), dir: dirName(geo.pos, s) })}</span>`
+      + `<span><em>${tag}</em>${t('distDir', { d: fmt(d), dir: dirFor(s) })}</span>`
       + (calib ? `<button data-cal="${s.id}">${t('setHere')}</button>` : '') + `</li>`;
   }).join('');
   if (calib) $('#calOut').textContent = JSON.stringify(Object.fromEntries(REAL.map(s => [s.id, [+s.lat.toFixed(6), +s.lng.toFixed(6)]])));
@@ -555,7 +667,7 @@ $('#rlist').addEventListener('click', e => {
   if (cal) { const s = REAL.find(x => x.id === cal.dataset.cal), p = geo.real || geo.pos; s.lat = p.lat; s.lng = p.lng; saveSpot(s); renderList(); toast(t('setDone', { name: s.name })); return; }
   const li = e.target.closest('li'); if (!li) return;
   const s = REAL.find(x => x.id === li.dataset.id);
-  if (geo.sim) geo.walkTo(s); else toast(t('walkThere', { name: s.name, dir: dirName(geo.pos, s), d: fmt(meters(geo.pos, s)) }));
+  if (geo.sim) geo.walkTo(s); else toast(t('walkThere', { name: s.name, dir: dirFor(s), d: fmt(meters(geo.pos, s)) }));
 });
 rcv.addEventListener('click', e => {
   if (!geo.sim) return;
@@ -615,7 +727,7 @@ function drawRadar() {
 }
 
 function encounter(s) {
-  closeRadar();
+  closeRadar(); breakthrough();
   if (s.id === 'venue') {
     const left = S1.filter(n => !n.awake).map(n => `${n.name} (${placeOf(n)})`);
     if (G.gateOpen) {
@@ -663,7 +775,8 @@ $('#dex').addEventListener('pointerdown', e => { e.preventDefault(); $('#dex').c
 function ending() {
   G.state = 'ending'; G.spiritTarget = 1; setSpirit(1); sfx.gate(); sfx.ending();
   const s = Math.round(G.playT), mm = String(Math.floor(s / 60)).padStart(2, '0'), ss = String(s % 60).padStart(2, '0');
-  $('#stats').textContent = t('stats', { time: `${mm}:${ss}`, qi: G.collected, qim: motes.length, b: SPOTS.filter(s => s.found).length, bm: SPOTS.length });
+  $('#stats').textContent = t('stats', { time: `${mm}:${ss}`, qi: G.collected, qim: motes.length, b: SPOTS.filter(s => s.found).length, bm: SPOTS.length })
+    + '\n' + t('statsWalk', { realm: REALMS[G.realm], d: G.geo ? fmt(G.walked) : t('stepsN', { n: Math.round(G.walked) }) });
   setTimeout(() => $('#ending').classList.add('show'), 600);
   $('#hud').classList.remove('play');
 }
@@ -798,7 +911,7 @@ function loop(now) {
   for (const p of G.particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; p.vy -= 6 * dt; p.vx *= 0.98; p.vz *= 0.98; p.life -= dt; }
   G.particles = G.particles.filter(p => p.life > 0);
   frame(dt);
-  if (G.state !== 'title') { hud(); drawMini(); }
+  if (G.state !== 'title') { hud(); drawMini(); updateGuide(); }
   if (radarOpen) drawRadar();
   requestAnimationFrame(loop);
 }
@@ -814,4 +927,4 @@ if (params.has('play') || params.has('at') || params.has('awake') || params.has(
   if (params.has('yaw')) cam.yaw = +params.get('yaw');
   if (params.has('pitch')) cam.pitch = +params.get('pitch');
 }
-window.__game = { fight, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
+window.__game = { openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
