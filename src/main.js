@@ -187,19 +187,19 @@ const syncSound = () => soundT.setAttribute('aria-checked', String(!muted));
 syncSound();
 for (const b of document.querySelectorAll('#menuBtn, #title .more')) b.addEventListener('click', e => { e.stopPropagation(); syncSound(); settings.hidden = false; });
 soundT.addEventListener('click', () => { setMuted(!muted); syncSound(); });
-settings.addEventListener('click', e => { if (e.target === settings || e.target.closest('.close')) settings.hidden = true; });
+settings.addEventListener('click', e => { if (e.target.closest('.xbtn')) settings.hidden = true; });
 $('#loreBtn').addEventListener('click', () => { settings.hidden = true; openLore(); });
 $('#realmBtn').addEventListener('click', () => { settings.hidden = true; openRealms({ realms: REALMS, need: NEED, now: G.state === 'title' ? -1 : G.realm, geo: G.geo }); });
 // 個人資訊：點左上角頭像，滿版顯示走了多少步、境界與收集進度
 const meEl = $('#me');
 $('#meBtn').addEventListener('click', e => { e.stopPropagation(); hudKey = ''; hud(); meEl.hidden = false; });
-meEl.addEventListener('click', e => { if (e.target === meEl || e.target.closest('.close')) meEl.hidden = true; });
+meEl.addEventListener('click', e => { if (e.target.closest('.xbtn')) meEl.hidden = true; });
 // 小地圖：點地圖 icon 才展開，8 秒後自動收起
 let miniT = 0;
 $('#mapBtn').addEventListener('click', e => {
   e.stopPropagation(); const on = !$('#mini').classList.contains('show');
   $('#mini').classList.toggle('show', on); $('#mapBtn').classList.toggle('on', on);
-  clearTimeout(miniT); if (on) miniT = setTimeout(() => { $('#mini').classList.remove('show'); $('#mapBtn').classList.remove('on'); }, 8000);
+  if (on) showMini(); else { clearTimeout(miniT); }
 });
 addEventListener('keydown', e => { input.keys[e.code] = true; if (e.code === 'Space') input.jump = true; if (e.code === 'KeyE' || e.code === 'KeyQ') doSense(); if ((e.code === 'Enter' || e.code === 'Space') && talk) nextLine(); });
 addEventListener('keyup', e => { input.keys[e.code] = false; if (e.code === 'Space') input.jump = false; });
@@ -241,32 +241,40 @@ function dirFor(s) {
   const [x, y] = offset(geo.pos, s); return relWord(((Math.atan2(x, y) * 180 / Math.PI - h + 540) % 360) - 180);
 }
 let guideOn = false;
-const guideEl = $('#guide'), guideArrow = guideEl.querySelector('i'), guideText = guideEl.querySelector('p'), guideMap = guideEl.querySelector('a');
+const guideEl = $('#guide'), guideArrow = guideEl.querySelector('i'), guideText = guideEl.querySelector('p');
+// 「帶我去」：直接打開雷達（島上是小地圖）標出目的地；遊戲畫面只留一顆小方向箭頭＋距離
 function guideTarget() {
   const n = nextGate();
-  if (G.geo) { const s = n ? REAL.find(r => r.node === n.id) : REAL.find(r => r.id === 'venue'); return { name: n ? `${n.icon} ${s.name}` : '⛩ ' + s.name, s }; }
-  return n ? { name: `${n.icon} ${n.name}`, pos: n.pos } : { name: '⛩ ' + t('gateName'), pos: GATE };
+  if (G.geo) { const s = radarTarget(); return s && { name: s.name, s }; }
+  return n ? { name: n.name, pos: n.pos } : { name: t('gateName'), pos: GATE };
 }
 function updateGuide() {
   if (!guideOn) return;
-  const g = guideTarget(); let deg = 0, text;
+  const g = guideTarget(); if (!g) return;
+  let deg = 0, text, nodir = false;
   if (G.geo) {
-    const d = meters(geo.pos, g.s), [x, y] = offset(geo.pos, g.s), bearing = Math.atan2(x, y) * 180 / Math.PI, h = heading ?? course;
-    guideMap.href = `https://www.google.com/maps/dir/?api=1&destination=${g.s.lat},${g.s.lng}&travelmode=walking`;
-    if (d <= g.s.r) text = t('guideHere', { name: g.name });
-    else if (h == null) text = t('guideWalk', { name: g.name, d: fmt(d) });
-    else { deg = ((bearing - h + 540) % 360) - 180; text = t('guideGeo', { name: g.name, rel: relWord(deg), d: fmt(d) }); }
-    guideEl.classList.toggle('nodir', h == null && d > g.s.r);
+    const d = meters(geo.pos, g.s), [x, y] = offset(geo.pos, g.s), h = heading ?? course;
+    if (d <= g.s.r) text = t('guideArrived');
+    else { text = fmt(d); nodir = h == null; if (!nodir) deg = ((Math.atan2(x, y) * 180 / Math.PI - h + 540) % 360) - 180; }
   } else {
-    const [rel, n, a] = islandRel(g.pos); deg = a;
-    text = n < 3 ? t('guideHereIsland', { name: g.name }) : t('guideIsland', { name: g.name, rel, n });
+    const [, n, a] = islandRel(g.pos); deg = a;
+    text = n < 3 ? t('guideArrived') : t('guideSteps', { n });
   }
+  guideEl.classList.toggle('nodir', nodir);
   guideArrow.style.transform = `rotate(${deg.toFixed(0)}deg)`;
   if (guideText.textContent !== text) guideText.textContent = text;
 }
-function openGuide() { guideOn = true; guideEl.classList.add('show'); guideEl.classList.toggle('geo', !!G.geo); if (G.geo) { askCompass(); geo.start(); } updateGuide(); sfx.sense(); }
+function showMini(ms = 8000) {
+  $('#mini').classList.add('show'); $('#mapBtn').classList.add('on');
+  clearTimeout(miniT); miniT = setTimeout(() => { $('#mini').classList.remove('show'); $('#mapBtn').classList.remove('on'); }, ms);
+}
+function openGuide() {
+  guideOn = true; guideEl.classList.add('show'); sfx.sense();
+  if (G.geo) { askCompass(); openRadar(); } else showMini();
+  updateGuide();
+}
 $('#guideBtn').addEventListener('click', e => { e.stopPropagation(); openGuide(); });
-guideEl.querySelector('.x').addEventListener('click', () => { guideOn = false; guideEl.classList.remove('show'); });
+guideEl.addEventListener('click', e => { if (e.target.closest('.x')) { guideOn = false; guideEl.classList.remove('show'); return; } e.stopPropagation(); G.geo ? openRadar() : showMini(); });
 
 // ---------- 走路修行：走的路轉成修為，修為滿了到機緣點突破境界 ----------
 // 現地模式算真實走的公尺數（模擬定位也算），島上算角色走的步數；每升一境，淨化之戰多一步
@@ -306,6 +314,15 @@ geo.on(p => {
   anchor = { ...p, ts: now };
 });
 
+// 下一步卡可收合；收起時目標換了就自動展開 5 秒再收回，重要的事不會錯過
+const questEl = $('#quest');
+let questFold = false, peekT = 0;
+try { questFold = localStorage.getItem('of-quest-fold') === '1'; } catch { }
+const setFold = on => { questFold = on; clearTimeout(peekT); questEl.classList.toggle('fold', on); if (on) questEl.classList.add('min'); try { localStorage.setItem('of-quest-fold', on ? '1' : '0'); } catch { } };
+function peekQuest() { if (!questFold) return; questEl.classList.remove('fold'); clearTimeout(peekT); peekT = setTimeout(() => questFold && questEl.classList.add('fold'), 5000); }
+questEl.classList.toggle('fold', questFold);
+$('#qFold').addEventListener('click', e => { e.stopPropagation(); setFold(!questEl.classList.contains('fold') ? true : false); });
+questEl.addEventListener('click', e => { if (questEl.classList.contains('fold')) { e.stopPropagation(); setFold(false); } });
 const toast = text => { const el = $('#toast'); el.textContent = text; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); };
 const avail = () => G.collected + (G.bonus || 0) - G.spent;
 let hudKey = '';
@@ -322,7 +339,7 @@ function hud() {
     $('#meXiu').textContent = xiuLine();
     $('#meGrid').innerHTML = [[t('meSeals'), `${G.awakened}/${S1.length + S2.length}`], [t('meQi'), avail()], [t('beauty'), `${found}/${SPOTS.length}`], [t('meChances'), visited.size]]
       .map(([k, v]) => `<li><small>${k}</small><b>${v}</b></li>`).join('');
-    $('#dexBtn').textContent = t('dexBtn', { n: found, m: SPOTS.length });
+    $('#dexN').textContent = found; $('#dexSub').textContent = t('dexSub', { n: found, m: SPOTS.length });
     $('#dexList').innerHTML = `<li class="sec">${t('secMountain')}</li>`
       + S1.map(n => n.awake ? `<li><b>${n.icon} ${n.name}${t('sep')}${n.hill}</b><small>${n.seal}${t('sep')}${n.virtue}</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`).join('')
       + (stage1Done() ? `<li class="sec">${t('secFlows')}</li>` + S2.map(n => n.awake ? `<li><b>${n.icon} ${n.name}${t('sep')}${n.hill}</b><small>${n.seal}${t('sep')}${n.virtue}</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`).join('') : '')
@@ -353,7 +370,8 @@ function hud() {
       title = t('questDone'); sub = G.geo ? t('gateWaits') : t('xiWaits');
       $('#qlist').innerHTML = (G.geo ? `<li><span>⛩</span>${t('backVenue')}<small>${t('gateWaits')}</small></li>` : '') + `<li><span>⛩</span>${t('islandGate')}<small>${t('xiWaits')}</small></li>`;
     }
-    $('#qhead').textContent = head; $('#qtitle').textContent = title; $('#qsub').textContent = sub;
+    $('#qhead').textContent = head; $('#qsub').textContent = sub;
+    if ($('#qtitle').textContent !== title) { $('#qtitle').textContent = title; peekQuest(); }
     $('#quest .qi').style.display = G.gateOpen ? 'none' : '';
   }
   const sb = $('#btnSense');
@@ -380,6 +398,11 @@ function drawMini() {
   const dot = (x, z, col, rad) => { mg.fillStyle = col; mg.beginPath(); mg.arc(x * k, z * k, rad * k, 0, 7); mg.fill(); };
   for (const n of NODES) dot(n.pos[0], n.pos[2], n.awake ? '#ffcf5a' : n.stage === 2 && !stage1Done() ? 'rgba(150,165,180,.7)' : `rgba(255,190,110,${0.6 + 0.4 * Math.sin(G.t * 4)})`, n.stage === 2 ? 2.2 : 3.2);
   dot(GATE[0], GATE[2], G.gateOpen ? '#ffcf5a' : '#b9483c', 3.2);
+  if (guideOn && !G.geo) { // 「帶我去」的目的地：金色脈動圈＋虛線
+    const g = guideTarget(), x = g.pos[0] * k, z = g.pos[2] * k;
+    mg.setLineDash([3 * k, 3 * k]); mg.strokeStyle = 'rgba(255,207,90,.85)'; mg.lineWidth = k; mg.beginPath(); mg.moveTo(P.x * k, P.z * k); mg.lineTo(x, z); mg.stroke(); mg.setLineDash([]);
+    mg.lineWidth = 1.4 * k; mg.beginPath(); mg.arc(x, z, (6 + 2 * Math.sin(G.t * 4)) * k, 0, 7); mg.stroke();
+  }
   for (const sp of SPOTS) if (sp.r) { mg.strokeStyle = '#fff'; mg.lineWidth = k * 0.8; mg.beginPath(); mg.arc((sp.pos[0] + 0.5) * k, (sp.pos[1] + 0.5) * k, 2 * k, 0, 7); sp.found ? (mg.fillStyle = '#fff', mg.fill()) : mg.stroke(); }
   mg.save(); mg.translate(P.x * k, P.z * k); mg.rotate(-P.yaw);
   mg.fillStyle = '#fff'; mg.strokeStyle = '#123'; mg.lineWidth = k; mg.beginPath();
@@ -721,23 +744,38 @@ function discover(sp) {
 let TT = null;
 fetch('data/taipei-travel.json').then(r => r.ok ? r.json() : null).then(j => { TT = j; }).catch(() => { });
 const clip = (t, n) => t.length > n ? t.slice(0, n).replace(/\s+$/, '') + '…' : t;
+let spotData = null;
 function showCard(title, sub, text, em, key) {
-  // 低調的小卡：預設只顯示一行，點開才看介紹與照片；沒點開就自己淡出
+  // 地標標籤：一行名字＋地區，點了才開滿版介紹；沒點就自己淡出
   const c = $('#card'), d = key && TT?.spots?.[key];
-  c.querySelector('b').textContent = '📍 ' + title; c.querySelector('small').textContent = sub; c.querySelector('em').textContent = em;
+  spotData = { title, sub, text, em, d };
+  c.querySelector('b').textContent = title; c.querySelector('small').textContent = sub;
+  c.classList.add('show');
+  clearTimeout(showCard.t); showCard.t = setTimeout(() => c.classList.remove('show'), 12000);
+}
+const spotEl = $('#spot'), spotPh = spotEl.querySelector('.ph'), spotDots = spotEl.querySelector('.dots');
+function openSpot() {
+  if (!spotData) return;
+  const { title, sub, text, em, d } = spotData;
+  $('#card').classList.remove('show');
+  spotEl.querySelector('header b').textContent = title; spotEl.querySelector('header small').textContent = sub;
+  spotEl.querySelector('em').textContent = em;
   const intro = lang === 'zh' ? d?.introduction : d?.i18n?.[lang]?.introduction;
-  c.querySelector('p').textContent = intro ? clip(intro.replace(/\s*\n\s*/g, lang === 'en' ? ' ' : ''), lang === 'en' ? 200 : 90) : text;
-  const ph = c.querySelector('.ph'), cr = c.querySelector('.cr');
-  ph.replaceChildren(...(d?.images || []).map(im => { const i = document.createElement('img'); i.src = im.file; i.alt = im.subject || d.name; i.loading = 'lazy'; i.onerror = () => i.remove(); return i; }));
-  cr.replaceChildren();
+  spotEl.querySelector('p').textContent = intro ? intro.replace(/\r/g, '').replace(/\n\s*\n+/g, '\n\n').trim() : text;
+  const imgs = d?.images || [];
+  spotPh.replaceChildren(...imgs.map(im => { const i = document.createElement('img'); i.src = im.file; i.alt = im.subject || d.name; i.onerror = () => i.remove(); return i; }));
+  spotDots.innerHTML = imgs.length > 1 ? imgs.map((_, k) => `<i class="${k ? '' : 'on'}"></i>`).join('') : '';
+  spotPh.scrollLeft = 0;
+  const cr = spotEl.querySelector('.cr'); cr.replaceChildren();
   if (d) {
     const dl = (lang !== 'zh' && d.i18n?.[lang]) || d;
     const a = document.createElement('a'); a.href = dl.url || d.url || TT.sourceUrl; a.target = '_blank'; a.rel = 'noopener';
     a.textContent = t('creditLink', { name: dl.name || d.name }); cr.append(t('creditPre'), a, t('creditPost'));
   }
-  c.classList.remove('open'); c.querySelector('i').textContent = t('more'); c.classList.add('show');
-  clearTimeout(showCard.t); showCard.t = setTimeout(() => { if (!c.classList.contains('open')) c.classList.remove('show'); }, 12000);
+  spotEl.hidden = false; spotEl.scrollTop = 0;
 }
+spotPh.addEventListener('scroll', () => { const k = Math.round(spotPh.scrollLeft / spotPh.clientWidth); spotDots.querySelectorAll('i').forEach((el, n) => el.classList.toggle('on', n === k)); }, { passive: true });
+spotEl.querySelector('.xbtn').addEventListener('click', () => { spotEl.hidden = true; });
 
 // ---------- 現世雷達：真實地點觸發機緣事件 ----------
 const visited = new Set();
@@ -859,7 +897,7 @@ function drawRadar() {
   if (geo.acc && geo.acc < 300) { g.fillStyle = 'rgba(88,176,234,.18)'; g.beginPath(); g.arc(c, c, geo.acc * sc, 0, 7); g.fill(); }
   g.fillStyle = '#58b0ea'; g.strokeStyle = '#fff'; g.lineWidth = 2 * d; g.beginPath(); g.arc(c, c, 7 * d, 0, 7); g.fill(); g.stroke();
   g.restore();
-  const rt = $('#rtarget'), html = tg ? `${t('rTarget', { name: tg.name })}<small>${t('distDir', { d: fmt(td), dir: dirFor(tg) })}</small>` : '';
+  const rt = $('#rtarget'), html = tg ? `${t('rTarget', { name: tg.name })}<small>${t('distDir', { d: fmt(td), dir: dirFor(tg) })}</small><a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${tg.lat},${tg.lng}&travelmode=walking">${t('maps')}</a>` : '';
   if (rt.innerHTML !== html) rt.innerHTML = html;
   // 狀態列與機緣按鈕
   $('#gstat').textContent = geo.sim ? t('simStat', { err: geo.error ? t('sep') + geo.error : '' }) : t('gpsStat', { n: Math.round(geo.acc || 0) });
@@ -914,15 +952,9 @@ function encounter(s) {
     showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('chanceBonus', { n: visited.size }), s.id);
   }
 }
-$('#card').addEventListener('pointerdown', e => {
-  if (e.target.closest('a, .ph')) return;
-  e.preventDefault(); e.stopPropagation();
-  const c = e.currentTarget;
-  if (c.classList.toggle('open')) c.querySelector('i').textContent = t('less');
-  else { c.classList.remove('show'); }
-});
+$('#card').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); openSpot(); });
 $('#dexBtn').addEventListener('pointerdown', e => { e.preventDefault(); $('#card').classList.remove('show'); $('#dex').classList.toggle('show'); });
-$('#dex').addEventListener('pointerdown', e => { e.preventDefault(); $('#dex').classList.remove('show'); });
+$('#dexClose').addEventListener('click', () => $('#dex').classList.remove('show'));
 
 function ending() {
   G.state = 'ending'; G.spiritTarget = 1; setSpirit(1); sfx.gate(); sfx.ending();
@@ -1081,4 +1113,4 @@ if (params.has('play') || params.has('at') || params.has('awake') || params.has(
   if (params.has('yaw')) cam.yaw = +params.get('yaw');
   if (params.has('pitch')) cam.pitch = +params.get('pitch');
 }
-window.__game = { openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
+window.__game = { showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
