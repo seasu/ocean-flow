@@ -1,0 +1,421 @@
+{
+  "source": "Wikimedia Commons（照片取自中文維基百科條目）",
+  "sourceUrl": "https://commons.wikimedia.org/",
+  "license": "各照片依其標示的自由授權使用（作者與授權見 images[].author / license）",
+  "fetchedAt": "2026-10-14T09:11:07.608Z",
+  "spots": {
+    "leopard": {
+      "src": "commons",
+      "name": "四獸山",
+      "url": "https://zh.wikipedia.org/wiki/%E5%9B%9B%E7%8D%B8%E5%B1%B1",
+      "images": [
+        {
+          "file": "data/photos/c-leopard-1.jpg",
+          "subject": "2010 07 22210 6931 Xinyi District, Taipei, Buildings in Taipei, Taipei 101, Streets in Taipei, Taiwan",
+          "author": "Lord Koxinga",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:2010_07_22210_6931_Xinyi_District,_Taipei,_Buildings_in_Taipei,_Taipei_101,_Streets_in_Taipei,_Taiwan.JPG"
+        },
+        {
+          "file": "data/photos/c-leopard-2.jpg",
+          "subject": "Taipei View from Four Beasts Scenic Area 20250301",
+          "author": "Heeheemalu",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_View_from_Four_Beasts_Scenic_Area_20250301.jpg"
+        },
+        {
+          "file": "data/photos/c-leopard-3.jpg",
+          "subject": "Taipei Skyline 2023-03-19",
+          "author": "Tzuhsun Hsu",
+          "license": "CC BY-SA 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Skyline_2023-03-19.jpg"
+        }
+      ]
+    },
+    "lion": {
+      "src": "commons",
+      "name": "四獸山",
+      "url": "https://zh.wikipedia.org/wiki/%E5%9B%9B%E7%8D%B8%E5%B1%B1",
+      "images": [
+        {
+          "file": "data/photos/c-lion-1.jpg",
+          "subject": "2010 07 22210 6931 Xinyi District, Taipei, Buildings in Taipei, Taipei 101, Streets in Taipei, Taiwan",
+          "author": "Lord Koxinga",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:2010_07_22210_6931_Xinyi_District,_Taipei,_Buildings_in_Taipei,_Taipei_101,_Streets_in_Taipei,_Taiwan.JPG"
+        },
+        {
+          "file": "data/photos/c-lion-2.jpg",
+          "subject": "Taipei night skyline from Elephant Mountain May 2025 2",
+          "author": "4300streetcar",
+          "license": "CC BY 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_night_skyline_from_Elephant_Mountain_May_2025_2.jpg"
+        },
+        {
+          "file": "data/photos/c-lion-3.jpg",
+          "subject": "View of Taipei from Elephant Mountain (象山)",
+          "author": "Любарский Сергей Николаевич",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:View_of_Taipei_from_Elephant_Mountain_(%E8%B1%A1%E5%B1%B1).jpg"
+        }
+      ]
+    },
+    "sea": {
+      "src": "commons",
+      "name": "龜山島",
+      "url": "https://zh.wikipedia.org/wiki/%E9%BE%9C%E5%B1%B1%E5%B3%B6",
+      "images": [
+        {
+          "file": "data/photos/c-sea-1.jpg",
+          "subject": "Guishan Island",
+          "author": "阿爾特斯",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Guishan_Island.jpg"
+        },
+        {
+          "file": "data/photos/c-sea-2.jpg",
+          "subject": "Guishan Island from Toucheng",
+          "author": "Ma7ged",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Guishan_Island_from_Toucheng.jpg"
+        },
+        {
+          "file": "data/photos/c-sea-3.jpg",
+          "subject": "Northeast and Yilan Coast National Scenic Area, Tourism Administration 1",
+          "author": "Tourism Administration, MOTC",
+          "license": "Attribution",
+          "page": "https://commons.wikimedia.org/wiki/File:Northeast_and_Yilan_Coast_National_Scenic_Area,_Tourism_Administration_1.jpg"
+        }
+      ]
+    },
+    "peak": {
+      "src": "commons",
+      "name": "玉山",
+      "url": "https://zh.wikipedia.org/wiki/%E7%8E%89%E5%B1%B1",
+      "images": [
+        {
+          "file": "data/photos/c-peak-1.jpg",
+          "subject": "Yushan Main Peak and Yushan Northern Peak seen from Dongpu Mountain in the afternoon on 28 January 2017",
+          "author": "Chi-Hung Lin",
+          "license": "CC BY-SA 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Yushan_Main_Peak_and_Yushan_Northern_Peak_seen_from_Dongpu_Mountain_in_the_afternoon_on_28_January_2017.jpg"
+        },
+        {
+          "file": "data/photos/c-peak-2.jpg",
+          "subject": "2005-04-21 Summit of Yushan Main Peak",
+          "author": "愛租王",
+          "license": "CC BY-SA 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:2005-04-21_Summit_of_Yushan_Main_Peak.jpg"
+        },
+        {
+          "file": "data/photos/c-peak-3.jpg",
+          "subject": "Yushan Main Peak Chien Tzu Hao 02",
+          "author": "A22605728",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Yushan_Main_Peak_Chien_Tzu_Hao_02.jpg"
+        }
+      ]
+    },
+    "shandao": {
+      "src": "commons",
+      "name": "善導寺 (臺北市)",
+      "url": "https://zh.wikipedia.org/wiki/%E5%96%84%E5%B0%8E%E5%AF%BA_(%E8%87%BA%E5%8C%97%E5%B8%82)",
+      "images": [
+        {
+          "file": "data/photos/c-shandao-1.jpg",
+          "subject": "Taipei Shandao Temple 20240328",
+          "author": "Yu tptw",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Shandao_Temple_20240328.jpg"
+        },
+        {
+          "file": "data/photos/c-shandao-2.jpg",
+          "subject": "Taipei Shandao Temple front view 20190728",
+          "author": "Solomon203",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Shandao_Temple_front_view_20190728.jpg"
+        },
+        {
+          "file": "data/photos/c-shandao-3.jpg",
+          "subject": "Taipei Shandao Temple front view 20070625",
+          "author": "大摩 Bigmorr",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Shandao_Temple_front_view_20070625.jpg"
+        }
+      ]
+    },
+    "controlyuan": {
+      "src": "commons",
+      "name": "監察院",
+      "url": "https://zh.wikipedia.org/wiki/%E7%9B%A3%E5%AF%9F%E9%99%A2",
+      "images": [
+        {
+          "file": "data/photos/c-controlyuan-1.jpg",
+          "subject": "Control Yuan, National Police Agency and Sheraton Grand Taipei Hotel 20240626",
+          "author": "Yu tptw",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Control_Yuan,_National_Police_Agency_and_Sheraton_Grand_Taipei_Hotel_20240626.jpg"
+        },
+        {
+          "file": "data/photos/c-controlyuan-2.jpg",
+          "subject": "Control Yuan Building 20050702",
+          "author": "The original uploader was Allentchang at English Wikipedia.",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Control_Yuan_Building_20050702.jpg"
+        },
+        {
+          "file": "data/photos/c-controlyuan-3.jpg",
+          "subject": "Control Yuan Building 20070527",
+          "author": "Jiang",
+          "license": "Public domain",
+          "page": "https://commons.wikimedia.org/wiki/File:Control_Yuan_Building_20070527.jpg"
+        }
+      ]
+    },
+    "jinan": {
+      "src": "commons",
+      "name": "濟南基督長老教會",
+      "url": "https://zh.wikipedia.org/wiki/%E6%BF%9F%E5%8D%97%E5%9F%BA%E7%9D%A3%E9%95%B7%E8%80%81%E6%95%99%E6%9C%83",
+      "images": [
+        {
+          "file": "data/photos/c-jinan-1.jpg",
+          "subject": "Taipei Jinan Presbyterian Church 20240626",
+          "author": "Yu tptw",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Jinan_Presbyterian_Church_20240626.jpg"
+        },
+        {
+          "file": "data/photos/c-jinan-2.jpg",
+          "subject": "Taipei Jinan Presbyterian Church 20240626 01",
+          "author": "Yu tptw",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Jinan_Presbyterian_Church_20240626_01.jpg"
+        },
+        {
+          "file": "data/photos/c-jinan-3.jpg",
+          "subject": "Taipei Jinan Presbyterian Church 20240921",
+          "author": "阿道",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Jinan_Presbyterian_Church_20240921.jpg"
+        }
+      ]
+    },
+    "guanghua": {
+      "src": "commons",
+      "name": "光華商場",
+      "url": "https://zh.wikipedia.org/wiki/%E5%85%89%E8%8F%AF%E5%95%86%E5%A0%B4",
+      "images": [
+        {
+          "file": "data/photos/c-guanghua-1.jpg",
+          "subject": "Guang Hua Digital Plaza and Mitsubishi Delica 4WD 20080203",
+          "author": "ellery",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Guang_Hua_Digital_Plaza_and_Mitsubishi_Delica_4WD_20080203.jpg"
+        },
+        {
+          "file": "data/photos/c-guanghua-2.jpg",
+          "subject": "2011 Guanghua Digital Plaza Chinese New Year Market-opening",
+          "author": "Rico Shen",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:2011_Guanghua_Digital_Plaza_Chinese_New_Year_Market-opening.jpg"
+        },
+        {
+          "file": "data/photos/c-guanghua-3.jpg",
+          "subject": "Stele of old Guanghua Bridge near by Guang Hua Digital Plaza 20150926",
+          "author": "Solomon203",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Stele_of_old_Guanghua_Bridge_near_by_Guang_Hua_Digital_Plaza_20150926.jpg"
+        }
+      ]
+    },
+    "turtle": {
+      "src": "commons",
+      "name": "龜山島",
+      "url": "https://zh.wikipedia.org/wiki/%E9%BE%9C%E5%B1%B1%E5%B3%B6",
+      "images": [
+        {
+          "file": "data/photos/c-turtle-1.jpg",
+          "subject": "Guishan Island",
+          "author": "阿爾特斯",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Guishan_Island.jpg"
+        },
+        {
+          "file": "data/photos/c-turtle-2.jpg",
+          "subject": "Guishan Island from Toucheng",
+          "author": "Ma7ged",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Guishan_Island_from_Toucheng.jpg"
+        },
+        {
+          "file": "data/photos/c-turtle-3.jpg",
+          "subject": "Northeast and Yilan Coast National Scenic Area, Tourism Administration 1",
+          "author": "Tourism Administration, MOTC",
+          "license": "Attribution",
+          "page": "https://commons.wikimedia.org/wiki/File:Northeast_and_Yilan_Coast_National_Scenic_Area,_Tourism_Administration_1.jpg"
+        }
+      ]
+    },
+    "kuroshio": {
+      "src": "commons",
+      "name": "黑潮",
+      "url": "https://zh.wikipedia.org/wiki/%E9%BB%91%E6%BD%AE",
+      "images": [
+        {
+          "file": "data/photos/c-kuroshio-1.jpg",
+          "subject": "Canoe class in Qingshui Cliff",
+          "author": "國立東華大學 National Dong Hwa University",
+          "license": "Attribution",
+          "page": "https://commons.wikimedia.org/wiki/File:Canoe_class_in_Qingshui_Cliff.jpg"
+        },
+        {
+          "file": "data/photos/c-kuroshio-2.jpg",
+          "subject": "清水断崖 - Qingshui Cliff - 2012.02 - panoramio",
+          "author": "rheins",
+          "license": "CC BY 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:%E6%B8%85%E6%B0%B4%E6%96%AD%E5%B4%96_-_Qingshui_Cliff_-_2012.02_-_panoramio.jpg"
+        },
+        {
+          "file": "data/photos/c-kuroshio-3.jpg",
+          "subject": "Qingshui Cliff 清水斷崖 - panoramio",
+          "author": "lienyuan lee",
+          "license": "CC BY 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Qingshui_Cliff_%E6%B8%85%E6%B0%B4%E6%96%B7%E5%B4%96_-_panoramio.jpg"
+        }
+      ]
+    },
+    "taroko": {
+      "src": "commons",
+      "name": "太魯閣國家公園",
+      "url": "https://zh.wikipedia.org/wiki/%E5%A4%AA%E9%AD%AF%E9%96%A3%E5%9C%8B%E5%AE%B6%E5%85%AC%E5%9C%92",
+      "images": [
+        {
+          "file": "data/photos/c-taroko-1.jpg",
+          "subject": "Taroko-Gorge Hualien Taiwan Pudu-Bridge-at-Taroko-National-Park-01",
+          "author": "CEphoto, Uwe Aranas",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taroko-Gorge_Hualien_Taiwan_Pudu-Bridge-at-Taroko-National-Park-01.jpg"
+        },
+        {
+          "file": "data/photos/c-taroko-2.jpg",
+          "subject": "Taroko-Gorge Hualien Taiwan Pudu-Bridge-at-Taroko-National-Park-02",
+          "author": "CEphoto, Uwe Aranas",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taroko-Gorge_Hualien_Taiwan_Pudu-Bridge-at-Taroko-National-Park-02.jpg"
+        },
+        {
+          "file": "data/photos/c-taroko-3.jpg",
+          "subject": "Taroko-Gorge Hualien Taiwan Liufang-Bridge-at-Taroko-National-Park-01",
+          "author": "CEphoto, Uwe Aranas",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taroko-Gorge_Hualien_Taiwan_Liufang-Bridge-at-Taroko-National-Park-01.jpg"
+        }
+      ]
+    },
+    "sunmoon": {
+      "src": "commons",
+      "name": "日月潭",
+      "url": "https://zh.wikipedia.org/wiki/%E6%97%A5%E6%9C%88%E6%BD%AD",
+      "images": [
+        {
+          "file": "data/photos/c-sunmoon-1.jpg",
+          "subject": "View of Sun Moon Lake near Lalu Island",
+          "author": "Dquai",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:View_of_Sun_Moon_Lake_near_Lalu_Island.jpg"
+        },
+        {
+          "file": "data/photos/c-sunmoon-2.jpg",
+          "subject": "View on Sun Moon Lake, Taiwan",
+          "author": "M. Weitzel",
+          "license": "CC BY 2.5",
+          "page": "https://commons.wikimedia.org/wiki/File:View_on_Sun_Moon_Lake,_Taiwan.jpg"
+        },
+        {
+          "file": "data/photos/c-sunmoon-3.jpg",
+          "subject": "Lalu Island 2015-02-10",
+          "author": "S099001",
+          "license": "CC0",
+          "page": "https://commons.wikimedia.org/wiki/File:Lalu_Island_2015-02-10.jpg"
+        }
+      ]
+    },
+    "yushan": {
+      "src": "commons",
+      "name": "玉山",
+      "url": "https://zh.wikipedia.org/wiki/%E7%8E%89%E5%B1%B1",
+      "images": [
+        {
+          "file": "data/photos/c-yushan-1.jpg",
+          "subject": "Yushan Main Peak and Yushan Northern Peak seen from Dongpu Mountain in the afternoon on 28 January 2017",
+          "author": "Chi-Hung Lin",
+          "license": "CC BY-SA 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Yushan_Main_Peak_and_Yushan_Northern_Peak_seen_from_Dongpu_Mountain_in_the_afternoon_on_28_January_2017.jpg"
+        },
+        {
+          "file": "data/photos/c-yushan-2.jpg",
+          "subject": "2005-04-21 Summit of Yushan Main Peak",
+          "author": "愛租王",
+          "license": "CC BY-SA 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:2005-04-21_Summit_of_Yushan_Main_Peak.jpg"
+        },
+        {
+          "file": "data/photos/c-yushan-3.jpg",
+          "subject": "Yushan Main Peak Chien Tzu Hao 02",
+          "author": "A22605728",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Yushan_Main_Peak_Chien_Tzu_Hao_02.jpg"
+        }
+      ]
+    },
+    "alishan": {
+      "src": "commons",
+      "name": "阿里山神木群",
+      "url": "https://zh.wikipedia.org/wiki/%E9%98%BF%E9%87%8C%E5%B1%B1%E7%A5%9E%E6%9C%A8%E7%BE%A4",
+      "images": [
+        {
+          "file": "data/photos/c-alishan-1.jpg",
+          "subject": "Alishan Giant Trees Trail",
+          "author": "Rybloo",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Alishan_Giant_Trees_Trail.JPG"
+        },
+        {
+          "file": "data/photos/c-alishan-2.jpg",
+          "subject": "阿里山巨木群栈道 - Alishan Giant Trees Boardwalk - 2012.02 - panoramio",
+          "author": "rheins",
+          "license": "CC BY 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:%E9%98%BF%E9%87%8C%E5%B1%B1%E5%B7%A8%E6%9C%A8%E7%BE%A4%E6%A0%88%E9%81%93_-_Alishan_Giant_Trees_Boardwalk_-_2012.02_-_panoramio.jpg"
+        }
+      ]
+    },
+    "kenting": {
+      "src": "commons",
+      "name": "鵝鑾鼻燈塔",
+      "url": "https://zh.wikipedia.org/wiki/%E9%B5%9D%E9%91%BE%E9%BC%BB%E7%87%88%E5%A1%94",
+      "images": [
+        {
+          "file": "data/photos/c-kenting-1.jpg",
+          "subject": "Eluanbi Lighthouse 20240918-3",
+          "author": "Suicasmo",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Eluanbi_Lighthouse_20240918-3.jpg"
+        },
+        {
+          "file": "data/photos/c-kenting-2.jpg",
+          "subject": "Eluanbi Lighthouse 02",
+          "author": "Bernard Gagnon",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Eluanbi_Lighthouse_02.jpg"
+        },
+        {
+          "file": "data/photos/c-kenting-3.jpg",
+          "subject": "Hengchun-Township Taiwan Eluanbi-Lighthouse-04",
+          "author": "CEphoto, Uwe Aranas",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Hengchun-Township_Taiwan_Eluanbi-Lighthouse-04.jpg"
+        }
+      ]
+    }
+  }
+}
