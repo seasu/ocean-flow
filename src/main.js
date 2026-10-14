@@ -496,6 +496,11 @@ function start(mode) {
   try { if (matchMedia('(pointer: coarse)').matches && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => { }); } catch { }
 }
 $('#title .start').addEventListener('click', () => start('geo'));
+// 版本號：頁面和程式各自的版本，不一致時兩個都列出來，方便判斷是不是快取到舊檔
+{
+  const el = $('#title .ver'), hv = el.dataset.v.startsWith('__') ? 'dev' : el.dataset.v, jv = new URL(import.meta.url).searchParams.get('v') || 'dev';
+  el.textContent = hv === jv ? 'v ' + jv : `html ${hv} · js ${jv}`;
+}
 $('#title .alt')?.addEventListener('click', () => start('island'));
 $('#again').addEventListener('click', () => location.reload());
 
@@ -805,6 +810,20 @@ rcv.addEventListener('pointermove', e => {
 const ptrUp = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null; };
 rcv.addEventListener('pointerup', ptrUp); rcv.addEventListener('pointercancel', ptrUp);
 rcv.addEventListener('wheel', e => { e.preventDefault(); setZoom((drawRadar.range || 500) * (e.deltaY > 0 ? 1.15 : 1 / 1.15)); }, { passive: false });
+// iPhone 上畫面一直在更新時，Safari 有時會把點擊當成「懸停」而不送出 click；
+// 在滿版頁裡手指按下又放開、沒拖動，卻等不到 click 時，自己補送一次
+for (const page of [radar, $('#dex'), $('#spot'), $('#settings'), $('#me')]) {
+  let down = null, wait = 0;
+  page.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, el: e.target }; }, true);
+  page.addEventListener('pointerup', e => {
+    if (!down || e.pointerType === 'mouse') return;
+    const d = down; down = null;
+    if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 10) return;
+    clearTimeout(wait); wait = setTimeout(() => d.el.isConnected && d.el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: e.clientX, clientY: e.clientY, view: window })), 400);
+  }, true);
+  page.addEventListener('pointercancel', () => { down = null; }, true);
+  page.addEventListener('click', () => clearTimeout(wait), true);
+}
 function openRadar() { if (G.state !== 'play' && G.state !== 'ending') return; radarOpen = true; radar.classList.add('show'); setZoom(null); geo.start(); renderList(); }
 function closeRadar() { radarOpen = false; radar.classList.remove('show'); }
 $('#radarBtn').addEventListener('pointerdown', e => { e.preventDefault(); openRadar(); });
@@ -817,13 +836,14 @@ function inRange() {
 function fmt(d) { return d < 1000 ? t('meters', { n: Math.round(d) }) : t('km', { n: (d / 1000).toFixed(1) }); }
 function renderList() {
   const items = REAL.map(s => ({ s, d: meters(geo.pos, s) })).sort((a, b) => a.d - b.d), tg = radarTarget();
-  $('#rlist').innerHTML = items.map(({ s, d }) => {
+  const html = items.map(({ s, d }) => {
     const done = visited.has(s.id), node = s.node ? NODES.find(n => n.id === s.node) : null;
     const tag = s.id === 'venue' ? (G.gateOpen ? t('canOpen') : t('startEnd')) : node ? (node.awake ? t('opened', { icon: node.icon, name: node.name }) : node === nextGate() ? `${node.seal}${t('sep')}${node.icon} ${node.name}` : node.seal + t('sep') + node.name) : done ? t('bound') : t('chance');
     return `<li data-id="${s.id}" class="${done ? 'done' : ''} ${d <= s.r ? 'near' : ''} ${node ? 'key' : ''} ${s === tg ? 'target' : ''}"><div><b>${s.name}</b><small>${s.sub}</small></div>`
       + `<span><em>${tag}</em>${t('distDir', { d: fmt(d), dir: dirFor(s) })}</span>`
       + (calib ? `<button data-cal="${s.id}">${t('setHere')}</button>` : '') + `</li>`;
   }).join('');
+  if (html !== renderList.html) { renderList.html = html; $('#rlist').innerHTML = html; }   // 沒變就不重畫，點擊才不會被吃掉
   if (calib) $('#calOut').textContent = JSON.stringify(Object.fromEntries(REAL.map(s => [s.id, [+s.lat.toFixed(6), +s.lng.toFixed(6)]])));
 }
 $('#rlist').addEventListener('click', e => {

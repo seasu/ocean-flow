@@ -9,5 +9,6 @@ s = html.read_text()
 tag = f'<script type="importmap">{json.dumps(imap)}</script>\n'
 assert '<script type="module" src="src/main.js"></script>' in s
 s = s.replace('<script type="module" src="src/main.js"></script>', tag + f'<script type="module" src="src/main.js?v={v}"></script>')
+s = s.replace('__VERSION__', v)
 html.write_text(s)
 print('stamped', v, len(mods), 'modules')
