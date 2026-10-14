@@ -50,6 +50,8 @@ const S = {
   gateGo: ['開啟靈門', 'Open the gate', '霊門を開く'],
   finalHere: ['台北靈門已經打開', 'The Taipei Spirit Gate is open', '台北霊門が開いた'],
   finalGo: ['走進靈門', 'Step through', '門をくぐる'],
+  battleQuit: ['離開', 'Leave', '離れる'],
+  battleLeft: ['先離開了，{name}還在等你', 'You stepped away. {name} will wait for you', 'ひとまず離れた。{name}は待っている'],
   verLabel: ['版本', 'Version', 'バージョン'],
   verStale: ['請重新整理', 'please reload', '再読み込みしてください'],
   meSteps: ['走了', 'You have walked', '歩いた歩数'],
