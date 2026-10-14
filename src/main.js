@@ -428,6 +428,8 @@ function start(mode) {
   initAudio();
   $('#title').classList.add('hide');
   G.state = 'intro'; G.geo = mode === 'geo'; $('#hud').classList.add('on');
+  // 手機上操作說明 10 秒後收起，讓畫面留給地圖
+  if (innerWidth < 600) setTimeout(() => { $('.hint').style.display = 'none'; }, 10000);
   cam.yaw = 0; cam.tx = P.x; cam.ty = P.y + 1.5; cam.tz = P.z;
   if (G.geo) geo.start();
   say(G.geo ? GEO_LINES : LINES, () => {
