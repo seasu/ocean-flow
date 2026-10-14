@@ -173,7 +173,7 @@ export function match3(A, { star, ease }) {
       g.restore();
       if (B.chain >= 1 && (B.phase === 'clear' || B.phase === 'fall')) {
         g.fillStyle = '#ffcf5a'; g.font = '900 18px system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
-        g.fillText(A.t('battleCombo', { n: B.chain + 1 }), A.lay.w / 2, b.y - 18);
+        g.fillText(A.t('battleCombo', { n: B.chain + 1 }), A.lay.area.x + A.lay.area.w / 2, b.y - 18);
       }
     },
   };

@@ -86,13 +86,27 @@ const api = {
 };
 
 // ---------- 版面：上方濁流、中間玩法區、下方守護獸 ----------
+// 瀏海／圓角的安全區（px），橫拿時左右都可能有
+const saProbe = document.createElement('div');
+saProbe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)';
+document.body.appendChild(saProbe);
+const sa = k => parseFloat(getComputedStyle(saProbe)[{ t: 'paddingTop', r: 'paddingRight', b: 'paddingBottom', l: 'paddingLeft' }[k]]) || 0;
 function size() {
   const dpr = Math.min(2, devicePixelRatio || 1), w = innerWidth, h = innerHeight;
   if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const sl = sa('l'), sr = sa('r'), sb = sa('b');
+  // 橫向：濁流與守護獸放左邊，玩法區占右邊整個高度
+  if (w > h * 1.15) {
+    const lw = Math.max(170, Math.min(w * 0.36, 320)), x0 = sl + lw, aw = Math.min(w - x0 - sr - 16, 560), top = 56;
+    const er = Math.min(lw * 0.3, (h - top) * 0.24);
+    S.lay = { w, h, ex: sl + lw / 2, ey: top + (h - top) * 0.36, er, gx: sl + lw / 2, gy: h - 40 - sb,
+      area: { x: x0 + (w - x0 - sr - aw) / 2, y: top, w: aw, h: h - top - 12 - sb } };
+    return S.lay;
+  }
   const top = 56, enemyH = Math.max(120, Math.min(240, h * 0.26)), bottom = 76;
   const aw = Math.min(w, 460) - 32;
-  S.lay = { w, h, ex: w / 2, ey: top + enemyH * 0.48, er: enemyH * 0.36, gy: h - 44,
+  S.lay = { w, h, ex: w / 2, ey: top + enemyH * 0.48, er: enemyH * 0.36, gx: w / 2, gy: h - 44,
     area: { x: (w - aw) / 2, y: top + enemyH, w: aw, h: h - top - enemyH - bottom } };
   return S.lay;
 }
@@ -185,11 +199,11 @@ function draw(L) {
   g.globalAlpha = 1;
   g.save(); S.game.draw(); g.restore();
   // 守護獸
-  const glow = g.createRadialGradient(w / 2, L.gy, 4, w / 2, L.gy, 34 + win * 80);
+  const glow = g.createRadialGradient(L.gx, L.gy, 4, L.gx, L.gy, 34 + win * 80);
   glow.addColorStop(0, `rgba(255,207,90,${0.5 + win * 0.4})`); glow.addColorStop(1, 'rgba(255,207,90,0)');
-  g.fillStyle = glow; g.beginPath(); g.arc(w / 2, L.gy, 34 + win * 80, 0, 6.283); g.fill();
+  g.fillStyle = glow; g.beginPath(); g.arc(L.gx, L.gy, 34 + win * 80, 0, 6.283); g.fill();
   g.font = '30px system-ui, "Apple Color Emoji", "Segoe UI Emoji"'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText(S.node.icon, w / 2, L.gy - win * 16);
+  g.fillText(S.node.icon, L.gx, L.gy - win * 16);
   for (const q of S.shots) { g.fillStyle = q.col; g.globalAlpha = 0.9; g.fillRect(q.x - 4, q.y - 4, 8, 8); }
   for (const q of S.fx) { g.globalAlpha = Math.min(1, q.life * 2); g.fillStyle = q.col; g.fillRect(q.x - 3, q.y - 3, 6, 6); }
   g.globalAlpha = 1;

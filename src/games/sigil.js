@@ -101,7 +101,7 @@ export function sigil(A, { star, ease }) {
       }
       if (S.fail) { g.strokeStyle = `rgba(255,107,107,${S.fail * 2})`; g.lineWidth = 4; A.rr(b.x - 10, b.y - 10, b.s + 20, b.s + 20, 18); g.stroke(); }
       // 進度：四道符
-      for (let i = 0; i < NUM; i++) { g.fillStyle = i < S.k ? '#ffcf5a' : 'rgba(255,255,255,.2)'; g.beginPath(); g.arc(A.lay.w / 2 + (i - (NUM - 1) / 2) * 22, b.y + b.s + 22, 6, 0, 6.283); g.fill(); }
+      for (let i = 0; i < NUM; i++) { g.fillStyle = i < S.k ? '#ffcf5a' : 'rgba(255,255,255,.2)'; g.beginPath(); g.arc(A.lay.area.x + A.lay.area.w / 2 + (i - (NUM - 1) / 2) * 22, b.y + b.s + 22, 6, 0, 6.283); g.fill(); }
     },
   };
 }
