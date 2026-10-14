@@ -180,7 +180,9 @@ const hold = (el, on, off) => {
 };
 hold($('#btnJump'), () => { input.jump = true; }, () => { input.jump = false; });
 hold($('#btnSense'), () => doSense());
-hold($('#mute'), () => { setMuted(!muted); $('#mute').textContent = muted ? '🔇' : '🔊'; });
+const muteIcon = () => { $('#mute').innerHTML = `<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 9.5h3.5L12 5.5v13l-4.5-4H4z'/>${muted ? "<path d='M16 9.5l5 5M21 9.5l-5 5'/>" : "<path d='M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11'/>"}</svg>`; };
+muteIcon();
+hold($('#mute'), () => { setMuted(!muted); muteIcon(); });
 addEventListener('keydown', e => { input.keys[e.code] = true; if (e.code === 'Space') input.jump = true; if (e.code === 'KeyE' || e.code === 'KeyQ') doSense(); if ((e.code === 'Enter' || e.code === 'Space') && talk) nextLine(); });
 addEventListener('keyup', e => { input.keys[e.code] = false; if (e.code === 'Space') input.jump = false; });
 document.addEventListener('gesturestart', e => e.preventDefault());
