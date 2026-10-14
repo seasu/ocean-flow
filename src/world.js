@@ -2,25 +2,31 @@
 import { Builder } from './gl.js';
 import { rng, hex, smooth, clamp } from './math.js';
 
-export const N = 128, WATER = 2.5;
-const CX = 64, CZ = 64;
+// 島的尺寸倍率：邏輯座標（原本 128 格的島）乘上 S；?scale=1~4 可調，預設 3 倍
+const Q = typeof location !== 'undefined' ? new URLSearchParams(location.search) : null;
+export const S = Math.max(1, Math.min(4, +(Q && Q.get('scale')) || 3));
+const HS = 1 + (S - 1) * 0.5;                 // 高度倍率：山跟著變高，但不會像平面那麼誇張
+const sc = v => Math.round(v * S);
+export const N = sc(128), WATER = 2.5;
+const CX = 64 * S, CZ = 64 * S, SHORE = 6.6 * S;   // SHORE：黑潮兩側留給海的寬度
 
 // 黑潮中心線（往北流，-z 為北）
-export const CURRENT = { x: CX + 30, half: 3.6, speed: 7 };
-export const curX = z => CURRENT.x + 3 * Math.sin(z * 0.05);
+export const CURRENT = { x: CX + 30 * S, half: 3.6 * S * 0.7, speed: 7 * Math.sqrt(S) };
+export const curX = z => CURRENT.x + 3 * S * Math.sin(z / S * 0.05);
 
 // 地點（x, z）
 export const PLACES = {
-  spawn: [56, 56],
-  gate: [55, 78],
-  city: [61, 38],
-  sea: [Math.round(curX(36)) - 2, 36],     // 龜山島
-  lake: [62, 65],                          // 日月潭
-  shenmu: [62, 86],                        // 阿里山神木
-  gorge: 60,
+  spawn: [sc(56), sc(56)],
+  gate: [sc(55), sc(78)],
+  city: [sc(61), sc(38)],
+  sea: [Math.round(curX(36 * S)) - sc(2), sc(36)],     // 龜山島
+  lake: [sc(62), sc(65)],                          // 日月潭
+  shenmu: [sc(62), sc(86)],                        // 阿里山神木
+  gorge: sc(60),                                   // 太魯閣峽谷所在的 z
   // 四獸山：在台北 101 東南側（位置關係依真實地形簡化）
-  tiger: [84, 31], leopard: [86, 38], lion: [83, 44], elephant: [77, 49],                               // 太魯閣峽谷所在的 z
-  peak: [68, 72],
+  tiger: [sc(84), sc(31)], leopard: [sc(86), sc(38)], lion: [sc(83), sc(44)], elephant: [sc(77), sc(49)],
+  peak: [sc(68), sc(72)],
+  tower: [sc(66.5), sc(29.5)],                     // 台北 101
 };
 
 // 地塊種類
@@ -50,17 +56,17 @@ export function makeWorld(seed = 7) {
   const fbm = noise2(seed), id = (x, z) => z * N + x;
   const land = new Uint8Array(N * N);
 
-  // 1. 島形與高度
+  // 1. 島形與高度（u, v 是邏輯座標，地形形狀跟原本一樣，只是放大）
   for (let z = 0; z < N; z++) for (let x = 0; x < N; x++) {
-    const dx = x - CX, dz = z - CZ, vz = dz / 44;
+    const u = x / S, v = z / S, dx = u - 64, dz = v - 64, vz = dz / 44;
     const wid = 21 * (1 - 0.5 * Math.max(vz, 0)) * (vz < -0.6 ? 1 - (-vz - 0.6) * 0.5 : 1);
-    const e = Math.hypot(dx / wid, vz) + fbm(x * 0.08, z * 0.08) * 0.12;
+    const e = Math.hypot(dx / wid, vz) + fbm(u * 0.08, v * 0.08) * 0.12 + fbm(x * 0.09 + 40, z * 0.09) * 0.02;
     const i = id(x, z);
-    if (e < 1 && Math.abs(x - curX(z)) > CURRENT.half + 3) {
+    if (e < 1 && Math.abs(x - curX(z)) > SHORE) {
       land[i] = 1;
       const plain = 1 + 2 * smooth(0.95, 0.55, e);
-      const ridge = 15 * Math.exp(-(((dx - 4) / 9) ** 2)) * Math.exp(-(((dz - 8) / 22) ** 2));
-      H[i] = Math.floor(3 + plain + ridge + fbm(x * 0.15 + 9, z * 0.15) * (1 + ridge * 0.15));
+      const ridge = 15 * HS * Math.exp(-(((dx - 4) / 9) ** 2)) * Math.exp(-(((dz - 8) / 22) ** 2));
+      H[i] = Math.floor(3 + plain + ridge + fbm(u * 0.15 + 9, v * 0.15) * (1 + ridge * 0.15) + fbm(x * 0.2, z * 0.2 + 7) * 0.5);
     } else {
       H[i] = clamp(Math.floor(2 - (e - 1) * 9), 0, 2);
     }
@@ -68,26 +74,31 @@ export function makeWorld(seed = 7) {
   // 2. 龜山島（海之流痕）：龜背＋往北伸出的龜頭
   {
     const [sx, sz] = PLACES.sea;
-    for (let z = sz - 5; z <= sz + 4; z++) for (let x = sx - 4; x <= sx + 4; x++) {
-      const d = Math.hypot((x - sx) / 1.15, z - sz), i = id(x, z);
-      const head = Math.abs(x - sx) <= 0 && z >= sz - 4 && z < sz - 2;
-      if (d < 3 || head) { land[i] = 1; H[i] = head ? (z === sz - 3 ? 4 : 3) : d < 1.2 ? 5 : d < 2.2 ? 4 : 3; K[i] = d < 2.2 && !head ? T.FOREST : T.ROCK; lock[i] = 1; }
+    for (let z = sz - sc(5); z <= sz + sc(4); z++) for (let x = sx - sc(4); x <= sx + sc(4); x++) {
+      const d = Math.hypot((x - sx) / 1.15, z - sz) / S, i = id(x, z);
+      const head = Math.abs(x - sx) <= S * 0.5 && z >= sz - sc(4) && z < sz - sc(2);
+      if (d < 3 || head) {
+        land[i] = 1; lock[i] = 1;
+        H[i] = head ? (z < sz - sc(3) ? 3 : 4) : Math.round(3 + (d < 1.2 ? 2 : d < 2.2 ? 1 : 0) * HS);
+        K[i] = d < 2.2 && !head ? T.FOREST : T.ROCK;
+      }
     }
   }
   // 2b. 四獸山：101 東側的四座小山
   const BEASTS = ['tiger', 'leopard', 'lion', 'elephant'];
   for (const k of BEASTS) {
     const [bx, bz] = PLACES[k];
-    for (let z = bz - 6; z <= bz + 6; z++) for (let x = bx - 6; x <= bx + 6; x++) {
-      const d = Math.hypot(x - bx, z - bz), i = id(x, z);
-      if (d > 6 || Math.abs(x - curX(z)) < CURRENT.half + 3) continue;
+    for (let z = bz - sc(6); z <= bz + sc(6); z++) for (let x = bx - sc(6); x <= bx + sc(6); x++) {
+      const d = Math.hypot(x - bx, z - bz) / S, i = id(x, z);
+      if (d > 6 || Math.abs(x - curX(z)) < SHORE) continue;
       if (!land[i]) { land[i] = 1; H[i] = 3; }
-      H[i] = Math.max(H[i], Math.floor(4 + 7 * Math.exp(-((d / 3.2) ** 2))));
+      H[i] = Math.max(H[i], Math.floor(4 + 7 * HS * Math.exp(-((d / 3.2) ** 2))));
     }
   }
   // 3. 城市區先整平
-  const inCity = (x, z) => x >= 49 && x <= 75 && z >= 26 && z <= 47;
-  for (let z = 0; z < N; z++) for (let x = 0; x < N; x++) if (inCity(x, z)) { const i = id(x, z); land[i] = 1; H[i] = 4; }
+  const C0 = [sc(49), sc(26)], C1 = [sc(75), sc(47)];
+  const inCity = (x, z) => x >= C0[0] && x <= C1[0] && z >= C0[1] && z <= C1[1];
+  for (let z = C0[1]; z <= C1[1]; z++) for (let x = C0[0]; x <= C1[0]; x++) { const i = id(x, z); land[i] = 1; H[i] = 4; }
 
   const relax = () => {
     for (let it = 0; it < 4; it++) {
@@ -110,86 +121,90 @@ export function makeWorld(seed = 7) {
     for (let z = cz - r; z <= cz + r; z++) for (let x = cx - r; x <= cx + r; x++) if (Math.hypot(x - cx, z - cz) <= r + 0.3) { const i = id(x, z); H[i] = Math.max(3, m); K[i] = kind; lock[i] = 2; land[i] = 1; }
     return m;
   };
-  flatten(...PLACES.spawn, 4, T.PARK);
-  flatten(...PLACES.gate, 5, T.STONE);
-  flatten(...PLACES.peak, 2, T.STONE);
-  for (const k of BEASTS) flatten(...PLACES[k], 1, T.STONE);
+  flatten(...PLACES.spawn, sc(4), T.PARK);
+  flatten(...PLACES.gate, Math.round(5 * HS), T.STONE);
+  flatten(...PLACES.peak, sc(2), T.STONE);
+  for (const k of BEASTS) flatten(...PLACES[k], Math.max(1, sc(1)), T.STONE);
   relax();
 
   // 5. 地表種類
-  const nearSea = (x, z, r) => { for (let a = -r; a <= r; a++) for (let b = -r; b <= r; b++) { const xx = clamp(x + a, 0, N - 1), zz = clamp(z + b, 0, N - 1); if (!land[id(xx, zz)]) return true; } return false; };
+  const sr = sc(2);
+  const nearSea = (x, z) => { for (let a = -sr; a <= sr; a++) for (let b = -sr; b <= sr; b++) { const xx = clamp(x + a, 0, N - 1), zz = clamp(z + b, 0, N - 1); if (!land[id(xx, zz)]) return true; } return false; };
+  const ROCKH = 3 + 10 * HS, FORESTH = 3 + 3 * HS;
   for (let z = 0; z < N; z++) for (let x = 0; x < N; x++) {
     const i = id(x, z); if (lock[i]) continue;
     if (!land[i]) { K[i] = T.SEA; continue; }
     const h = H[i];
-    K[i] = h >= 13 ? T.ROCK : h <= 3 && nearSea(x, z, 2) ? T.SAND : h >= 6 ? T.FOREST : T.GRASS;
+    K[i] = h >= ROCKH ? T.ROCK : h <= 3 && nearSea(x, z) ? T.SAND : h >= FORESTH ? T.FOREST : T.GRASS;
   }
 
   // 5b. 日月潭：挖到海平面以下（用同一片水面），周圍做成緩坡，中央是拉魯島
   {
     const [lx, lz] = PLACES.lake;
-    for (let z = lz - 9; z <= lz + 9; z++) for (let x = lx - 9; x <= lx + 9; x++) {
-      const i = id(x, z), d = Math.hypot((x - lx) / 1.3, z - lz);
+    for (let z = lz - sc(9); z <= lz + sc(9); z++) for (let x = lx - sc(9); x <= lx + sc(9); x++) {
+      const i = id(x, z), d = Math.hypot((x - lx) / 1.3, z - lz) / S;
       if (d < 3.6) {
-        if (Math.hypot(x - lx, z - lz) < 0.8) { H[i] = 3; K[i] = T.PARK; land[i] = 1; }
+        if (Math.hypot(x - lx, z - lz) / S < 0.8) { H[i] = 3; K[i] = T.PARK; land[i] = 1; }
         else { H[i] = d < 2.4 ? 0 : 1; K[i] = T.SEA; land[i] = 0; }
         lock[i] = 4;
       } else if (d < 8 && land[i] && !lock[i]) {
-        H[i] = Math.min(H[i], 3 + Math.floor(d - 3.6));
+        H[i] = Math.min(H[i], 3 + Math.floor((d - 3.6) * S));
         if (d < 4.6) K[i] = T.SAND;
       }
     }
   }
   // 5c. 太魯閣：從東岸切進山裡的大理石峽谷
-  const gz = PLACES.gorge;
+  const gz = PLACES.gorge, gw = sc(2), wall = Math.max(1, Math.round(S / 2));
   let gx1 = CX; while (land[id(gx1 + 1, gz)]) gx1++;
-  const gx0 = gx1 - 10;
+  const gx0 = gx1 - sc(10);
   for (let x = gx0; x <= gx1; x++) {
-    const floor = 3 + Math.max(0, Math.floor((gx1 - 2 - x) / 2));
-    for (const z of [gz, gz + 1]) { const i = id(x, z); H[i] = floor; K[i] = T.SAND; lock[i] = 5; }
-    for (const z of [gz - 1, gz + 2]) { const i = id(x, z); H[i] = Math.max(H[i], floor + 4 + ((x * 7) % 3)); K[i] = T.MARBLE; lock[i] = 5; }
+    const floor = 3 + Math.max(0, Math.floor((gx1 - sc(2) - x) / 2));
+    for (let z = gz; z < gz + gw; z++) { const i = id(x, z); H[i] = floor; K[i] = T.SAND; lock[i] = 5; }
+    for (let k = 1; k <= wall; k++) for (const z of [gz - k, gz + gw - 1 + k]) { const i = id(x, z); H[i] = Math.max(H[i], floor + 4 + ((x * 7) % 3)); K[i] = T.MARBLE; lock[i] = 5; }
   }
-  const gorge = [gx1 - 4, gz + 1];
+  const gorge = [gx1 - sc(4), gz + Math.floor(gw / 2)];
   relax();
   // 5d. 墾丁：最南端的海岬
   let tip = [CX, CZ];
-  for (let z = 0; z < N; z++) for (let x = 40; x < 90; x++) if (land[id(x, z)] && z > tip[1]) tip = [x, z];
+  for (let z = 0; z < N; z++) for (let x = sc(40); x < sc(90); x++) if (land[id(x, z)] && z > tip[1]) tip = [x, z];
 
-  // 6. 城市：道路格線、大樓、廣場、地標高塔
+  // 6. 城市：道路格線、大樓、廣場、地標高塔（街廓維持原本大小，城市變大就多出更多街廓）
   const R = rng(seed + 11), lots = [];
-  for (let z = 26; z <= 47; z++) for (let x = 49; x <= 75; x++) {
-    const i = id(x, z), road = (x - 49) % 7 === 0 || (z - 26) % 7 === 0;
+  for (let z = C0[1]; z <= C1[1]; z++) for (let x = C0[0]; x <= C1[0]; x++) {
+    const i = id(x, z), road = (x - C0[0]) % 7 === 0 || (z - C0[1]) % 7 === 0;
     K[i] = road ? T.ROAD : T.STONE;
-    if (!road && (x - 49) % 7 === 1 && (z - 26) % 7 === 1) lots.push([x, z]);
+    if (!road && (x - C0[0]) % 7 === 1 && (z - C0[1]) % 7 === 1 && x + 5 <= C1[0] && z + 5 <= C1[1]) lots.push([x, z]);
   }
   const [ncx, ncz] = PLACES.city;
+  let tw = lots[0], twD = 1e9;
+  for (const l of lots) { const d = Math.hypot(l[0] + 2.5 - PLACES.tower[0], l[1] + 2.5 - PLACES.tower[1]); if (d < twD) { twD = d; tw = l; } }
+  const TOWERH = Math.round(24 * HS);
   for (const [lx, lz] of lots) {
     const center = [lx + 2.5, lz + 2.5];
-    if (Math.hypot(center[0] - ncx, center[1] - ncz) < 3) continue;          // 節點廣場
-    const tower = lx === 64 && lz === 27;
+    if (Math.hypot(center[0] - ncx, center[1] - ncz) < 3 + S) continue;      // 節點廣場
+    const tower = lx === tw[0] && lz === tw[1];
     const park = !tower && R() < 0.18;
-    const bh = tower ? 24 : 3 + Math.floor(R() * R() * 10);
+    const bh = tower ? TOWERH : 3 + Math.floor(R() * R() * 10);
     for (let z = lz; z < lz + 6; z++) for (let x = lx; x < lx + 6; x++) {
       const i = id(x, z);
       if (park) { K[i] = T.PARK; continue; }
-      const inset = tower ? (x >= lx + 1 && x <= lx + 4 && z >= lz + 1 && z <= lz + 4) : (x >= lx + 1 && x <= lx + 4 && z >= lz + 1 && z <= lz + 4);
-      if (inset) { H[i] = 4 + bh; K[i] = tower ? T.TOWER : T.BUILDING; lock[i] = 3; }
+      if (x >= lx + 1 && x <= lx + 4 && z >= lz + 1 && z <= lz + 4) { H[i] = 4 + bh; K[i] = tower ? T.TOWER : T.BUILDING; lock[i] = 3; }
     }
   }
-  const towerTop = 4 + 24;
+  const towerTop = 4 + TOWERH;
 
-  // 7. 樹
+  // 7. 樹（密度除以 S，島變大樹不會多到跑不動）
   const trees = [];
-  const TR = rng(seed + 5);
+  const TR = rng(seed + 5), keep = (x, z, px, pz, r) => Math.hypot(x - px, z - pz) < r * S;
   for (let z = 2; z < N - 2; z++) for (let x = 2; x < N - 2; x++) {
     const k = K[id(x, z)];
-    if ((k === T.FOREST && TR() < 0.07) || (k === T.GRASS && TR() < 0.015) || (k === T.PARK && TR() < 0.05)) {
-      if (Math.hypot(x - PLACES.gate[0], z - PLACES.gate[1]) < 7 || Math.hypot(x - PLACES.shenmu[0], z - PLACES.shenmu[1]) < 4 || Math.hypot(x - tip[0], z - tip[1]) < 4 || ['tiger', 'leopard', 'lion', 'elephant'].some(k => Math.hypot(x - PLACES[k][0], z - PLACES[k][1]) < 6) || Math.hypot(x - PLACES.spawn[0], z - PLACES.spawn[1]) < 9) continue;
+    if ((k === T.FOREST && TR() < 0.07 / S) || (k === T.GRASS && TR() < 0.015 / S) || (k === T.PARK && TR() < 0.05 / S)) {
+      if (keep(x, z, ...PLACES.gate, 7) || keep(x, z, ...PLACES.shenmu, 4) || keep(x, z, ...tip, 4) || BEASTS.some(b => keep(x, z, ...PLACES[b], 6)) || keep(x, z, ...PLACES.spawn, 9)) continue;
       trees.push([x, z, H[id(x, z)], k === T.FOREST ? 1 : 0]);
     }
   }
 
-  const world = { H, K, land, trees, towerTop, lots, tip, gorge };
+  const world = { H, K, land, trees, towerTop, tower: tw, lots, tip, gorge, road0: C0 };
   world.height = (x, z) => {
     const xi = Math.floor(x), zi = Math.floor(z);
     if (xi < 0 || zi < 0 || xi >= N || zi >= N) return 0;
@@ -207,35 +222,47 @@ export function makeWorld(seed = 7) {
 
 // 地形網格：只畫看得到的面
 export function terrainMesh(w) {
-  const b = new Builder(), { H, K } = w;
-  const win = hex('#9fd3f0'), wall = hex('#e6eaef'), wall2 = hex('#c9d1da'), towerWin = hex('#5d8f8a'), towerWall = hex('#7fb5ad');
+  const b = new Builder(), { H, K } = w, [rx0, rz0] = w.road0;
+  const win = hex('#9fd3f0'), wall = hex('#e6eaef'), wall2 = hex('#c9d1da'), towerWin = hex('#5d8f8a'), towerWall = hex('#7fb5ad'), rock = hex('#8a9096'), mark = hex('#d8d8c8');
+  // 頂面：同一排相同高度、顏色的格子合併成一個長條（棋盤深淺改在 shader 依世界座標畫）
+  const topOf = (x, z) => { const k = K[z * N + x]; return k === T.ROAD && ((x - rx0) % 7 === 0) !== ((z - rz0) % 7 === 0) && ((x + z) % 3 === 0) ? mark : TOP[k]; };
+  for (let z = 0; z < N; z++) {
+    let x = 0;
+    while (x < N) {
+      const h = H[z * N + x], c = topOf(x, z); let x1 = x + 1;
+      while (x1 < N && H[z * N + x1] === h && topOf(x1, z) === c) x1++;
+      b.quad([x, h, z], [x, h, z + 1], [x1, h, z + 1], [x1, h, z], [0, 1, 0], c, 0);
+      x = x1;
+    }
+  }
+  // 側面：泥土、岩石一面一個長條，分層深淺在 shader 畫（e = -1 代表要畫分層）；大樓窗戶與大理石維持逐格
+  const ROCKY = Math.round(3 + 9 * (1 + (S - 1) * 0.5));
+  const nb = [[1, 0, 4], [-1, 0, 8], [0, 1, 16], [0, -1, 32]];
   for (let z = 0; z < N; z++) for (let x = 0; x < N; x++) {
-    const i = z * N + x, h = H[i], k = K[i];
-    let top = TOP[k];
-    // 棋盤般的深淺變化（Roblox 草地感）
-    const chk = ((x + z) & 1) ? 0.96 : 1.0;
-    if (k === T.ROAD && ((x - 49) % 7 === 0) !== ((z - 26) % 7 === 0) && ((x + z) % 3 === 0)) top = hex('#d8d8c8');
-    top = top.map(c => c * chk);
-    b.quad([x, h, z], [x, h, z + 1], [x + 1, h, z + 1], [x + 1, h, z], [0, 1, 0], top, 0);
-    const nb = [[1, 0, 4], [-1, 0, 8], [0, 1, 16], [0, -1, 32]];
+    const i = z * N + x, h = H[i], k = K[i], top = TOP[k];
     for (const [ox, oz, f] of nb) {
       const xx = x + ox, zz = z + oz;
       const nh = xx < 0 || zz < 0 || xx >= N || zz >= N ? -4 : H[zz * N + xx];
       if (nh >= h) continue;
-      for (let y = nh; y < h; y++) {
-        let c, e = 0;
-        if (k === T.BUILDING || k === T.TOWER) {
-          const winRow = y > 4 && (y % 2 === 1);
-          const tw = k === T.TOWER;
-          c = winRow ? (tw ? towerWin : win) : (tw ? towerWall : (((x * 7 + z * 3) & 1) ? wall : wall2));
-          e = winRow ? 0.25 : 0;
-        } else if (y === h - 1 && k !== T.SEA && k !== T.ROCK && k !== T.ROAD && k !== T.STONE) {
-          c = top.map(v => v * 0.85);
-        } else if (k === T.MARBLE) c = (y % 3 === 1) ? hex('#b9b6ad') : hex('#ebe8df');
-        else if (k === T.ROCK || y >= 12) c = hex('#8a9096').map(v => v * (y & 1 ? 1 : 0.94));
-        else c = (y & 1) ? DIRT : DIRT2;
-        b.box(x, y, z, 1, 1, 1, c, e, f);
+      if (k === T.BUILDING || k === T.TOWER || k === T.MARBLE) {
+        for (let y = nh; y < h; y++) {
+          let c, e = 0;
+          if (k === T.MARBLE) c = (y % 3 === 1) ? hex('#b9b6ad') : hex('#ebe8df');
+          else {
+            const winRow = y > 4 && (y % 2 === 1), tw = k === T.TOWER;
+            c = winRow ? (tw ? towerWin : win) : (tw ? towerWall : (((x * 7 + z * 3) & 1) ? wall : wall2));
+            e = winRow ? 0.25 : 0;
+          }
+          b.box(x, y, z, 1, 1, 1, c, e, f);
+        }
+        continue;
       }
+      let y1 = h;
+      if (k !== T.SEA && k !== T.ROCK && k !== T.ROAD && k !== T.STONE) { b.box(x, h - 1, z, 1, 1, 1, top.map(v => v * 0.85), 0, f); y1 = h - 1; }
+      if (y1 <= nh) continue;
+      const ry = k === T.ROCK ? nh : Math.max(nh, Math.min(y1, ROCKY));
+      if (ry > nh) b.box(x, nh, z, 1, ry - nh, 1, DIRT, -1, f);
+      if (y1 > ry) b.box(x, ry, z, 1, y1 - ry, 1, rock, -1, f);
     }
   }
   // 樹：樹幹＋兩層方塊樹冠
@@ -266,13 +293,12 @@ export function terrainMesh(w) {
   }
   // 拉魯島上的小亭
   {
-    const [lx, lz] = PLACES.lake;
-    b.box(lx + 0.15, 3, lz + 0.15, 0.15, 1.2, 0.15, hex('#b9483c')); b.box(lx + 0.7, 3, lz + 0.7, 0.15, 1.2, 0.15, hex('#b9483c'));
-    b.box(lx + 0.7, 3, lz + 0.15, 0.15, 1.2, 0.15, hex('#b9483c')); b.box(lx + 0.15, 3, lz + 0.7, 0.15, 1.2, 0.15, hex('#b9483c'));
-    b.box(lx - 0.1, 4.2, lz - 0.1, 1.2, 0.25, 1.2, hex('#2f4f6f'));
+    const [lx, lz] = PLACES.lake, k = S, red = hex('#b9483c');
+    for (const [a, c] of [[0.15, 0.15], [0.7, 0.7], [0.7, 0.15], [0.15, 0.7]]) b.box(lx + (a - 0.5) * k + 0.5, 3, lz + (c - 0.5) * k + 0.5, 0.15 * k, 1.2 * k, 0.15 * k, red);
+    b.box(lx + (-0.1 - 0.5) * k + 0.5, 3 + 1.2 * k, lz + (-0.1 - 0.5) * k + 0.5, 1.2 * k, 0.25 * k, 1.2 * k, hex('#2f4f6f'));
   }
   // 高塔頂與避雷尖
-  const tx = 64 + 1, tz = 27 + 1;
+  const tx = w.tower[0] + 1, tz = w.tower[1] + 1;
   b.box(tx + 0.5, w.towerTop, tz + 0.5, 3, 1.5, 3, hex('#7fb5ad'));
   b.box(tx + 1, w.towerTop + 1.5, tz + 1, 2, 1.5, 2, hex('#6fa8a0'));
   b.box(tx + 1.8, w.towerTop + 3, tz + 1.8, 0.4, 4, 0.4, hex('#e8eef3'), 0.6);
@@ -303,7 +329,7 @@ export function waterData(w) {
 // 靈界浮島（啟流後從雲下升起）
 export function floatMesh() {
   const b = new Builder(), R = rng(99);
-  const isles = [[30, 44, 30], [100, 26, 34], [96, 104, 28], [24, 100, 36], [64, 8, 40]];
+  const isles = [[30, 44, 30], [100, 26, 34], [96, 104, 28], [24, 100, 36], [64, 8, 40]].map(([x, z, y]) => [x * S, z * S, y * (1 + (S - 1) * 0.5)]);
   for (const [ix, iz, iy] of isles) {
     const r = 3 + R() * 2;
     for (let z = -6; z <= 6; z++) for (let x = -6; x <= 6; x++) {
