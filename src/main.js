@@ -605,8 +605,8 @@ function buildVein(n) {
 // 開門前先淨化擋在門前的濁流；?nobattle 可跳過（測試用）
 function fight(n, then) {
   if (params.has('nobattle')) return then();
-  G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show');
-  battle(n, G.realm, REALMS[G.realm]).then(ok => { G.state = 'play'; $('#hud').classList.add('play', 'on'); if (ok) then(); else toast(t('battleLeft', { name: n.name })); });
+  G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show'); sfx.battle(true);
+  battle(n, G.realm, REALMS[G.realm]).then(ok => { sfx.battle(false); G.state = 'play'; $('#hud').classList.add('play', 'on'); if (ok) then(); else toast(t('battleLeft', { name: n.name })); });
 }
 
 function awaken(n) {

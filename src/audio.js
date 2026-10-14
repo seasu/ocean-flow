@@ -1,5 +1,5 @@
 // 音樂與音效：背景音樂是 Gemini Lyria 生成的管弦樂（audio/），海潮環境音與音效用 WebAudio 即時合成
-let ctx = null, master = null, sea = null, foam = null, fx = null, verb = null, music = null;
+let ctx = null, master = null, sea = null, foam = null, fx = null, verb = null, music = null, fight = null;
 export let muted = false;
 
 // 海潮音：低沉的遠浪底噪＋一波波湧上來又退下的浪（每 6–10 秒一波，彼此重疊）
@@ -149,6 +149,22 @@ export const sfx = {
   deny() { harp(146.8, 0.2); harp(138.6, 0.18, 0.14); },
   // 靈門開啟：豎琴刮奏＋弦樂和弦＋鐘
   gate() { this.sense(); strings([293.7, 370, 440, 587.3], 4, 0.05, 0.2); this.bell(146.8); },
+  // 淨化之戰：探索配樂淡出，換成緊湊的戰鬥配樂；結束再換回來
+  battle(on) {
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    if (music) music.gain.gain.setTargetAtTime(on ? 0 : 0.5, now, on ? 0.25 : 0.8);
+    if (on) {
+      if (!fight) { fight = { gain: ctx.createGain(), src: null }; fight.gain.gain.value = 0; fight.gain.connect(master); }
+      const go = buf => { if (!fight.on) return; try { fight.src?.stop(); } catch { }
+        const s = ctx.createBufferSource(); s.buffer = buf; s.loop = true; s.loopStart = 0.02; s.loopEnd = buf.duration - 0.02; s.connect(fight.gain); s.start(ctx.currentTime + 0.05, 0.02); fight.src = s;
+        fight.gain.gain.cancelScheduledValues(ctx.currentTime); fight.gain.gain.setTargetAtTime(0.55, ctx.currentTime + 0.05, 0.3); };
+      fight.on = true;
+      if (fight.buf) go(fight.buf); else loadTrack('audio/battle-loop.mp3').then(b => { fight.buf = b; go(b); }).catch(() => { });
+    } else if (fight) {
+      fight.on = false; fight.gain.gain.setTargetAtTime(0, now, 0.4); const src = fight.src; fight.src = null; if (src) setTimeout(() => { try { src.stop(); } catch { } }, 2500);
+    }
+  },
   // 結局：背景音樂淡出，播放管弦樂結尾曲
   ending() {
     if (!ctx) return;
