@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0a1018">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="洋流">
+<meta name="apple-mobile-web-app-title" content="洋流：起源">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -177,6 +177,9 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
   #title.calm{background:linear-gradient(180deg,rgba(6,12,22,.35),rgba(6,12,22,0) 22%,rgba(6,12,22,0) 55%,rgba(6,12,22,.78))}
   #title.calm .fold{opacity:0;max-height:0;margin:-7px 0;pointer-events:none}
   #title.calm .more{opacity:1;pointer-events:auto}
+  /* 收起後：「洋流」移到上方放大、「啟程」移到下方（位移動畫在下面的 flip()） */
+  #title.calm h1{position:absolute;left:0;right:0;top:calc(9% + var(--st));font-size:clamp(84px,28vw,150px);text-shadow:0 4px 28px rgba(6,12,22,.6),0 2px 0 rgba(6,12,22,.35)}
+  #title.calm .start{position:absolute;left:0;right:0;margin:0 auto;width:max-content;bottom:calc(44px + var(--sb))}
 }
 .screen h1{margin:0;font-size:clamp(56px,18vw,120px);font-weight:900;letter-spacing:.12em;line-height:1;text-shadow:0 4px 24px rgba(111,227,255,.35)}
 .screen .en{font-size:13px;letter-spacing:.4em;color:var(--cyan);font-weight:500}
@@ -252,7 +255,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 <div class="screen" id="title">
   <button class="more" aria-label="more">ⓘ</button>
   <div class="en fold">OCEAN FLOW · ORIGIN</div>
-  <h1 class="fold">洋流</h1>
+  <h1>洋流</h1>
   <div class="tag fold" data-i18n="tagline">山有脈，海有流，人亦有自己的道。<br>走遍一座方塊台灣：台北、龜山島、日月潭、玉山、墾丁。</div>
   <button class="start" data-i18n="startGeo">啟程</button>
   <button class="alt fold" data-i18n="startIsland">先在島上逛逛</button>
@@ -284,13 +287,23 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
     // 手機上展開的任務面板 8 秒後自動收回，把畫面還給地圖
     clearTimeout(qT); if (small() && !quest.classList.contains('min')) qT = setTimeout(() => quest.classList.add('min'), 8000);
   });
-  // 片頭：手機上 5 秒沒動作就收起說明；點 ⓘ 或空白處展開，再閒置 8 秒又收起
-  const title = document.getElementById('title');
-  let tT = setTimeout(() => small() && title.classList.add('calm'), 5000);
+  // 片頭：手機上 3 秒後收起說明，「洋流」邊上移邊放大、「啟程」往下；點 ⓘ 或空白處展開，再閒置 8 秒又收起
+  const title = document.getElementById('title'), keep = [title.querySelector('h1'), title.querySelector('.start')];
+  function flip(calm) {
+    if (title.classList.contains('calm') === calm) return;
+    const a = keep.map(e => e.getBoundingClientRect());
+    title.classList.toggle('calm', calm);
+    keep.forEach((e, i) => {
+      const b = e.getBoundingClientRect(), k = a[i].width / b.width;
+      const dx = a[i].left + a[i].width / 2 - b.left - b.width / 2, dy = a[i].top + a[i].height / 2 - b.top - b.height / 2;
+      e.animate([{ transform: `translate(${dx}px,${dy}px) scale(${k})` }, { transform: 'none' }], { duration: calm ? 1200 : 600, easing: 'cubic-bezier(.22,.8,.24,1)' });
+    });
+  }
+  let tT = setTimeout(() => small() && flip(true), 3000);
   title.addEventListener('pointerdown', e => {
     if (e.target.closest('button:not(.more)')) return;
-    title.classList.remove('calm'); clearTimeout(tT);
-    tT = setTimeout(() => small() && title.classList.add('calm'), 8000);
+    flip(false); clearTimeout(tT);
+    tT = setTimeout(() => small() && flip(true), 8000);
   });
 </script>
 </body>
