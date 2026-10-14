@@ -42,18 +42,18 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #qchips{display:flex;gap:6px}
 #qchips i{width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55)}
 #qchips i.done{background:var(--gold);border-color:var(--gold);box-shadow:0 0 6px rgba(255,207,90,.6)}
-/* 上方：左（個人、小地圖）｜中（下一步卡、台灣之美）｜右（設定、現世） */
-.topbar{position:absolute;left:calc(10px + var(--sl));right:calc(10px + var(--sr));top:calc(10px + var(--st));display:flex;align-items:flex-start;gap:8px}
-.topbar .side{position:relative;flex:none;display:flex;flex-direction:column;gap:10px}
-.topbar .mid{flex:1;min-width:0;max-width:440px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:8px}
+/* 上方：下一步卡全寬；下面一排：左（個人、小地圖）｜台灣之美｜右（現世、設定） */
+.topbar{position:absolute;left:calc(12px + var(--sl));right:calc(12px + var(--sr));top:calc(10px + var(--st));max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.topbar .tools{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.topbar .side{position:relative;flex:none;display:flex;gap:8px}
 .ico{width:44px;height:44px;border-radius:50%;display:grid;place-items:center}
 #hud .ico{pointer-events:auto}
 .ico svg{width:22px;height:22px}
 .ico.on{border-color:rgba(255,207,90,.8);color:var(--gold)}
-#mini{position:absolute;left:0;top:108px;width:132px;height:132px;border-radius:18px;border:1.5px solid rgba(255,255,255,.45);background:#1c4678;image-rendering:pixelated;
+#mini{position:absolute;left:0;top:54px;width:132px;height:132px;border-radius:18px;border:1.5px solid rgba(255,255,255,.45);background:#1c4678;image-rendering:pixelated;
   box-shadow:0 10px 30px rgba(0,0,0,.35);opacity:0;transform:translateY(-6px) scale(.96);transform-origin:top left;transition:opacity .25s,transform .25s;pointer-events:none}
 #mini.show{opacity:1;transform:none}
-#dexBtn{padding:0 16px;height:38px;font-size:15px;pointer-events:auto}
+#dexBtn{min-width:0;padding:0 14px;height:40px;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:auto}
 #qtitle{display:block;margin-top:4px;font-size:23px;line-height:1.3;letter-spacing:.04em}
 #qsub{margin:2px 0 0;font-size:16px;line-height:1.5;font-weight:500;color:#dbe6f0}
 .qrow{display:flex;align-items:center;gap:12px;margin-top:10px}
@@ -356,12 +356,6 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
 <canvas id="c"></canvas>
 <div id="hud">
   <div class="topbar playonly">
-    <div class="side">
-      <button class="ico" id="meBtn" aria-label="me" data-i18n-label="meTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.5c.8-4 3.8-6 7.5-6s6.7 2 7.5 6"/></svg></button>
-      <button class="ico" id="mapBtn" aria-label="map" data-i18n-label="miniMap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6.5l5-2.5 7 3 5-2.5v13l-5 2.5-7-3-5 2.5z"/><path d="M8.5 4v13M15.5 7v13"/></svg></button>
-      <canvas id="mini"></canvas>
-    </div>
-    <div class="mid">
       <div class="quest min" id="quest">
         <div class="qtop"><span id="qhead"></span><span id="qchips"></span></div>
         <b id="qtitle"></b>
@@ -369,11 +363,17 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
         <div class="qrow"><span class="qi"><span class="bar"><i id="qibar"></i></span><span id="qi">靈光 0</span></span><button id="guideBtn" data-i18n="guideBtn">帶我去</button></div>
         <ul id="qlist"></ul>
       </div>
+    <div class="tools">
+      <div class="side">
+      <button class="ico" id="meBtn" aria-label="me" data-i18n-label="meTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.5c.8-4 3.8-6 7.5-6s6.7 2 7.5 6"/></svg></button>
+      <button class="ico" id="mapBtn" aria-label="map" data-i18n-label="miniMap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6.5l5-2.5 7 3 5-2.5v13l-5 2.5-7-3-5 2.5z"/><path d="M8.5 4v13M15.5 7v13"/></svg></button>
+        <canvas id="mini"></canvas>
+      </div>
       <button id="dexBtn">台灣之美 0/8</button>
-    </div>
-    <div class="side">
-      <button class="ico" id="menuBtn" aria-label="settings" data-i18n-label="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+      <div class="side">
       <button class="ico" id="radarBtn" aria-label="real world" data-i18n-label="radarLabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.8-6.5-10.8a6.5 6.5 0 0 1 13 0C18.5 15.2 12 21 12 21z"/><circle cx="12" cy="10" r="2.3"/></svg></button>
+      <button class="ico" id="menuBtn" aria-label="settings" data-i18n-label="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+      </div>
     </div>
   </div>
   <div id="guide"><span class="arrow"><i></i></span><p></p><a target="_blank" rel="noopener" data-i18n="maps">Google 地圖步行</a><button class="x" aria-label="關閉">✕</button></div>
