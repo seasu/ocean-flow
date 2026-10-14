@@ -332,12 +332,12 @@ function hud() {
     $('#dexN').textContent = found; $('#dexSub').textContent = t('dexSub', { n: found, m: SPOTS.length });
     // 已收集的項目可以點開，用景點介紹頁再看一次；有照片就放縮圖
     const ent = (k, key, title, sub, text) => { const im = TT?.spots?.[key]?.images?.[0]?.file; return `<li class="open" data-k="${k}"><div class="t"><b>${title}</b><small>${sub}</small><p>${text}</p></div>${im ? `<img src="${im}" alt="">` : ''}<i class="chev"></i></li>`; };
-    const gate = n => n.awake ? ent('g:' + n.id, n.id, `${n.icon} ${n.name}${t('sep')}${n.hill}`, `${n.seal}${t('sep')}${n.virtue}`, n.info) : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`;
+    const gate = n => n.awake ? ent('g:' + n.id, n.id, `${n.icon} ${n.name}${t('sep')}${n.hill}`, `${n.seal}${t('sep')}${n.virtue}`, n.info) : `<li class="lock open" data-k="xg:${n.id}"><div class="t"><b>${n.icon} ？？？</b><small>${n.seal}</small></div><i class="chev"></i></li>`;
     $('#dexList').innerHTML = `<li class="sec">${t('secMountain')}</li>` + S1.map(gate).join('')
       + (stage1Done() ? `<li class="sec">${t('secFlows')}</li>` + S2.map(gate).join('') : '')
       + (visited.size ? `<li class="sec">${t('secCulture')}</li>` + REAL.filter(x => visited.has(x.id)).map(x => ent('r:' + x.id, x.id, x.name, x.sub, x.text)).join('') : '')
       + `<li class="sec">${t('beauty')}</li>`
-      + SPOTS.map(sp => sp.found ? ent('s:' + sp.id, sp.id, sp.name, sp.area, sp.text) : `<li class="lock"><b>？？？</b><small>${sp.area.split(/・|, | · /)[0]}</small></li>`).join('');
+      + SPOTS.map(sp => sp.found ? ent('s:' + sp.id, sp.id, sp.name, sp.area, sp.text) : `<li class="lock open" data-k="xs:${sp.id}"><div class="t"><b>？？？</b><small>${sp.area.split(/・|, | · /)[0]}</small></div><i class="chev"></i></li>`).join('');
     $('#qi').textContent = t('qiOf', { n: avail(), cost: COST });
     $('#qibar').style.width = Math.min(100, avail() / COST * 100) + '%';
     const stars = n => ' ' + '★'.repeat(n.star);
@@ -775,7 +775,9 @@ spotPh.addEventListener('scroll', () => { const k = Math.round(spotPh.scrollLeft
 $('#dexList').addEventListener('click', e => {
   const li = e.target.closest('li[data-k]'); if (!li) return;
   const [kind, id] = li.dataset.k.split(':'), d = TT?.spots?.[id];
-  if (kind === 'g') { const n = NODES.find(x => x.id === id); spotData = { title: `${n.name}${t('sep')}${n.hill}`, sub: `${n.seal}${t('sep')}${n.virtue}`, text: n.info, em: '', d }; }
+  if (kind === 'xg') { const n = NODES.find(x => x.id === id); spotData = { title: `${n.icon} ？？？`, sub: n.seal, text: t('lockedGate', { hint: G.geo ? placeOf(n) : n.hint }), em: '', d: null }; }
+  else if (kind === 'xs') { const sp = SPOTS.find(q => q.id === id), area = sp.area.split(/・|, | · /)[0]; spotData = { title: '？？？', sub: area, text: t('lockedSpot', { area }), em: '', d: null }; }
+  else if (kind === 'g') { const n = NODES.find(x => x.id === id); spotData = { title: `${n.name}${t('sep')}${n.hill}`, sub: `${n.seal}${t('sep')}${n.virtue}`, text: n.info, em: '', d }; }
   else if (kind === 'r') { const x = REAL.find(r => r.id === id); spotData = { title: x.name, sub: x.sub, text: x.text, em: '', d }; }
   else { const sp = SPOTS.find(q => q.id === id); spotData = { title: sp.name, sub: sp.area, text: sp.text, em: '', d }; }
   openSpot();
