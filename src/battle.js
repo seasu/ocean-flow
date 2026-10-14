@@ -53,7 +53,7 @@ export function battle(node, lv = 0, realm = '') {
 }
 
 function start(node, lv, done) {
-  S = { node, lv, done, run: false, t: 0, pur: 0, fx: [], shots: [], hitT: 0, shake: 0, win: 0, lay: null, game: null };
+  S = { node, lv, done, run: false, t: 0, pur: 0, fx: [], shots: [], hitT: 0, hurt: 0, rings: [], blink: 2, shake: 0, win: 0, lay: null, game: null };
   size();
   S.game = gameOf(node)(api, { star: node.star || 1, ease: Math.min(2, tries[node.id] || 0) });
   bar.style.width = '0%';
@@ -113,10 +113,12 @@ function tick(now) {
   for (const s of S.shots) {
     s.t += dt; const k = Math.min(1, s.t / s.d), e = k * k;
     s.x = s.x0 + (L.ex - s.x0) * e + Math.sin(k * 3.14) * (s.x0 < L.ex ? -30 : 30); s.y = s.y0 + (L.ey - s.y0) * e;
-    if (k >= 1) { s.hit = true; S.hitT = 0.25; api.burst(L.ex + (Math.random() - 0.5) * L.er, L.ey + (Math.random() - 0.5) * L.er * 0.6, s.col, 4, 120); }
+    if (k >= 1) { s.hit = true; S.hitT = 0.25; S.hurt = 1; S.rings.push({ t: 0 }); api.burst(L.ex + (Math.random() - 0.5) * L.er, L.ey + (Math.random() - 0.5) * L.er * 0.6, s.col, 4, 120); }
   }
   S.shots = S.shots.filter(s => !s.hit);
   S.hitT = Math.max(0, S.hitT - dt); S.shake = Math.max(0, S.shake - dt);
+  S.hurt = Math.max(0, S.hurt - dt / 0.5); S.blink -= dt; if (S.blink < -0.12) S.blink = 2 + Math.random() * 2.5;
+  for (const r of S.rings) r.t += dt; S.rings = S.rings.filter(r => r.t < 0.5);
   if (S.win) S.win += dt;
   for (const p of S.fx) { p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.94; p.vy *= 0.94; p.life -= dt; }
   S.fx = S.fx.filter(p => p.life > 0);
@@ -150,17 +152,36 @@ function draw(L) {
   g.save();
   if (S.shake) g.translate((Math.random() - 0.5) * 12 * S.shake, (Math.random() - 0.5) * 12 * S.shake);
   // 濁流：一團旋轉的方塊，淨化越多越小、越亮；被打中時抖一下、閃白
-  const jx = S.hitT ? (Math.random() - 0.5) * 8 : 0, n = 22, rad = L.er * (1 - p * 0.45) * (1 - win);
+  // 受擊：往後一縮、壓扁再彈回，方塊被震開，核心閃白、眼睛瞇起來
+  const hu = S.hurt, kick = hu * hu, wob = Math.sin((1 - hu) * 14) * hu;
+  const jx = S.hitT ? (Math.random() - 0.5) * 8 : 0, n = 22, rad = L.er * (1 - p * 0.45) * (1 - win), cy = L.ey - kick * 12;
   for (let i = 0; i < n; i++) {
-    const a = i / n * 6.283 + T * (0.6 + (i % 3) * 0.25), r = rad * (0.35 + ((i * 37) % 10) / 14) + Math.sin(T * 2 + i) * 4;
-    const x = L.ex + jx + Math.cos(a) * r, y = L.ey + Math.sin(a) * r * 0.7, sz = 8 + (i % 4) * 4 + Math.sin(T * 3 + i) * 2;
+    const a = i / n * 6.283 + T * (0.6 + (i % 3) * 0.25), r = (rad * (0.35 + ((i * 37) % 10) / 14) + Math.sin(T * 2 + i) * 4) * (1 + kick * 0.45);
+    const x = L.ex + jx + Math.cos(a) * r, y = cy + Math.sin(a) * r * 0.7, sz = 8 + (i % 4) * 4 + Math.sin(T * 3 + i) * 2;
     g.save(); g.translate(x, y); g.rotate(a + T);
     const m = (i % 5) / 5;
     g.fillStyle = S.hitT > 0.15 ? '#ffffff' : mix([58 + m * 30, 50 + m * 20, 86 + m * 30], [127, 232, 255], p * 0.8 + win);
     g.globalAlpha = 0.85 * (1 - win); g.fillRect(-sz / 2, -sz / 2, sz, sz); g.restore();
   }
   g.globalAlpha = 1 - win;
-  g.fillStyle = mix([20, 14, 34], [255, 207, 90], p); g.beginPath(); g.arc(L.ex + jx, L.ey, rad * 0.32 + 4, 0, 6.283); g.fill();
+  const cr = rad * 0.32 + 4, cx = L.ex + jx;
+  for (const q of S.rings) { g.globalAlpha = (1 - q.t / 0.5) * 0.7 * (1 - win); g.strokeStyle = '#bff4ff'; g.lineWidth = 3; g.beginPath(); g.ellipse(cx, cy, cr + q.t * 160, (cr + q.t * 160) * 0.75, 0, 0, 6.283); g.stroke(); }
+  g.globalAlpha = 1 - win;
+  g.save(); g.translate(cx, cy); g.scale(1 + wob * 0.22, 1 - wob * 0.22);
+  g.fillStyle = mix([20, 14, 34], [255, 207, 90], p); g.beginPath(); g.arc(0, 0, cr, 0, 6.283); g.fill();
+  if (S.hitT > 0.1) { g.globalAlpha = (1 - win) * S.hitT * 3; g.fillStyle = '#ffffff'; g.beginPath(); g.arc(0, 0, cr, 0, 6.283); g.fill(); g.globalAlpha = 1 - win; }
+  // 眼睛：平常會眨眼，被打中瞇成 > <，快被淨化時變得溫和
+  const ex = cr * 0.36, ey = -cr * 0.08, es = Math.max(2.5, cr * 0.13);
+  g.strokeStyle = g.fillStyle = mix([255, 120, 160], [255, 255, 255], p);
+  g.lineWidth = Math.max(2, es * 0.55); g.lineCap = 'round';
+  if (hu > 0.25) {
+    for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(sd * ex + es * sd, ey - es); g.lineTo(sd * ex - es * 0.3 * sd, ey); g.lineTo(sd * ex + es * sd, ey + es); g.stroke(); }
+  } else if (S.blink < 0) {
+    for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(sd * ex - es, ey); g.lineTo(sd * ex + es, ey); g.stroke(); }
+  } else {
+    for (const sd of [-1, 1]) { g.beginPath(); g.ellipse(sd * ex, ey, es, es * (1.25 - p * 0.5), 0, 0, 6.283); g.fill(); }
+  }
+  g.restore();
   g.globalAlpha = 1;
   g.save(); S.game.draw(); g.restore();
   // 守護獸
