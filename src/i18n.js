@@ -56,7 +56,7 @@ const S = {
   safety: ['請走人行道、注意來車，過馬路時不要看手機。', 'Stay on the sidewalk, watch for traffic, and don\'t look at your phone while crossing.', '歩道を歩き、車に注意してください。横断中はスマホを見ないでください。'],
   tapNext: ['點一下繼續 ▸', 'Tap to continue ▸', 'タップで次へ ▸'],
   tagline: ['山有脈，海有流，人亦有自己的道。<br>走遍一座方塊台灣：台北、龜山島、日月潭、玉山、墾丁。', 'Mountains have veins, the sea has currents, and people have their own way.<br>Explore a blocky Taiwan: Taipei, Guishan Island, Sun Moon Lake, Yushan, Kenting.', '山に脈あり、海に流れあり、人にもまた道あり。<br>ブロックの台湾をめぐろう：台北、亀山島、日月潭、玉山、墾丁。'],
-  startGeo: ['走出去・現地探索', 'Go outside · Explore on site', '外へ出よう・現地探索'],
+  startGeo: ['啟程', 'Set Out', '出発'],
   startIsland: ['先在島上逛逛', 'Explore the island first', 'まず島を歩いてみる'],
   how: ['現地探索會使用定位，從黑客松會場（北平東路30號）出發<br>沒有定位時會自動改用模擬定位・建議開聲音<br>電腦：WASD 移動、空白鍵跳、E 感知',
     'On-site mode uses your location, starting from the hackathon venue (No. 30, Beiping E. Rd.)<br>Without location it switches to a simulated one · Sound on recommended<br>Desktop: WASD to move, Space to jump, E to sense',
