@@ -1,0 +1,378 @@
+{
+  "source": "Wikimedia Commons（照片取自中文維基百科條目）",
+  "sourceUrl": "https://commons.wikimedia.org/",
+  "license": "各照片依其標示的自由授權使用（作者與授權見 images[].author / license）",
+  "fetchedAt": "2026-10-14T09:06:38.427Z",
+  "spots": {
+    "leopard": {
+      "src": "commons",
+      "name": "四獸山",
+      "url": "https://zh.wikipedia.org/wiki/%E5%9B%9B%E7%8D%B8%E5%B1%B1",
+      "images": [
+        {
+          "file": "data/photos/c-leopard-1.jpg",
+          "subject": "2010 07 22210 6931 Xinyi District, Taipei, Buildings in Taipei, Taipei 101, Streets in Taipei, Taiwan",
+          "author": "Lord Koxinga",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:2010_07_22210_6931_Xinyi_District,_Taipei,_Buildings_in_Taipei,_Taipei_101,_Streets_in_Taipei,_Taiwan.JPG"
+        },
+        {
+          "file": "data/photos/c-leopard-2.jpg",
+          "subject": "2010 07 22230 6939 Xinyi District, Taipei, Buildings, Taipei 101, Observation, Streets in Taipei, Taiwan",
+          "author": "Lord Koxinga",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:2010_07_22230_6939_Xinyi_District,_Taipei,_Buildings,_Taipei_101,_Observation,_Streets_in_Taipei,_Taiwan.JPG"
+        },
+        {
+          "file": "data/photos/c-leopard-3.jpg",
+          "subject": "Night skyline of Taipei, Taiwan viewed from Mt. Tiger 2019",
+          "author": "大頭家族",
+          "license": "CC BY-SA 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Night_skyline_of_Taipei,_Taiwan_viewed_from_Mt._Tiger_2019.jpg"
+        }
+      ]
+    },
+    "lion": {
+      "src": "commons",
+      "name": "四獸山",
+      "url": "https://zh.wikipedia.org/wiki/%E5%9B%9B%E7%8D%B8%E5%B1%B1",
+      "images": [
+        {
+          "file": "data/photos/c-lion-1.jpg",
+          "subject": "2010 07 22210 6931 Xinyi District, Taipei, Buildings in Taipei, Taipei 101, Streets in Taipei, Taiwan",
+          "author": "Lord Koxinga",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:2010_07_22210_6931_Xinyi_District,_Taipei,_Buildings_in_Taipei,_Taipei_101,_Streets_in_Taipei,_Taiwan.JPG"
+        },
+        {
+          "file": "data/photos/c-lion-2.jpg",
+          "subject": "2010 07 22230 6939 Xinyi District, Taipei, Buildings, Taipei 101, Observation, Streets in Taipei, Taiwan",
+          "author": "Lord Koxinga",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:2010_07_22230_6939_Xinyi_District,_Taipei,_Buildings,_Taipei_101,_Observation,_Streets_in_Taipei,_Taiwan.JPG"
+        },
+        {
+          "file": "data/photos/c-lion-3.jpg",
+          "subject": "Night skyline of Taipei, Taiwan viewed from Mt. Tiger 2019",
+          "author": "大頭家族",
+          "license": "CC BY-SA 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Night_skyline_of_Taipei,_Taiwan_viewed_from_Mt._Tiger_2019.jpg"
+        }
+      ]
+    },
+    "sea": {
+      "src": "commons",
+      "name": "龜山島",
+      "url": "https://zh.wikipedia.org/wiki/%E9%BE%9C%E5%B1%B1%E5%B3%B6",
+      "images": [
+        {
+          "file": "data/photos/c-sea-1.jpg",
+          "subject": "Dasi Station view of Gueishan Island",
+          "author": "KasugaHuang",
+          "license": "CC BY 2.5",
+          "page": "https://commons.wikimedia.org/wiki/File:Dasi_Station_view_of_Gueishan_Island.jpg"
+        },
+        {
+          "file": "data/photos/c-sea-2.jpg",
+          "subject": "Gueishan Island the Cliff",
+          "author": "Peellden",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Gueishan_Island_the_Cliff.jpg"
+        },
+        {
+          "file": "data/photos/c-sea-3.jpg",
+          "subject": "Gueishan Island the Militarybase",
+          "author": "Peellden",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Gueishan_Island_the_Militarybase.jpg"
+        }
+      ]
+    },
+    "peak": {
+      "src": "commons",
+      "name": "玉山",
+      "url": "https://zh.wikipedia.org/wiki/%E7%8E%89%E5%B1%B1",
+      "images": [
+        {
+          "file": "data/photos/c-peak-1.jpg",
+          "subject": "04.13 總統出席「海軍新型兩棲船塢運輸艦命名暨下水典禮」 - Flickr id 51112816358",
+          "author": "​總統府",
+          "license": "CC BY 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:04.13_%E7%B8%BD%E7%B5%B1%E5%87%BA%E5%B8%AD%E3%80%8C%E6%B5%B7%E8%BB%8D%E6%96%B0%E5%9E%8B%E5%85%A9%E6%A3%B2%E8%88%B9%E5%A1%A2%E9%81%8B%E8%BC%B8%E8%89%A6%E5%91%BD%E5%90%8D%E6%9A%A8%E4%B8%8B%E6%B0%B4%E5%85%B8%E7%A6%AE%E3%80%8D_-_Flickr_id_51112816358.jpg"
+        },
+        {
+          "file": "data/photos/c-peak-2.jpg",
+          "subject": "150. Distant View of Mt. Niitaka from Mt. Ari. Formosa.",
+          "author": "Unknown authorUnknown author",
+          "license": "Public domain",
+          "page": "https://commons.wikimedia.org/wiki/File:150._Distant_View_of_Mt._Niitaka_from_Mt._Ari._Formosa..JPG"
+        },
+        {
+          "file": "data/photos/c-peak-3.jpg",
+          "subject": "Mount Yu Shan - Taiwan",
+          "author": "original-uploaded by Kailing3",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Mount_Yu_Shan_-_Taiwan.jpg"
+        }
+      ]
+    },
+    "shandao": {
+      "src": "commons",
+      "name": "善導寺 (臺北市)",
+      "url": "https://zh.wikipedia.org/wiki/%E5%96%84%E5%B0%8E%E5%AF%BA_(%E8%87%BA%E5%8C%97%E5%B8%82)",
+      "images": [
+        {
+          "file": "data/photos/c-shandao-1.jpg",
+          "subject": "Taipei Shandao Temple 20240328",
+          "author": "Yu tptw",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Shandao_Temple_20240328.jpg"
+        }
+      ]
+    },
+    "controlyuan": {
+      "src": "commons",
+      "name": "監察院",
+      "url": "https://zh.wikipedia.org/wiki/%E7%9B%A3%E5%AF%9F%E9%99%A2",
+      "images": [
+        {
+          "file": "data/photos/c-controlyuan-1.jpg",
+          "subject": "Control Yuan, National Police Agency and Sheraton Grand Taipei Hotel 20240626",
+          "author": "Yu tptw",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Control_Yuan,_National_Police_Agency_and_Sheraton_Grand_Taipei_Hotel_20240626.jpg"
+        },
+        {
+          "file": "data/photos/c-controlyuan-2.jpg",
+          "subject": "Control Yuan panoramic building",
+          "author": "監察院",
+          "license": "Attribution",
+          "page": "https://commons.wikimedia.org/wiki/File:Control_Yuan_panoramic_building.jpg"
+        },
+        {
+          "file": "data/photos/c-controlyuan-3.jpg",
+          "subject": "Former Legislative Yuan & Control Yuan in Nanjing 2011-10",
+          "author": "猫猫的日记本",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Former_Legislative_Yuan_%26_Control_Yuan_in_Nanjing_2011-10.JPG"
+        }
+      ]
+    },
+    "jinan": {
+      "src": "commons",
+      "name": "濟南基督長老教會",
+      "url": "https://zh.wikipedia.org/wiki/%E6%BF%9F%E5%8D%97%E5%9F%BA%E7%9D%A3%E9%95%B7%E8%80%81%E6%95%99%E6%9C%83",
+      "images": [
+        {
+          "file": "data/photos/c-jinan-1.jpg",
+          "subject": "Taipei Jinan Church 20240616 02 (cropped)",
+          "author": "Yu tptw",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Jinan_Church_20240616_02_(cropped).jpg"
+        },
+        {
+          "file": "data/photos/c-jinan-2.jpg",
+          "subject": "Taipei Jinan Presbyterian Church 20240626",
+          "author": "Yu tptw",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Jinan_Presbyterian_Church_20240626.jpg"
+        },
+        {
+          "file": "data/photos/c-jinan-3.jpg",
+          "subject": "Taipei Jinan Presbyterian Church 20240626 01",
+          "author": "Yu tptw",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Jinan_Presbyterian_Church_20240626_01.jpg"
+        }
+      ]
+    },
+    "guanghua": {
+      "src": "commons",
+      "name": "光華商場",
+      "url": "https://zh.wikipedia.org/wiki/%E5%85%89%E8%8F%AF%E5%95%86%E5%A0%B4",
+      "images": [
+        {
+          "file": "data/photos/c-guanghua-1.jpg",
+          "subject": "Bade Road and TransGlobe Taipei Hope Square 20210829",
+          "author": "玄史生",
+          "license": "CC0",
+          "page": "https://commons.wikimedia.org/wiki/File:Bade_Road_and_TransGlobe_Taipei_Hope_Square_20210829.jpg"
+        },
+        {
+          "file": "data/photos/c-guanghua-2.jpg",
+          "subject": "Former place of Guanghua Bridge 20060204",
+          "author": "Kamakura",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Former_place_of_Guanghua_Bridge_20060204.jpg"
+        },
+        {
+          "file": "data/photos/c-guanghua-3.jpg",
+          "subject": "GuangHuaComputerMarket Old",
+          "author": "Richy Li",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:GuangHuaComputerMarket_Old.jpg"
+        }
+      ]
+    },
+    "turtle": {
+      "src": "commons",
+      "name": "龜山島",
+      "url": "https://zh.wikipedia.org/wiki/%E9%BE%9C%E5%B1%B1%E5%B3%B6",
+      "images": [
+        {
+          "file": "data/photos/c-turtle-1.jpg",
+          "subject": "Dasi Station view of Gueishan Island",
+          "author": "KasugaHuang",
+          "license": "CC BY 2.5",
+          "page": "https://commons.wikimedia.org/wiki/File:Dasi_Station_view_of_Gueishan_Island.jpg"
+        },
+        {
+          "file": "data/photos/c-turtle-2.jpg",
+          "subject": "Gueishan Island the Cliff",
+          "author": "Peellden",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Gueishan_Island_the_Cliff.jpg"
+        },
+        {
+          "file": "data/photos/c-turtle-3.jpg",
+          "subject": "Gueishan Island the Militarybase",
+          "author": "Peellden",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Gueishan_Island_the_Militarybase.jpg"
+        }
+      ]
+    },
+    "kuroshio": {
+      "src": "commons",
+      "name": "黑潮",
+      "url": "https://zh.wikipedia.org/wiki/%E9%BB%91%E6%BD%AE",
+      "images": []
+    },
+    "taroko": {
+      "src": "commons",
+      "name": "太魯閣國家公園",
+      "url": "https://zh.wikipedia.org/wiki/%E5%A4%AA%E9%AD%AF%E9%96%A3%E5%9C%8B%E5%AE%B6%E5%85%AC%E5%9C%92",
+      "images": [
+        {
+          "file": "data/photos/c-taroko-1.jpg",
+          "subject": "A red suspension bridge in Taroko Gorge (12609732185)",
+          "author": "Alexander Synaptic from Taipei, Taiwan",
+          "license": "CC BY-SA 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:A_red_suspension_bridge_in_Taroko_Gorge_(12609732185).jpg"
+        },
+        {
+          "file": "data/photos/c-taroko-2.jpg",
+          "subject": "Bridge and an observation spur of some sort. (10328910506)",
+          "author": "Connie Ma from Chicago, United States of America",
+          "license": "CC BY-SA 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Bridge_and_an_observation_spur_of_some_sort._(10328910506).jpg"
+        },
+        {
+          "file": "data/photos/c-taroko-3.jpg",
+          "subject": "Butterfly p1100275 cropped",
+          "author": "David Monniaux",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Butterfly_p1100275_cropped.jpg"
+        }
+      ]
+    },
+    "sunmoon": {
+      "src": "commons",
+      "name": "日月潭",
+      "url": "https://zh.wikipedia.org/wiki/%E6%97%A5%E6%9C%88%E6%BD%AD",
+      "images": [
+        {
+          "file": "data/photos/c-sunmoon-1.jpg",
+          "subject": "Chiaming Lake under blue sky with white clouds",
+          "author": "Elsie Lin",
+          "license": "CC BY-SA 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Chiaming_Lake_under_blue_sky_with_white_clouds.jpg"
+        },
+        {
+          "file": "data/photos/c-sunmoon-2.jpg",
+          "subject": "Da-Guan No.1 Hydropower Plant01",
+          "author": "Eric Deng",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Da-Guan_No.1_Hydropower_Plant01.jpg"
+        },
+        {
+          "file": "data/photos/c-sunmoon-3.jpg",
+          "subject": "LAKE JITSUGETSUTAN DISTRICT",
+          "author": "Air Force History Research Agency, United States",
+          "license": "Public domain",
+          "page": "https://commons.wikimedia.org/wiki/File:LAKE_JITSUGETSUTAN_DISTRICT.jpg"
+        }
+      ]
+    },
+    "yushan": {
+      "src": "commons",
+      "name": "玉山",
+      "url": "https://zh.wikipedia.org/wiki/%E7%8E%89%E5%B1%B1",
+      "images": [
+        {
+          "file": "data/photos/c-yushan-1.jpg",
+          "subject": "04.13 總統出席「海軍新型兩棲船塢運輸艦命名暨下水典禮」 - Flickr id 51112816358",
+          "author": "​總統府",
+          "license": "CC BY 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:04.13_%E7%B8%BD%E7%B5%B1%E5%87%BA%E5%B8%AD%E3%80%8C%E6%B5%B7%E8%BB%8D%E6%96%B0%E5%9E%8B%E5%85%A9%E6%A3%B2%E8%88%B9%E5%A1%A2%E9%81%8B%E8%BC%B8%E8%89%A6%E5%91%BD%E5%90%8D%E6%9A%A8%E4%B8%8B%E6%B0%B4%E5%85%B8%E7%A6%AE%E3%80%8D_-_Flickr_id_51112816358.jpg"
+        },
+        {
+          "file": "data/photos/c-yushan-2.jpg",
+          "subject": "150. Distant View of Mt. Niitaka from Mt. Ari. Formosa.",
+          "author": "Unknown authorUnknown author",
+          "license": "Public domain",
+          "page": "https://commons.wikimedia.org/wiki/File:150._Distant_View_of_Mt._Niitaka_from_Mt._Ari._Formosa..JPG"
+        },
+        {
+          "file": "data/photos/c-yushan-3.jpg",
+          "subject": "Mount Yu Shan - Taiwan",
+          "author": "original-uploaded by Kailing3",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Mount_Yu_Shan_-_Taiwan.jpg"
+        }
+      ]
+    },
+    "alishan": {
+      "src": "commons",
+      "name": "阿里山神木群",
+      "url": "https://zh.wikipedia.org/wiki/%E9%98%BF%E9%87%8C%E5%B1%B1%E7%A5%9E%E6%9C%A8%E7%BE%A4",
+      "images": [
+        {
+          "file": "data/photos/c-alishan-1.jpg",
+          "subject": "Alishan Visitor Center-01.2023-11-11",
+          "author": "阿道",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Alishan_Visitor_Center-01.2023-11-11.jpg"
+        }
+      ]
+    },
+    "kenting": {
+      "src": "commons",
+      "name": "鵝鑾鼻燈塔",
+      "url": "https://zh.wikipedia.org/wiki/%E9%B5%9D%E9%91%BE%E9%BC%BB%E7%87%88%E5%A1%94",
+      "images": [
+        {
+          "file": "data/photos/c-kenting-1.jpg",
+          "subject": "Eluanbi Lighthouse 01",
+          "author": "Bernard Gagnon",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Eluanbi_Lighthouse_01.jpg"
+        },
+        {
+          "file": "data/photos/c-kenting-2.jpg",
+          "subject": "Eluanbi Lighthouse 20240918-3",
+          "author": "Suicasmo",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Eluanbi_Lighthouse_20240918-3.jpg"
+        },
+        {
+          "file": "data/photos/c-kenting-3.jpg",
+          "subject": "Eluanbi Lighthouse Kenting National Park-ID9286",
+          "author": "Xavier Berlioux",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Eluanbi_Lighthouse_Kenting_National_Park-ID9286.jpg"
+        }
+      ]
+    }
+  }
+}
