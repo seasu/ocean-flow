@@ -490,15 +490,15 @@ if (showA2hs) {
   const box = launch.querySelector('.a2hs'), p = box.querySelector('p');
   box.hidden = false;
   // iOS 只有 Safari 能加到主畫面；LINE、FB、Chrome 等內建瀏覽器要先換到 Safari
-  if (ios) { const safari = !/CriOS|FxiOS|EdgiOS|Line\/|FBAN|FBAV|Instagram/.test(ua); p.innerHTML = t(safari ? 'a2hsIos' : 'a2hsIosApp'); launch.querySelector('.arrow').hidden = !safari || innerWidth > 700; }
+  if (ios) { const safari = !/CriOS|FxiOS|EdgiOS|Line\/|FBAN|FBAV|Instagram/.test(ua); p.innerHTML = t(safari ? 'a2hsIos' : 'a2hsIosApp'); }
   else p.innerHTML = t('a2hsOther');
 }
 // Android Chrome 會給安裝事件，可以直接跳出「安裝」視窗
-addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; const b = launch.querySelector('.install'); b.hidden = false; launch.querySelector('.a2hs p').hidden = true; });
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; const b = launch.querySelector('.install'); b.hidden = false; launch.querySelector('.a2hs p').textContent = t('tipHomeAndroid'); });
 launch.querySelector('.install').addEventListener('click', async e => { e.stopPropagation(); if (!installEvt) return; installEvt.prompt(); await installEvt.userChoice.catch(() => { }); installEvt = null; e.target.hidden = true; });
 if (!params.has('play') && !params.has('geo') && (wantFilm || (showA2hs && !a2hsShown))) {
   launch.classList.add('show');
-  if (!wantFilm) launch.querySelector('small').hidden = true;
+  if (!wantFilm) launch.querySelector('.tip').hidden = true;
   launch.querySelector('.go').addEventListener('click', () => {
     launch.classList.remove('show');
     try { localStorage.setItem(A2HS_KEY, '1'); } catch { }
