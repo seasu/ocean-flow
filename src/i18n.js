@@ -8,13 +8,8 @@ function detect() {
   const q = new URLSearchParams(location.search).get('lang');
   if (q && LANGS.some(l => l[0] === q)) return q;
   try { const s = localStorage.getItem(KEY); if (s && LANGS.some(l => l[0] === s)) return s; } catch { }
-  for (const l of navigator.languages || [navigator.language || '']) {
-    const v = (l || '').toLowerCase();
-    if (v.startsWith('zh')) return 'zh';
-    if (v.startsWith('ja')) return 'ja';
-    if (v.startsWith('en')) return 'en';
-  }
-  return 'en';
+  // 預設一律繁體中文；英文、日文要在語言按鈕切換（會記住）或用 ?lang=
+  return 'zh';
 }
 export const lang = detect();
 document.documentElement.lang = { zh: 'zh-Hant', en: 'en', ja: 'ja' }[lang];
@@ -67,12 +62,15 @@ const S = {
   watchFilm: ['▶ 觀看介紹影片', '▶ Watch the intro film', '▶ 紹介映像を見る'],
   skip: ['略過 ▸', 'Skip ▸', 'スキップ ▸'],
   tapSound: ['🔊 點一下開聲音', '🔊 Tap for sound', '🔊 タップで音声オン'],
-  launchGo: ['▶ 點一下開始', '▶ Tap to begin', '▶ タップしてはじめる'],
-  launchSound: ['🔊 開啟聲音，會先播一段介紹影片', '🔊 Turn your sound on — a short intro film plays first', '🔊 音声をオンに。最初に紹介映像が流れます'],
-  a2hsTitle: ['加到主畫面，像 App 一樣全螢幕玩', 'Add to Home Screen to play full screen like an app', 'ホーム画面に追加すると、アプリのように全画面で遊べます'],
-  a2hsIos: ['點 <b>分享</b> <span class="ico">⎙</span>（新版 iOS 在 <b>⋯</b> 裡），選 <b>加入主畫面</b>', 'Tap <b>Share</b> <span class="ico">⎙</span> (under <b>⋯</b> on newer iOS), then <b>Add to Home Screen</b>', '<b>共有</b> <span class="ico">⎙</span>（新しい iOS では <b>⋯</b> の中）から <b>ホーム画面に追加</b>'],
-  a2hsIosApp: ['請先用 <b>Safari</b> 開啟這個網址，再從 <b>分享</b> 選 <b>加入主畫面</b>', 'Open this page in <b>Safari</b> first, then <b>Share</b> → <b>Add to Home Screen</b>', 'まず <b>Safari</b> で開き、<b>共有</b> → <b>ホーム画面に追加</b>'],
-  a2hsOther: ['在瀏覽器選單選 <b>加到主畫面</b> 或 <b>安裝應用程式</b>', 'In the browser menu choose <b>Add to Home screen</b> or <b>Install app</b>', 'ブラウザのメニューから <b>ホーム画面に追加</b> または <b>アプリをインストール</b>'],
+  launchGo: ['啟程', 'Set Out', '出発'],
+  tipsTitle: ['✦ 啟程前的提醒 ✦', '✦ Before You Set Out ✦', '✦ 出発前のひとこと ✦'],
+  tipSoundT: ['把聲音打開', 'Turn your sound on', '音をオンに'],
+  tipSound: ['出發前先看一段介紹影片，配樂和旁白都很重要喔！', 'A short intro film plays first, and the music and narration are half the magic!', '最初に紹介映像が流れます。音楽とナレーションも大事な旅の一部！'],
+  tipHomeT: ['加到主畫面，像 App 一樣玩', 'Add it to your Home Screen', 'ホーム画面に追加しよう'],
+  a2hsIos: ['全螢幕更好玩，下次一點就出發。點 <b>分享</b> <span class="ico">⎙</span>（新版 iOS 在 <b>⋯</b> 裡）→ <b>加入主畫面</b>', 'Full screen plays better, and next time it is one tap away. Tap <b>Share</b> <span class="ico">⎙</span> (under <b>⋯</b> on newer iOS) → <b>Add to Home Screen</b>', '全画面で遊べて、次からワンタップで出発。<b>共有</b> <span class="ico">⎙</span>（新しい iOS では <b>⋯</b> の中）→ <b>ホーム画面に追加</b>'],
+  a2hsIosApp: ['全螢幕更好玩！先用 <b>Safari</b> 打開這個網址，再點 <b>分享</b> → <b>加入主畫面</b>', 'Full screen plays better! Open this page in <b>Safari</b>, then <b>Share</b> → <b>Add to Home Screen</b>', '全画面がおすすめ！まず <b>Safari</b> で開き、<b>共有</b> → <b>ホーム画面に追加</b>'],
+  a2hsOther: ['全螢幕更好玩！在瀏覽器選單選 <b>加到主畫面</b> 或 <b>安裝應用程式</b>', 'Full screen plays better! In the browser menu choose <b>Add to Home screen</b> or <b>Install app</b>', '全画面がおすすめ！ブラウザのメニューから <b>ホーム画面に追加</b> または <b>アプリをインストール</b>'],
+  tipHomeAndroid: ['全螢幕更好玩，下次一點就出發！', 'Full screen plays better, and next time it is one tap away!', '全画面で遊べて、次からワンタップで出発！'],
   a2hsInstall: ['📲 加到主畫面', '📲 Add to Home Screen', '📲 ホーム画面に追加'],
   noGL: ['此裝置無法執行 WebGL', 'WebGL is not available on this device', 'この端末では WebGL を実行できません'],
 
