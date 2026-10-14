@@ -27,10 +27,15 @@ uniform float uEmi, uAlpha, uSpirit, uTime, uGrid;
 void main(){
   vec3 n = normalize(vN);
   vec3 base = vCol * uMul;
+  if (uGrid > 0.5) {
+    // 地形：頂面棋盤深淺（Roblox 草地感）、側面每一格一層的深淺；網格合併後改在這裡畫
+    if (n.y > 0.5) base *= 1.0 - 0.04 * mod(floor(vW.x + 0.001) + floor(vW.z + 0.001), 2.0);
+    if (vEmi < -0.5) base *= 0.88 + 0.12 * mod(floor(vW.y + 0.001), 2.0);
+  }
   float d = max(dot(n, uLight), 0.0);
   float side = 0.86 + 0.14 * abs(n.x);       // 兩側面亮度略不同，方塊感更清楚
   vec3 c = base * (uAmb + uSun * d) * side;
-  float e = vEmi + uEmi;
+  float e = max(vEmi, 0.0) + uEmi;
   c = mix(c, base * 1.25, clamp(e, 0.0, 1.0));
   float dist = distance(vW, uEye);
   if (uGrid > 0.5) {

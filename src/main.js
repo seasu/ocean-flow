@@ -1,7 +1,7 @@
 // 《洋流：起源》mobile web prototype：主迴圈、操作、任務流程
 import { M, clamp, lerp, rng, hex, mixColor, smooth } from './math.js';
 import { Renderer, Builder } from './gl.js';
-import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, bellMesh, beastMesh, N, WATER, T, PLACES, CURRENT, curX } from './world.js';
+import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, bellMesh, beastMesh, N, S, WATER, T, PLACES, CURRENT, curX } from './world.js';
 import { drawAvatar, BLUE, ORANGE } from './avatar.js';
 import { initAudio, unlockAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
 import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
@@ -85,7 +85,7 @@ const nextGate = () => S1.find(n => !n.awake) || S2.find(n => !n.awake);
 const canOpen = n => n.stage === 1 ? n === S1.find(m => !m.awake) : stage1Done() && G.realm >= REQ;
 for (const n of NODES) {
   n.mesh = r.mesh(nodeMesh(n.id)); n.awake = false; n.charge = 0; n.vein = null; n.flash = 0;
-  if (n.stage === 1) { n.beast = r.mesh(beastMesh(n.id)); n.face = Math.atan2(56 - n.pos[0], 56 - n.pos[2]) + Math.PI; }
+  if (n.stage === 1) { n.beast = r.mesh(beastMesh(n.id)); n.face = Math.atan2(PLACES.spawn[0] - n.pos[0], PLACES.spawn[1] - n.pos[2]) + Math.PI; }
 }
 const GATE = at(PLACES.gate);
 
@@ -98,26 +98,28 @@ const motes = [];
     while (n > 0 && tries++ < 4000) {
       const x = 2 + Math.floor(R() * (N - 4)), z = 2 + Math.floor(R() * (N - 4)), k = K[z * N + x], h = world.H[z * N + x];
       if (!test(x, z, k, h)) continue;
-      if (motes.some(m => Math.hypot(m.x - x, m.z - z) < 6)) continue;
+      if (motes.some(m => Math.hypot(m.x - x, m.z - z) < 6 * S)) continue;
       motes.push({ x: x + 0.5, z: z + 0.5, y: h + 1.1, ph: R() * 6, taken: false }); n--;
     }
   };
-  pick((x, z, k) => k === T.ROAD, 6);
-  for (let z = 30; z <= 100; z += 12) motes.push({ x: curX(z), z, y: WATER + 0.8, ph: R() * 6, taken: false });
-  pick((x, z, k, h) => h >= 8 && k !== T.BUILDING && k !== T.TOWER, 8);
-  pick((x, z, k, h) => world.land[z * N + x] && k !== T.BUILDING && k !== T.TOWER && h >= 3, 10);
+  // 島變大，靈光也跟著多一些（約 S 的一半倍數），走起來不會空
+  const more = n => Math.round(n * (1 + S) / 2);
+  pick((x, z, k) => k === T.ROAD, more(6));
+  for (let z = 30 * S; z <= 100 * S; z += 24 * S / (1 + S)) motes.push({ x: curX(z), z, y: WATER + 0.8, ph: R() * 6, taken: false });
+  pick((x, z, k, h) => h >= 8 && k !== T.BUILDING && k !== T.TOWER, more(8));
+  pick((x, z, k, h) => world.land[z * N + x] && k !== T.BUILDING && k !== T.TOWER && h >= 3, more(10));
 }
 const COST = 3;
 
 // 台灣之美：走近就會收進圖鑑（內容為真實地景的簡介）
 const SPOTS = [
-  { id: '101', name: '台北 101', area: '台北・Taipei 101', pos: [67, 30], r: 8, text: '高 508 公尺，2004 年完工，曾是世界最高的大樓。外型取自節節高升的竹子，每年跨年的煙火是台北的招牌畫面。',
+  { id: '101', name: '台北 101', area: '台北・Taipei 101', pos: [Math.round(67 * S), Math.round(30 * S)], r: 8, text: '高 508 公尺，2004 年完工，曾是世界最高的大樓。外型取自節節高升的竹子，每年跨年的煙火是台北的招牌畫面。',
     en: { name: "Taipei 101", area: "Taipei", text: "At 508 m, it was finished in 2004 and was once the world's tallest building. Its shape echoes rising bamboo, and its New Year's Eve fireworks are Taipei's signature scene." },
     ja: { name: "台北101", area: "台北", text: "高さ 508 m、2004 年完成。かつて世界一高いビルでした。伸びていく竹をかたどった姿で、年越しの花火は台北を代表する光景です。" } },
   { id: 'turtle', name: '龜山島', area: '宜蘭外海・Guishan Island', pos: PLACES.sea, r: 7, text: '宜蘭外海的火山島，遠看像一隻浮在海上的烏龜。對宜蘭人來說，看到龜山島就是回到家了。',
     en: { name: "Guishan Island", area: "Off Yilan", text: "A volcanic island off the Yilan coast that looks like a turtle floating on the sea. For people from Yilan, seeing it means you're home." },
     ja: { name: "亀山島", area: "宜蘭沖", text: "宜蘭の沖に浮かぶ火山島で、遠くから見ると海に浮かぶ亀のよう。宜蘭の人にとって、亀山島が見えたら「家に帰ってきた」合図です。" } },
-  { id: 'kuroshio', name: '黑潮', area: '台灣東部海域・Kuroshio Current', pos: [curX(64), 64], r: 0, text: '流經台灣東岸、一路往北的強勁暖流，海水深藍近黑而得名。它帶來溫暖的海水和豐富的魚群，也是鯨豚出沒的海路。',
+  { id: 'kuroshio', name: '黑潮', area: '台灣東部海域・Kuroshio Current', pos: [Math.round(curX(64 * S)), 64 * S], r: 0, text: '流經台灣東岸、一路往北的強勁暖流，海水深藍近黑而得名。它帶來溫暖的海水和豐富的魚群，也是鯨豚出沒的海路。',
     en: { name: "Kuroshio Current", area: "Waters east of Taiwan", text: "A strong warm current flowing north along Taiwan's east coast, named for its deep blue, almost black water. It brings warm seas, rich fish and whales and dolphins." },
     ja: { name: "黒潮", area: "台湾東部の海域", text: "台湾の東海岸を北へ流れる強い暖流。黒に近い深い藍色からその名が付きました。温かい海水と豊かな魚、そしてクジラやイルカを運んできます。" } },
   { id: 'taroko', name: '太魯閣峽谷', area: '花蓮・Taroko Gorge', pos: world.gorge, r: 5, text: '立霧溪花了千萬年，切穿堅硬的大理石山壁，刻出深邃的峽谷。抬頭只看得見一線天。',
@@ -136,6 +138,8 @@ const SPOTS = [
     en: { name: "Eluanbi Lighthouse", area: "Kenting, Pingtung", text: "A white lighthouse at Taiwan's southern tip, first lit in 1883 and called the \"Light of East Asia.\" Look south and you see the Bashi Channel." },
     ja: { name: "鵝鑾鼻灯台", area: "屏東・墾丁", text: "台湾最南端の白い灯台。1883 年に点灯し「東アジアの光」と呼ばれます。南を見れば、そこはバシー海峡です。" } },
 ];
+// 島放大後，走近的判定範圍跟著放大一些
+for (const sp of SPOTS) sp.r = Math.round(sp.r * (1 + (S - 1) * 0.5));
 localize(SPOTS);
 for (const sp of SPOTS) sp.found = false;
 
@@ -398,18 +402,18 @@ base.width = base.height = N;
   g.putImageData(img, 0, 0);
 }
 function drawMini() {
-  const s = mini.width = mini.height = Math.round(mini.clientWidth * Math.min(devicePixelRatio, 2)), k = s / N;
+  const s = mini.width = mini.height = Math.round(mini.clientWidth * Math.min(devicePixelRatio, 2)), k = s / N, q = k * Math.sqrt(S);   // q：標記大小，島變大時標記不會縮成一點
   mg.imageSmoothingEnabled = false; mg.drawImage(base, 0, 0, s, s);
-  const dot = (x, z, col, rad) => { mg.fillStyle = col; mg.beginPath(); mg.arc(x * k, z * k, rad * k, 0, 7); mg.fill(); };
+  const dot = (x, z, col, rad) => { mg.fillStyle = col; mg.beginPath(); mg.arc(x * k, z * k, rad * q, 0, 7); mg.fill(); };
   for (const n of NODES) dot(n.pos[0], n.pos[2], n.awake ? '#ffcf5a' : n.stage === 2 && !stage1Done() ? 'rgba(150,165,180,.7)' : `rgba(255,190,110,${0.6 + 0.4 * Math.sin(G.t * 4)})`, n.stage === 2 ? 2.2 : 3.2);
   dot(GATE[0], GATE[2], G.gateOpen ? '#ffcf5a' : '#b9483c', 3.2);
   if (guideOn) { // 「帶我去」的目的地：金色脈動圈＋虛線
     const g = guideTarget(), x = g.pos[0] * k, z = g.pos[2] * k;
-    mg.setLineDash([3 * k, 3 * k]); mg.strokeStyle = 'rgba(255,207,90,.85)'; mg.lineWidth = k; mg.beginPath(); mg.moveTo(P.x * k, P.z * k); mg.lineTo(x, z); mg.stroke(); mg.setLineDash([]);
-    mg.lineWidth = 1.4 * k; mg.beginPath(); mg.arc(x, z, (6 + 2 * Math.sin(G.t * 4)) * k, 0, 7); mg.stroke();
+    mg.setLineDash([3 * q, 3 * q]); mg.strokeStyle = 'rgba(255,207,90,.85)'; mg.lineWidth = q; mg.beginPath(); mg.moveTo(P.x * k, P.z * k); mg.lineTo(x, z); mg.stroke(); mg.setLineDash([]);
+    mg.lineWidth = 1.4 * q; mg.beginPath(); mg.arc(x, z, (6 + 2 * Math.sin(G.t * 4)) * q, 0, 7); mg.stroke();
   }
-  for (const sp of SPOTS) if (sp.r) { mg.strokeStyle = '#fff'; mg.lineWidth = k * 0.8; mg.beginPath(); mg.arc((sp.pos[0] + 0.5) * k, (sp.pos[1] + 0.5) * k, 2 * k, 0, 7); sp.found ? (mg.fillStyle = '#fff', mg.fill()) : mg.stroke(); }
-  mg.save(); mg.translate(P.x * k, P.z * k); mg.rotate(-P.yaw);
+  for (const sp of SPOTS) if (sp.r) { mg.strokeStyle = '#fff'; mg.lineWidth = q * 0.8; mg.beginPath(); mg.arc((sp.pos[0] + 0.5) * k, (sp.pos[1] + 0.5) * k, 2 * q, 0, 7); sp.found ? (mg.fillStyle = '#fff', mg.fill()) : mg.stroke(); }
+  mg.save(); mg.translate(P.x * k, P.z * k); mg.rotate(-P.yaw); mg.scale(q / k, q / k);
   mg.fillStyle = '#fff'; mg.strokeStyle = '#123'; mg.lineWidth = k; mg.beginPath();
   mg.moveTo(0, 5 * k); mg.lineTo(3.4 * k, -3 * k); mg.lineTo(-3.4 * k, -3 * k); mg.closePath(); mg.fill(); mg.stroke(); mg.restore();
 }
@@ -1070,7 +1074,7 @@ function frame(dt) {
   let eye, target;
   if (G.state === 'title') {
     const a = G.t * 0.06;
-    target = [64, 8, 66]; eye = [64 + Math.sin(a) * 62, 46, 66 + Math.cos(a) * 62];
+    target = [64 * S, 8, 66 * S]; eye = [64 * S + Math.sin(a) * 62 * S, 46 * S, 66 * S + Math.cos(a) * 62 * S];
   } else {
     const k = 1 - Math.exp(-dt * 10);
     cam.tx = lerp(cam.tx, P.x, k); cam.ty = lerp(cam.ty, P.ry + 1.6, k); cam.tz = lerp(cam.tz, P.z, k);
@@ -1099,7 +1103,7 @@ function frame(dt) {
   const env = {
     time: G.t, spirit: s, sense: G.sense > 0 ? Math.min(1, G.sense) : 0,
     fog: mixColor(C.fog0, C.fog1, s), skyTop: mixColor(C.top0, C.top1, s),
-    fogR: G.state === 'title' ? [70, 150] : [38, 92], light: LIGHT,
+    fogR: G.state === 'title' ? [70 * S, 150 * S] : [38, 92], light: LIGHT,
     sun: mixColor(C.sun0, C.sun1, s), amb: mixColor(C.amb0, C.amb1, s), glow: mixColor(C.glow, C.gold, 0.35),
     pulse: G.pulse, waterLevel: WATER, shallow: mixColor(C.sh0, C.sh1, s), deep: mixColor(C.dp0, C.dp1, s),
     current: [CURRENT.x, CURRENT.half, CURRENT.speed],
