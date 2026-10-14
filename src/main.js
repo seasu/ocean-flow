@@ -290,10 +290,10 @@ geo.on(p => {
 
 const toast = text => { const el = $('#toast'); el.textContent = text; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); };
 const avail = () => G.collected + (G.bonus || 0) - G.spent;
-// 次要工具（小地圖、現世、圖鑑、靜音、境界）平常收起，點右上「⋯」叫出來；閒置幾秒或開始走路就再收起
+// 次要工具（小地圖、現世、圖鑑、靜音、境界）平常收起，點右上齒輪叫出來；閒置幾秒或開始走路就再收起
 const hudEl = $('#hud');
 let quietT = 0;
-function wakeHud(ms = 5000) { $('.tray').style.top = Math.round($('#quest').getBoundingClientRect().bottom + 12) + 'px'; hudEl.classList.remove('quiet'); clearTimeout(quietT); quietT = setTimeout(() => hudEl.classList.add('quiet'), ms); }
+function wakeHud(ms = 5000) { hudEl.classList.remove('quiet'); clearTimeout(quietT); quietT = setTimeout(() => hudEl.classList.add('quiet'), ms); }
 $('#menuBtn').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (hudEl.classList.contains('quiet')) wakeHud(6000); else { clearTimeout(quietT); hudEl.classList.add('quiet'); } });
 for (const b of ['#radarBtn', '#dexBtn', '#mute']) $(b).addEventListener('pointerdown', () => wakeHud(6000));
 let hudKey = '';

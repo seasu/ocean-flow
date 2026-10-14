@@ -35,10 +35,10 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #guideBtn{flex:none;padding:0 16px;height:40px;font-size:16px}
 #guideBtn::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M15.5 8.5l-2 5-5 2 2-5z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M15.5 8.5l-2 5-5 2 2-5z'/%3E%3C/svg%3E")}
 /* 下一步卡：現在要做的事，大而清楚 */
-.quest{position:absolute;left:calc(12px + var(--sl));right:calc(68px + var(--sr));top:calc(10px + var(--st));max-width:380px;pointer-events:auto;
+.quest{position:absolute;left:calc(12px + var(--sl));right:calc(12px + var(--sr));top:calc(10px + var(--st));max-width:460px;pointer-events:auto;
   background:rgba(14,24,40,.55);border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:12px 14px 12px 16px;
   -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 8px 30px rgba(0,0,0,.25);text-shadow:0 1px 6px rgba(0,0,0,.3)}
-.qtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.qtop{display:flex;align-items:center;gap:10px;padding-right:44px}
 #qhead{font-size:14px;color:var(--gold);letter-spacing:.08em}
 #qchips{display:flex;gap:6px}
 #qchips i{width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55)}
@@ -56,14 +56,15 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #qlist li.wait{opacity:.5}
 #qlist li.note{display:block;color:var(--dim);font-weight:500;font-size:14px}
 .quest.min #qlist{display:none}
-/* 右上角：其他工具收在這裡，閒置幾秒自動收起，點「⋯」再叫出來 */
-#menuBtn{position:absolute;right:calc(12px + var(--sr));top:calc(14px + var(--st));width:44px;height:44px;border-radius:50%;display:grid;place-items:center;pointer-events:auto}
+/* 設定：齒輪漂浮在最上層，點開是一塊浮在畫面上的面板，不推擠其他資訊 */
+#menuBtn{position:absolute;z-index:4;right:calc(16px + var(--sr));top:calc(16px + var(--st));width:40px;height:40px;border-radius:50%;display:grid;place-items:center;pointer-events:auto}
 #menuBtn svg{width:22px;height:22px}
-.tray{position:absolute;right:calc(12px + var(--sr));top:calc(68px + var(--st));display:flex;flex-direction:column;align-items:flex-end;gap:10px;transition:opacity .35s,transform .35s}
+.tray{position:absolute;z-index:4;right:calc(12px + var(--sr));top:calc(64px + var(--st));display:flex;flex-direction:column;align-items:flex-end;gap:10px;padding:14px;border-radius:22px;
+  background:rgba(14,24,40,.72);border:1px solid rgba(255,255,255,.16);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 12px 40px rgba(0,0,0,.35);transition:opacity .3s,transform .3s}
 #hud.play .tray > *{pointer-events:auto}
 #hud.quiet .tray{opacity:0;transform:translateY(-8px)}
 #hud.quiet .tray > *{pointer-events:none}
-.plate{display:flex;gap:8px;align-items:center;font-size:15px;padding:8px 12px;border-radius:999px;background:rgba(14,24,40,.55);border:1px solid rgba(255,255,255,.16);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.plate{display:flex;gap:8px;align-items:center;font-size:15px;padding:2px 2px 4px}
 .lv{background:var(--gold);color:#2a1c00;border-radius:999px;padding:1px 8px}
 .xb{width:44px;height:6px;background:rgba(0,0,0,.45);border-radius:6px;overflow:hidden}.xb i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
 .xb.full{box-shadow:0 0 8px var(--gold)}
@@ -289,7 +290,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
     <div class="qrow"><span class="qi"><span class="bar"><i id="qibar"></i></span><span id="qi">靈光 0</span></span><button id="guideBtn" data-i18n="guideBtn">帶我去</button></div>
     <ul id="qlist"></ul>
   </div>
-  <button class="playonly" id="menuBtn" aria-label="more" data-i18n-label="more2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg></button>
+  <button class="playonly" id="menuBtn" aria-label="settings" data-i18n-label="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   <div class="tray playonly">
     <div class="plate"><span class="lv" id="lv">感流境</span><span data-i18n="traveler">旅人・阿流</span><span class="xb"><i id="xbar"></i></span></div>
     <canvas id="mini"></canvas>
