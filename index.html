@@ -202,7 +202,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #battle .msg button{background:var(--gold);color:#3a2300;border-radius:10px;padding:10px 22px;font-weight:900;font-size:15px}
 #film{position:fixed;inset:0;z-index:20;background:#000;display:none;align-items:center;justify-content:center}
 #film.show{display:flex}
-#film video{width:100%;height:100%;object-fit:contain;background:#000}
+#film video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
 #film .skip{position:absolute;right:calc(14px + var(--sr, 0px));bottom:calc(18px + var(--sb));font-size:14px;font-weight:900;padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.16);color:#fff}
 #film .sound{position:absolute;left:50%;top:calc(18px + var(--st));transform:translateX(-50%);display:none;font-size:14px;font-weight:900;padding:8px 16px;border-radius:999px;background:rgba(255,207,90,.9);color:#2a1c00}
 #film.muted .sound{display:block}
