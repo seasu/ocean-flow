@@ -1,13 +1,19 @@
 // 連點（虎門・爆發）：在時間內狂點，每一下都化成光打向濁流，偶爾會打出會心一擊
-// 點擊會累積「爆發」，集滿就出現虎爪大招；守護獸也會自己定時出手（境界越高，幫得越多）
-export function taphero(A, { lv, ease }) {
-  const S = { time: 10 + lv * 2 + ease * 4, power: 0, combo: 0, comboT: 0, ripples: [], nums: [], claw: 0, pet: 1, taps: 0 };
-  const DMG = 1.4, CRIT = 0.15, POWER = 0.05, CLAW = 14, PET = 1 + lv * 0.6;
+// 點擊會累積「爆發」，集滿就出現虎爪大招；守護獸也會自己定時出手
+// 星等：濁流越厚（每下傷害打折）、時間越長；3 星會週期性張開護盾，這時點下去無效，要等護盾散掉
+const LEVEL = { 1: { hp: 1, time: 10, shield: 0 }, 2: { hp: 1.5, time: 12, shield: 0 }, 3: { hp: 1.7, time: 16, shield: 1 } };
+export function taphero(A, { star, ease }) {
+  const LV = LEVEL[star] || LEVEL[1];
+  const S = { time: LV.time + ease * 4, blockT: 0, power: 0, combo: 0, comboT: 0, ripples: [], nums: [], claw: 0, pet: 1, taps: 0 };
+  const DMG = 1.4 / LV.hp, CRIT = 0.15, POWER = 0.05, CLAW = 14 / LV.hp, PET = 1 / LV.hp;
+  // 護盾：每 5 秒裡最後 1.5 秒張開
+  const shielded = () => LV.shield && (A.time % 5) > 3.5;
   const info = () => A.info(A.t('secondsLeft', { n: Math.max(0, Math.ceil(S.time)) }));
   info();
   const btn = () => { const a = A.lay.area, r = Math.min(56, a.w * 0.16); return { x: a.x + a.w / 2, y: a.y + a.h * 0.42, r }; };
 
   function hit(x, y) {
+    if (shielded()) { S.blockT = 0.4; S.nums.push({ x, y, t: 0, s: A.t('blocked'), crit: false }); S.combo = 0; A.sfx.dispel(); return; }
     const crit = Math.random() < CRIT, mult = 1 + Math.min(S.combo, 20) * 0.02;
     const d = DMG * mult * (crit ? 3 : 1);
     A.add(d); A.shoot(x, y, crit ? '#ffcf5a' : '#7fe8ff');
@@ -18,6 +24,7 @@ export function taphero(A, { lv, ease }) {
     A.sfx.hit(Math.min(6, S.combo >> 2)); A.buzz(crit ? 25 : 8);
   }
   function claw() {
+    if (shielded()) { S.blockT = 0.4; A.sfx.deny(); return; }
     S.power = 0; S.claw = 0.6; A.add(CLAW); A.shake(0.4);
     const a = A.lay.area;
     for (let i = 0; i < 3; i++) A.shoot(a.x + a.w * (0.3 + i * 0.2), a.y + a.h * 0.4, '#ffb35c');
@@ -35,13 +42,13 @@ export function taphero(A, { lv, ease }) {
     tick(dt) {
       S.time -= dt; info();
       S.comboT -= dt; if (S.comboT <= 0) S.combo = 0;
-      S.claw = Math.max(0, S.claw - dt);
+      S.claw = Math.max(0, S.claw - dt); S.blockT = Math.max(0, S.blockT - dt);
       // 守護獸每秒出手一次
       S.pet -= dt;
-      if (S.pet <= 0) { S.pet = 1; A.add(PET); A.shoot(A.lay.w / 2, A.lay.gy - 20, '#ffcf5a'); }
+      if (S.pet <= 0 && !shielded()) { S.pet = 1; A.add(PET); A.shoot(A.lay.w / 2, A.lay.gy - 20, '#ffcf5a'); }
       for (const r of S.ripples) r.t += dt; S.ripples = S.ripples.filter(r => r.t < 0.4);
       for (const n of S.nums) n.t += dt; S.nums = S.nums.filter(n => n.t < 0.7);
-      if (S.time <= 0 && A.pur < 100) A.lose();
+      if (S.time <= 0 && A.pur < 99.99) A.lose();
     },
     draw() {
       const g = A.g, a = A.lay.area, b = btn(), T = A.time;
@@ -63,6 +70,13 @@ export function taphero(A, { lv, ease }) {
       } else {
         g.fillStyle = 'rgba(255,217,168,.75)'; g.font = '900 20px system-ui'; g.fillText(A.t('tapFast'), b.x, b.y);
       }
+      if (shielded()) { // 護盾
+        const L = A.lay, r = L.er * 1.25;
+        g.strokeStyle = `rgba(185,166,214,${Math.min(1, 0.6 + 0.3 * Math.sin(T * 12) + S.blockT)})`; g.lineWidth = 5; g.beginPath();
+        for (let i = 0; i <= 6; i++) { const an = i / 6 * 6.283 + T; i ? g.lineTo(L.ex + Math.cos(an) * r, L.ey + Math.sin(an) * r * 0.75) : g.moveTo(L.ex + Math.cos(an) * r, L.ey + Math.sin(an) * r * 0.75); }
+        g.stroke();
+        g.fillStyle = '#d9ccf0'; g.font = '900 16px system-ui'; g.fillText(A.t('shieldUp'), a.x + a.w / 2, a.y + a.h * 0.62);
+      }
       if (S.claw) { // 三道爪痕
         g.strokeStyle = `rgba(255,243,214,${S.claw / 0.6})`; g.lineWidth = 6;
         for (let i = -1; i <= 1; i++) { g.beginPath(); g.moveTo(A.lay.ex - 60 + i * 26, A.lay.ey - 50); g.lineTo(A.lay.ex + 40 + i * 26, A.lay.ey + 50); g.stroke(); }
@@ -75,4 +89,3 @@ export function taphero(A, { lv, ease }) {
   };
 }
 taphero.key = 'taphero';
-taphero.bonus = lv => lv * 2;
