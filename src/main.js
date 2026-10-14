@@ -152,7 +152,7 @@ let stickId = null, stickO = [0, 0], camId = null, camLast = [0, 0];
 canvas.addEventListener('pointerdown', e => {
   if (G.state !== 'play') return;
   if (e.clientX < innerWidth * 0.45 && stickId === null) {
-    stickId = e.pointerId; stickO = [e.clientX, e.clientY]; $('.hint').style.display = 'none'; if (!hudEl.classList.contains('quiet')) wakeHud(1200);
+    stickId = e.pointerId; stickO = [e.clientX, e.clientY]; $('.hint').style.display = 'none';
     stick.style.left = e.clientX + 'px'; stick.style.top = e.clientY + 'px'; stick.classList.add('on');
   } else if (camId === null) { camId = e.pointerId; camLast = [e.clientX, e.clientY]; }
   canvas.setPointerCapture(e.pointerId);
@@ -180,9 +180,24 @@ const hold = (el, on, off) => {
 };
 hold($('#btnJump'), () => { input.jump = true; }, () => { input.jump = false; });
 hold($('#btnSense'), () => doSense());
-const muteIcon = () => { $('#mute').innerHTML = `<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 9.5h3.5L12 5.5v13l-4.5-4H4z'/>${muted ? "<path d='M16 9.5l5 5M21 9.5l-5 5'/>" : "<path d='M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11'/>"}</svg>`; };
-muteIcon();
-hold($('#mute'), () => { setMuted(!muted); muteIcon(); });
+// 設定：主畫面和遊戲裡共用同一個齒輪與面板，只放語言和聲音
+const settings = $('#settings'), soundT = $('#soundT');
+const syncSound = () => soundT.setAttribute('aria-checked', String(!muted));
+syncSound();
+for (const b of document.querySelectorAll('#menuBtn, #title .more')) b.addEventListener('click', e => { e.stopPropagation(); syncSound(); settings.hidden = false; });
+soundT.addEventListener('click', () => { setMuted(!muted); syncSound(); });
+settings.addEventListener('click', e => { if (e.target === settings || e.target.closest('.close')) settings.hidden = true; });
+// 個人資訊：點左上角頭像，滿版顯示走了多少步、境界與收集進度
+const meEl = $('#me');
+$('#meBtn').addEventListener('click', e => { e.stopPropagation(); hudKey = ''; hud(); meEl.hidden = false; });
+meEl.addEventListener('click', e => { if (e.target === meEl || e.target.closest('.close')) meEl.hidden = true; });
+// 小地圖：點地圖 icon 才展開，8 秒後自動收起
+let miniT = 0;
+$('#mapBtn').addEventListener('click', e => {
+  e.stopPropagation(); const on = !$('#mini').classList.contains('show');
+  $('#mini').classList.toggle('show', on); $('#mapBtn').classList.toggle('on', on);
+  clearTimeout(miniT); if (on) miniT = setTimeout(() => { $('#mini').classList.remove('show'); $('#mapBtn').classList.remove('on'); }, 8000);
+});
 addEventListener('keydown', e => { input.keys[e.code] = true; if (e.code === 'Space') input.jump = true; if (e.code === 'KeyE' || e.code === 'KeyQ') doSense(); if ((e.code === 'Enter' || e.code === 'Space') && talk) nextLine(); });
 addEventListener('keyup', e => { input.keys[e.code] = false; if (e.code === 'Space') input.jump = false; });
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -290,20 +305,20 @@ geo.on(p => {
 
 const toast = text => { const el = $('#toast'); el.textContent = text; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); };
 const avail = () => G.collected + (G.bonus || 0) - G.spent;
-// 次要工具（小地圖、現世、圖鑑、靜音、境界）平常收起，點右上齒輪叫出來；閒置幾秒或開始走路就再收起
-const hudEl = $('#hud');
-let quietT = 0;
-function wakeHud(ms = 5000) { hudEl.classList.remove('quiet'); clearTimeout(quietT); quietT = setTimeout(() => hudEl.classList.add('quiet'), ms); }
-$('#menuBtn').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (hudEl.classList.contains('quiet')) wakeHud(6000); else { clearTimeout(quietT); hudEl.classList.add('quiet'); } });
-for (const b of ['#radarBtn', '#dexBtn', '#mute']) $(b).addEventListener('pointerdown', () => wakeHud(6000));
 let hudKey = '';
 function hud() {
   const found = SPOTS.filter(sp => sp.found).length;
-  const key = [visited.size, G.geo, G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, G.realm, Math.ceil(G.xiu), found].join();
+  const key = [Math.round(G.walked), visited.size, G.geo, G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, G.realm, Math.ceil(G.xiu), found].join();
   if (key !== hudKey) {
     hudKey = key;
     $('#lv').textContent = REALMS[G.realm];
-    $('#xbar').style.width = (G.realm >= NEED.length ? 100 : G.xiu / NEED[G.realm] * 100) + '%'; $('#xbar').parentNode.classList.toggle('full', xiuFull());
+    $('#xbar').style.width = (G.realm >= NEED.length ? 100 : G.xiu / NEED[G.realm] * 100) + '%';
+    const steps = Math.round(G.geo ? G.walked / 0.7 : G.walked);   // 現世：用公尺換算步數（一步約 0.7 公尺）
+    $('#meSteps').textContent = t('stepsN', { n: steps.toLocaleString() });
+    $('#meDist').textContent = G.geo ? t('meDist', { d: fmt(G.walked) }) : '';
+    $('#meXiu').textContent = xiuLine();
+    $('#meGrid').innerHTML = [[t('meSeals'), `${G.awakened}/${S1.length + S2.length}`], [t('meQi'), avail()], [t('beauty'), `${found}/${SPOTS.length}`], [t('meChances'), visited.size]]
+      .map(([k, v]) => `<li><small>${k}</small><b>${v}</b></li>`).join('');
     $('#dexBtn').textContent = t('dexBtn', { n: found, m: SPOTS.length });
     $('#dexList').innerHTML = `<li class="sec">${t('secMountain')}</li>`
       + S1.map(n => n.awake ? `<li><b>${n.icon} ${n.name}${t('sep')}${n.hill}</b><small>${n.seal}${t('sep')}${n.virtue}</small><p>${n.info}</p></li>` : `<li class="lock"><b>${n.icon} ？？？</b><small>${n.seal}</small></li>`).join('')
@@ -455,7 +470,7 @@ function start(mode) {
   try { if (matchMedia('(pointer: coarse)').matches && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => { }); } catch { }
 }
 $('#title .start').addEventListener('click', () => start('geo'));
-$('#title .alt').addEventListener('click', () => start('island'));
+$('#title .alt')?.addEventListener('click', () => start('island'));
 $('#again').addEventListener('click', () => location.reload());
 
 // ---------- 介紹影片：第一次開啟時自動播放，之後可從片頭／片尾按鈕重看 ----------
