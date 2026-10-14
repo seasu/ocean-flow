@@ -45,6 +45,7 @@ const S = {
   radarLabel: ['現世雷達', 'Real-world radar', '現世レーダー'],
   langLabel: ['語言', 'Language', '言語'],
   soundLabel: ['聲音', 'Sound', 'サウンド'],
+  radarNudge: ['點這裡，打開現世雷達', 'Tap to open the real-world radar', 'ここをタップして現世レーダーへ'],
   verLabel: ['版本', 'Version', 'バージョン'],
   verStale: ['請重新整理', 'please reload', '再読み込みしてください'],
   meSteps: ['走了', 'You have walked', '歩いた歩数'],

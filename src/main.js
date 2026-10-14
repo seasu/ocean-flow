@@ -484,7 +484,8 @@ function start(mode) {
   say(G.geo ? GEO_LINES : LINES, () => {
     G.state = 'play'; $('#hud').classList.add('play'); XI.wave = false;
     pop(t('firstSeal'), 'gold'); setTimeout(() => toast(t('xiuIntro')), 2600);
-    if (G.geo) openRadar();
+    // 不直接跳進雷達：讓雷達按鈕發光＋小提示，由玩家自己點開
+    if (G.geo) setTimeout(nudgeRadar, 900);
   });
   try { if (matchMedia('(pointer: coarse)').matches && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => { }); } catch { }
 }
@@ -857,7 +858,12 @@ for (const page of [radar, $('#dex'), $('#spot'), $('#settings'), $('#me')]) {
   page.addEventListener('pointercancel', () => { down = null; }, true);
   page.addEventListener('click', () => clearTimeout(wait), true);
 }
-function openRadar() { if (G.state !== 'play' && G.state !== 'ending') return; radarOpen = true; radar.classList.add('show'); setZoom(null); geo.start(); renderList(); }
+function nudgeRadar() {
+  const b = $('#radarBtn'); if (radarOpen) return;
+  if (!b.querySelector('.tip')) { const tip = document.createElement('span'); tip.className = 'tip'; b.append(tip); }
+  b.querySelector('.tip').textContent = t('radarNudge'); b.classList.add('nudge');
+}
+function openRadar() { if (G.state !== 'play' && G.state !== 'ending') return; radarOpen = true; $('#radarBtn').classList.remove('nudge'); radar.classList.add('show'); setZoom(null); geo.start(); renderList(); }
 function closeRadar() { radarOpen = false; radar.classList.remove('show'); }
 $('#radarBtn').addEventListener('click', e => { e.stopPropagation(); openRadar(); });
 $('#rClose').addEventListener('click', closeRadar);
