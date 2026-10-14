@@ -30,55 +30,64 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #hud.on{opacity:1}
 #hud .playonly{opacity:0;transition:opacity .4s}
 #hud.play .playonly{opacity:1}
-.plate{position:absolute;left:calc(12px + var(--sl));top:calc(10px + var(--st));display:flex;gap:8px;align-items:center;background:var(--panel);
-  border-radius:10px;padding:6px 10px;font-size:14px}
-.lv{background:var(--gold);color:#2a1c00;border-radius:6px;padding:0 6px}
+#radarBtn::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z'/%3E%3Ccircle cx='12' cy='9.5' r='2.5'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z'/%3E%3Ccircle cx='12' cy='9.5' r='2.5'/%3E%3C/svg%3E")}
+#dexBtn::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 5.5C5.5 4 8.5 4 12 6c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5z'/%3E%3Cpath d='M12 6v13.5'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 5.5C5.5 4 8.5 4 12 6c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5z'/%3E%3Cpath d='M12 6v13.5'/%3E%3C/svg%3E")}
+#guideBtn{flex:none;padding:0 16px;height:40px;font-size:16px}
+#guideBtn::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M15.5 8.5l-2 5-5 2 2-5z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M15.5 8.5l-2 5-5 2 2-5z'/%3E%3C/svg%3E")}
+/* 下一步卡：現在要做的事，大而清楚 */
+.quest{position:absolute;left:calc(12px + var(--sl));right:calc(68px + var(--sr));top:calc(10px + var(--st));max-width:380px;pointer-events:auto;
+  background:rgba(14,24,40,.55);border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:12px 14px 12px 16px;
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 8px 30px rgba(0,0,0,.25);text-shadow:0 1px 6px rgba(0,0,0,.3)}
+.qtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#qhead{font-size:14px;color:var(--gold);letter-spacing:.08em}
+#qchips{display:flex;gap:6px}
+#qchips i{width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55)}
+#qchips i.done{background:var(--gold);border-color:var(--gold);box-shadow:0 0 6px rgba(255,207,90,.6)}
+#qtitle{display:block;margin-top:4px;font-size:23px;line-height:1.3;letter-spacing:.04em}
+#qsub{margin:2px 0 0;font-size:16px;line-height:1.5;font-weight:500;color:#dbe6f0}
+.qrow{display:flex;align-items:center;gap:12px;margin-top:10px}
+.qi{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;font-size:15px;color:var(--cyan)}
+.qi .bar{height:8px;background:rgba(0,0,0,.35);border-radius:8px;overflow:hidden}
+.qi .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#5cc8ff,#ffcf5a);transition:width .3s}
+#qlist{list-style:none;margin:12px 0 0;padding:12px 0 0;border-top:1px solid rgba(255,255,255,.14);display:grid;gap:8px;font-size:16px;line-height:1.45}
+#qlist li{display:grid;grid-template-columns:24px 1fr;column-gap:4px}
+#qlist li small{grid-column:2;color:var(--dim);font-weight:500;font-size:14px}
+#qlist li.done{color:var(--gold)}
+#qlist li.wait{opacity:.5}
+#qlist li.note{display:block;color:var(--dim);font-weight:500;font-size:14px}
+.quest.min #qlist{display:none}
+/* 右上角：其他工具收在這裡，閒置幾秒自動收起，點「⋯」再叫出來 */
+#menuBtn{position:absolute;right:calc(12px + var(--sr));top:calc(14px + var(--st));width:44px;height:44px;border-radius:50%;display:grid;place-items:center;pointer-events:auto}
+#menuBtn svg{width:22px;height:22px}
+.tray{position:absolute;right:calc(12px + var(--sr));top:calc(68px + var(--st));display:flex;flex-direction:column;align-items:flex-end;gap:10px;transition:opacity .35s,transform .35s}
+#hud.play .tray > *{pointer-events:auto}
+#hud.quiet .tray{opacity:0;transform:translateY(-8px)}
+#hud.quiet .tray > *{pointer-events:none}
+.plate{display:flex;gap:8px;align-items:center;font-size:15px;padding:8px 12px;border-radius:999px;background:rgba(14,24,40,.55);border:1px solid rgba(255,255,255,.16);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.lv{background:var(--gold);color:#2a1c00;border-radius:999px;padding:1px 8px}
 .xb{width:44px;height:6px;background:rgba(0,0,0,.45);border-radius:6px;overflow:hidden}.xb i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
 .xb.full{box-shadow:0 0 8px var(--gold)}
-.qi{position:absolute;left:calc(12px + var(--sl));top:calc(46px + var(--st));display:flex;gap:6px;align-items:center;font-size:12px;color:var(--cyan);text-shadow:0 1px 0 #000}
-.qi .bar{width:84px;height:8px;background:rgba(0,0,0,.45);border-radius:8px;overflow:hidden}
-.qi .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#5cc8ff,#ffcf5a);transition:width .3s}
-#radarBtn{position:absolute;right:calc(60px + var(--sr));top:calc(120px + var(--st));pointer-events:auto;padding:0 14px;height:40px;font-size:16px}
-#radarBtn::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z'/%3E%3Ccircle cx='12' cy='9.5' r='2.5'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z'/%3E%3Ccircle cx='12' cy='9.5' r='2.5'/%3E%3C/svg%3E")}
-#dexBtn{position:absolute;left:calc(12px + var(--sl));top:calc(68px + var(--st));pointer-events:auto;padding:0 14px;height:36px;font-size:15px}
-#dexBtn::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 5.5C5.5 4 8.5 4 12 6c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5z'/%3E%3Cpath d='M12 6v13.5'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 5.5C5.5 4 8.5 4 12 6c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5z'/%3E%3Cpath d='M12 6v13.5'/%3E%3C/svg%3E")}
-.quest{position:absolute;left:calc(12px + var(--sl));top:calc(100px + var(--st));width:min(250px,58vw);background:var(--panel);border:1px solid rgba(255,255,255,.1);
-  border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.45;pointer-events:auto}
-.quest b{display:block;color:var(--gold);font-size:11px;letter-spacing:.12em}
-.quest ul{list-style:none;margin:4px 0 0;padding:0}
-.quest li{display:grid;grid-template-columns:20px 1fr;column-gap:2px;margin-top:3px}
-.quest li small{grid-column:2;color:var(--dim);font-weight:500;font-size:11px}
-.quest li.done{color:var(--gold)}
-.quest li.wait{opacity:.5}
-.quest li.note{display:block;color:var(--dim);font-weight:500;font-size:11px;margin-top:6px}
-.quest.min ul{display:none}
-#guideBtn{display:inline-flex;margin-top:8px;padding:0 14px;height:36px;font-size:15px}
-#guideBtn::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M15.5 8.5l-2 5-5 2 2-5z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M15.5 8.5l-2 5-5 2 2-5z'/%3E%3C/svg%3E")}
+#mini{width:104px;height:104px;border-radius:16px;border:1.5px solid rgba(255,255,255,.4);background:#1c4678;image-rendering:pixelated;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+#radarBtn,#dexBtn{padding:0 16px;height:42px;font-size:16px}
+#mute{width:42px;height:42px;border-radius:50%;display:grid;place-items:center}
+#mute svg{width:20px;height:20px}
 #guide{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(176px + var(--sb));display:none;align-items:center;gap:8px;max-width:calc(100vw - 32px);
-  background:var(--panel);border-radius:999px;padding:6px 8px 6px 6px;pointer-events:auto;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  background:rgba(14,24,40,.6);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:6px 10px 6px 6px;pointer-events:auto;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 #guide.show{display:flex}
-#guide .arrow{flex:none;width:40px;height:40px;border-radius:50%;background:var(--gold);display:grid;place-items:center}
+#guide .arrow{flex:none;width:44px;height:44px;border-radius:50%;background:var(--gold);display:grid;place-items:center}
 #guide .arrow i{width:18px;height:22px;background:#3a2300;clip-path:polygon(50% 0,100% 100%,50% 76%,0 100%);transition:transform .15s linear}
-#guide p{margin:0;min-width:0;font-size:13px;line-height:1.35}
+#guide p{margin:0;min-width:0;font-size:16px;line-height:1.35}
 #guide a{flex:none;border-radius:999px;padding:7px 12px;font-size:14px;font-weight:900;text-decoration:none;white-space:nowrap}
 #guide:not(.geo) a{display:none}
-#guide .x{flex:none;background:none;color:var(--dim);font-size:15px;padding:4px}
-.quest b em{font-style:normal;color:var(--dim)}
-#qchips{display:none;gap:8px;margin-top:2px;font-size:15px}
-#qchips span{opacity:.55}#qchips span.done{opacity:1;color:var(--gold)}
-.quest.min #qchips{display:flex}
-#mini{position:absolute;right:calc(12px + var(--sr));top:calc(10px + var(--st));width:104px;height:104px;border-radius:12px;border:2px solid rgba(255,255,255,.25);
-  background:#1c4678;image-rendering:pixelated}
-#mute{position:absolute;right:calc(12px + var(--sr));top:calc(120px + var(--st));width:40px;height:40px;border-radius:50%;display:grid;place-items:center;pointer-events:auto}
-#mute svg{width:20px;height:20px}
+#guide .x{flex:none;background:none;color:var(--dim);font-size:18px;padding:6px}
 #pop{position:absolute;left:50%;top:calc(22% + var(--st));transform:translateX(-50%) scale(.85);opacity:0;transition:opacity .25s,transform .25s;
-  background:linear-gradient(180deg,#e9f6ff,#9fdcff);color:#06263f;font-size:clamp(16px,4.6vw,24px);padding:8px 20px;border-radius:12px;
-  border:3px solid #fff;box-shadow:0 4px 0 #2f7fb5;white-space:nowrap}
-#pop.gold{background:linear-gradient(180deg,#ffe28a,#ffb627);color:#3a2300;box-shadow:0 4px 0 #b9771a;border-color:#fff4c8}
-#pop.cyan{background:linear-gradient(180deg,#bff4ff,#56c8f0)}
+  background:rgba(14,24,40,.6);color:#bff4ff;font-size:clamp(20px,6vw,28px);padding:10px 24px;border-radius:999px;letter-spacing:.06em;
+  border:1.5px solid rgba(127,232,255,.5);box-shadow:0 8px 30px rgba(0,0,0,.3);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);white-space:nowrap}
+#pop.gold{color:var(--gold);border-color:rgba(255,207,90,.6)}
+#pop.cyan{color:#bff4ff}
 #pop.show{opacity:1;transform:translateX(-50%) scale(1)}
-#toast{position:absolute;left:50%;top:calc(30% + var(--st));transform:translateX(-50%);max-width:88vw;text-align:center;font-size:13px;
-  background:rgba(0,0,0,.5);padding:6px 12px;border-radius:999px;opacity:0;color:#dff7ff}
+#toast{position:absolute;left:50%;top:calc(34% + var(--st));transform:translateX(-50%);width:max-content;max-width:calc(100vw - 40px);text-align:center;font-size:17px;line-height:1.5;
+  background:rgba(14,24,40,.62);border:1px solid rgba(255,255,255,.16);padding:10px 18px;border-radius:18px;opacity:0;color:#eef8ff;font-weight:700;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
 #toast.show{animation:toast 3.2s ease forwards}
 @keyframes toast{0%{opacity:0;transform:translate(-50%,8px)}8%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
 #prog{position:absolute;left:50%;top:58%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;opacity:0;transition:opacity .2s;
@@ -89,11 +98,11 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #tag{position:absolute;left:0;top:0;font-size:12px;background:rgba(232,100,28,.9);color:#fff;padding:2px 8px;border-radius:6px;opacity:0;white-space:nowrap}
 
 /* 遊戲中的按鈕：跟主畫面「啟程」、影片「跳過」同一套毛玻璃 */
-#radarBtn,#dexBtn,#guideBtn,#guide a,#mute,.btn,#rClose,#enc button{color:#fff;font-weight:900;border-radius:999px;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.4);
+#radarBtn,#dexBtn,#guideBtn,#guide a,#mute,#menuBtn,.btn,#rClose,#enc button{color:#fff;font-weight:900;border-radius:999px;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.4);
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 8px 30px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.22);text-shadow:0 1px 6px rgba(0,0,0,.35);transition:transform .12s,background .12s}
 #radarBtn,#dexBtn,#guideBtn,#rClose{display:inline-flex;align-items:center;gap:7px}
 #radarBtn::before,#dexBtn::before,#guideBtn::before,#rClose::before{content:"";width:18px;height:18px;flex:none;background:currentColor;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
-#radarBtn:active,#dexBtn:active,#guideBtn:active,#guide a:active,#mute:active,.btn:active,#rClose:active,#enc button:active{transform:scale(.95);background:rgba(255,255,255,.28)}
+#radarBtn:active,#dexBtn:active,#guideBtn:active,#guide a:active,#mute:active,#menuBtn:active,.btn:active,#rClose:active,#enc button:active{transform:scale(.95);background:rgba(255,255,255,.28)}
 /* 觸控按鈕 */
 .btn{position:absolute;pointer-events:auto;border-radius:50%;display:grid;place-items:center;font-weight:900;touch-action:none;
   color:#fff}
@@ -105,7 +114,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
   opacity:0;left:90px;bottom:0}
 #stick.on{opacity:1}
 #stick i{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(255,255,255,.75)}
-.hint{position:absolute;left:calc(16px + var(--sl));bottom:calc(20px + var(--sb));font-size:11px;color:rgba(255,255,255,.65);font-weight:500;text-shadow:0 1px 0 #000;line-height:1.6}
+.hint{position:absolute;left:calc(16px + var(--sl));bottom:calc(24px + var(--sb));font-size:15px;transition:opacity .4s;color:#fff;font-weight:700;text-shadow:0 1px 6px rgba(0,0,0,.7),0 0 2px rgba(0,0,0,.8);line-height:1.6}
 
 /* 台灣之美：發現卡與圖鑑 */
 #card{position:fixed;left:50%;bottom:calc(118px + var(--sb));transform:translate(-50%,8px);width:min(340px,calc(100vw - 32px));
@@ -113,16 +122,16 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
   border-radius:12px;padding:7px 12px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s}
 #card.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 #card .row{display:flex;align-items:baseline;gap:6px;min-width:0}
-#card b{font-size:14px;font-weight:900;white-space:nowrap}
-#card small{flex:1;min-width:0;font-size:11px;color:var(--dim);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#card i{font-style:normal;font-size:11px;color:var(--gold);white-space:nowrap}
+#card b{font-size:18px;font-weight:900;white-space:nowrap}
+#card small{flex:1;min-width:0;font-size:14px;color:var(--dim);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#card i{font-style:normal;font-size:14px;color:var(--gold);white-space:nowrap}
 #card p,#card em,#card .ph,#card .cr{display:none}
 #card.open .ph{display:flex;gap:6px;margin-top:8px;overflow-x:auto;scrollbar-width:none}
-#card .ph img{height:78px;width:auto;max-width:none;border-radius:8px;flex:none;background:rgba(255,255,255,.08)}
+#card .ph img{height:96px;width:auto;max-width:none;border-radius:8px;flex:none;background:rgba(255,255,255,.08)}
 #card.open .cr{display:block;margin-top:4px;font-size:10px;color:var(--dim);font-weight:500}
 #card .cr a{color:var(--cyan)}
-#card.open p{display:block;max-height:24vh;overflow:auto;margin:6px 0 0;font-size:13px;line-height:1.6;font-weight:500;white-space:pre-line;color:#dbe6f0}
-#card.open em{display:block;margin-top:6px;font-style:normal;font-size:11px;font-weight:900;color:var(--gold)}
+#card.open p{display:block;max-height:28vh;overflow:auto;margin:8px 0 0;font-size:16px;line-height:1.6;font-weight:500;white-space:pre-line;color:#dbe6f0}
+#card.open em{display:block;margin-top:8px;font-style:normal;font-size:14px;font-weight:900;color:var(--gold)}
 #dex{position:fixed;inset:0;z-index:5;background:rgba(6,12,22,.96);display:none;flex-direction:column;align-items:center;padding:calc(20px + var(--st)) 16px calc(20px + var(--sb));overflow:auto}
 #dex.show{display:flex}
 #dex h3{margin:0 0 10px;color:var(--gold);letter-spacing:.15em}
@@ -169,9 +178,9 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #dialog{position:fixed;left:50%;bottom:calc(18px + var(--sb));transform:translate(-50%,20px);width:min(560px,calc(100vw - 24px));background:rgba(10,18,30,.88);
   border:2px solid rgba(255,176,46,.6);border-radius:14px;padding:12px 16px 10px;opacity:0;pointer-events:none;transition:.3s}
 #dialog.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
-#dialog b{color:#ffb02e;font-size:13px}
-#dialog p{margin:4px 0 6px;font-size:16px;line-height:1.6;font-weight:500}
-#dialog small{display:block;text-align:right;color:var(--dim);font-size:11px;animation:blink 1.2s infinite}
+#dialog b{color:#ffb02e;font-size:15px}
+#dialog p{margin:6px 0 8px;font-size:18px;line-height:1.6;font-weight:500}
+#dialog small{display:block;text-align:right;color:var(--dim);font-size:13px;animation:blink 1.2s infinite}
 @keyframes blink{50%{opacity:.3}}
 
 /* 片頭與片尾 */
@@ -216,7 +225,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #ending h2{margin:0;font-size:clamp(26px,7vw,40px);letter-spacing:.2em}
 #ending .logo{font-size:clamp(36px,11vw,64px);font-weight:900;letter-spacing:.15em}
 #stats{color:var(--gold);font-size:14px;white-space:pre-line;line-height:1.7}
-@media (max-height:480px){.quest{width:220px;font-size:12px}#mini{width:84px;height:84px}#mute{top:calc(100px + var(--st))}.hint{display:none}}
+@media (max-height:480px){#qtitle{font-size:18px}#qsub{display:none}#mini{width:72px;height:72px}.hint{display:none}}
 :root:lang(ja){--sans:"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,sans-serif}
 .langs{display:flex;gap:6px;justify-content:center;margin:4px 0}
 .langs button{font-size:13px;font-weight:900;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.1);color:var(--dim)}
@@ -272,14 +281,22 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="hud">
-  <div class="plate"><span class="lv" id="lv">感流境</span><span data-i18n="traveler">旅人・阿流</span><span class="xb"><i id="xbar"></i></span></div>
-  <div class="qi playonly"><span class="bar"><i id="qibar"></i></span><span id="qi">靈光 0</span></div>
-  <button class="playonly" id="radarBtn" data-i18n="radar">📍 現世</button>
-  <button class="playonly" id="dexBtn">📖 台灣之美 0/8</button>
-  <div class="quest playonly" id="quest"><b><span data-i18n="quest">主線任務</span> <em>▾</em></b><div id="qtitle"></div><div id="qchips"></div><button id="guideBtn" data-i18n="guideBtn">🧭 帶我去</button><ul id="qlist"></ul></div>
-  <canvas id="mini"></canvas>
-  <button id="mute" aria-label="靜音" data-i18n-label="mute">🔊</button>
+<div id="hud" class="quiet">
+  <div class="quest playonly min" id="quest">
+    <div class="qtop"><span id="qhead"></span><span id="qchips"></span></div>
+    <b id="qtitle"></b>
+    <p id="qsub"></p>
+    <div class="qrow"><span class="qi"><span class="bar"><i id="qibar"></i></span><span id="qi">靈光 0</span></span><button id="guideBtn" data-i18n="guideBtn">帶我去</button></div>
+    <ul id="qlist"></ul>
+  </div>
+  <button class="playonly" id="menuBtn" aria-label="more" data-i18n-label="more2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg></button>
+  <div class="tray playonly">
+    <div class="plate"><span class="lv" id="lv">感流境</span><span data-i18n="traveler">旅人・阿流</span><span class="xb"><i id="xbar"></i></span></div>
+    <canvas id="mini"></canvas>
+    <button id="radarBtn" data-i18n="radar">現世</button>
+    <button id="dexBtn">台灣之美 0/8</button>
+    <button id="mute" aria-label="靜音" data-i18n-label="mute"></button>
+  </div>
   <div id="guide"><span class="arrow"><i></i></span><p></p><a target="_blank" rel="noopener" data-i18n="maps">Google 地圖步行</a><button class="x" aria-label="關閉">✕</button></div>
   <div id="pop"></div>
   <div id="toast"></div>
@@ -344,15 +361,13 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 </script>
 <script type="module" src="src/main.js"></script>
 <script>
-  // 收合任務面板（直式手機預設收合）
-  if (innerWidth < 600) document.getElementById('quest').classList.add('min');
+  // 下一步卡：點一下展開完整任務清單，8 秒後自動收回
   const quest = document.getElementById('quest'), small = () => innerWidth < 600;
   let qT = 0;
   quest.addEventListener('pointerdown', e => {
     if (e.target.closest('#guideBtn')) return;
     quest.classList.toggle('min');
-    // 手機上展開的任務面板 8 秒後自動收回，把畫面還給地圖
-    clearTimeout(qT); if (small() && !quest.classList.contains('min')) qT = setTimeout(() => quest.classList.add('min'), 8000);
+    clearTimeout(qT); if (!quest.classList.contains('min')) qT = setTimeout(() => quest.classList.add('min'), 8000);
   });
   // 片頭：手機上 3 秒後標語淡出，「洋流」邊上移邊放大、「啟程」往下；點空白處展開，再閒置 8 秒又收起
   const title = document.getElementById('title'), keep = [title.querySelector('h1'), title.querySelector('.start')];
