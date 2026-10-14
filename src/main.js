@@ -332,7 +332,7 @@ function hud() {
       .map(([k, v]) => `<li><small>${k}</small><b>${v}</b></li>`).join('');
     $('#dexN').textContent = found; $('#dexSub').textContent = t('dexSub', { n: found, m: SPOTS.length });
     // 已收集的項目可以點開，用景點介紹頁再看一次；有照片就放縮圖
-    const ent = (k, key, title, sub, text) => { const im = TT?.spots?.[key]?.images?.[0]?.file; return `<li class="open" data-k="${k}"><div class="t"><b>${title}</b><small>${sub}</small><p>${text}</p></div>${im ? `<img src="${im}" alt="">` : ''}<i class="chev"></i></li>`; };
+    const ent = (k, key, title, sub, text) => { const im = spotInfo(key)?.images?.[0]?.file; return `<li class="open" data-k="${k}"><div class="t"><b>${title}</b><small>${sub}</small><p>${text}</p></div>${im ? `<img src="${im}" alt="">` : ''}<i class="chev"></i></li>`; };
     const gate = n => n.awake ? ent('g:' + n.id, n.id, `${n.icon} ${n.name}${t('sep')}${n.hill}`, `${n.seal}${t('sep')}${n.virtue}`, n.info) : `<li class="lock open" data-k="xg:${n.id}"><div class="t"><b>${n.icon} ？？？</b><small>${n.seal}</small></div><i class="chev"></i></li>`;
     $('#dexList').innerHTML = `<li class="sec">${t('secMountain')}</li>` + S1.map(gate).join('')
       + (stage1Done() ? `<li class="sec">${t('secFlows')}</li>` + S2.map(gate).join('') : '')
@@ -760,13 +760,16 @@ function discover(sp) {
   showCard(sp.name, sp.area, sp.text, t('discovered', { n: SPOTS.filter(s => s.found).length, m: SPOTS.length }), sp.id);
 }
 // 臺北旅遊網 Open API 的介紹與照片（由 tools/fetch-taipei-travel.mjs 產生；沒有檔案時就只用遊戲內文字）
-let TT = null;
+let TT = null, CM = null;
 fetch('data/taipei-travel.json').then(r => r.ok ? r.json() : null).then(j => { TT = j; hudKey = ''; }).catch(() => { });
+// 臺北旅遊網沒有的景點（外縣市、部分古蹟），照片改用 Wikimedia Commons
+fetch('data/commons.json').then(r => r.ok ? r.json() : null).then(j => { CM = j; hudKey = ''; }).catch(() => { });
+const spotInfo = k => TT?.spots?.[k]?.images?.length ? TT.spots[k] : CM?.spots?.[k] || TT?.spots?.[k];
 const clip = (t, n) => t.length > n ? t.slice(0, n).replace(/\s+$/, '') + '…' : t;
 let spotData = null;
 function showCard(title, sub, text, em, key) {
   // 地標標籤：一行名字＋地區，點了才開滿版介紹；沒點就自己淡出
-  const c = $('#card'), d = key && TT?.spots?.[key];
+  const c = $('#card'), d = key && spotInfo(key);
   spotData = { title, sub, text, em, d };
   c.querySelector('b').textContent = title; c.querySelector('small').textContent = sub;
   c.classList.add('show');
@@ -786,7 +789,13 @@ function openSpot() {
   spotDots.innerHTML = imgs.length > 1 ? imgs.map((_, k) => `<i class="${k ? '' : 'on'}"></i>`).join('') : '';
   spotPh.scrollLeft = 0;
   const cr = spotEl.querySelector('.cr'); cr.replaceChildren();
-  if (d) {
+  if (d?.src === 'commons') {
+    cr.append(t('photoPre'));
+    const seen = new Set();
+    imgs.forEach(im => { const label = [im.author, im.license].filter(Boolean).join('・') || 'Wikimedia Commons'; if (seen.has(label)) return;
+      const a = document.createElement('a'); a.href = im.page; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label; cr.append(seen.size ? '、' : '', a); seen.add(label); });
+    cr.append(t('photoPost'));
+  } else if (d) {
     const dl = (lang !== 'zh' && d.i18n?.[lang]) || d;
     const a = document.createElement('a'); a.href = dl.url || d.url || TT.sourceUrl; a.target = '_blank'; a.rel = 'noopener';
     a.textContent = t('creditLink', { name: dl.name || d.name }); cr.append(t('creditPre'), a, t('creditPost'));
@@ -796,7 +805,7 @@ function openSpot() {
 spotPh.addEventListener('scroll', () => { const k = Math.round(spotPh.scrollLeft / spotPh.clientWidth); spotDots.querySelectorAll('i').forEach((el, n) => el.classList.toggle('on', n === k)); }, { passive: true });
 $('#dexList').addEventListener('click', e => {
   const li = e.target.closest('li[data-k]'); if (!li) return;
-  const [kind, id] = li.dataset.k.split(':'), d = TT?.spots?.[id];
+  const [kind, id] = li.dataset.k.split(':'), d = spotInfo(id);
   if (kind === 'xg') { const n = NODES.find(x => x.id === id); spotData = { title: `${n.icon} ？？？`, sub: n.seal, text: t('lockedGate', { hint: G.geo ? placeOf(n) : n.hint }), em: '', d: null }; }
   else if (kind === 'xs') { const sp = SPOTS.find(q => q.id === id), area = sp.area.split(/・|, | · /)[0]; spotData = { title: '？？？', sub: area, text: t('lockedSpot', { area }), em: '', d: null }; }
   else if (kind === 'g') { const n = NODES.find(x => x.id === id); spotData = { title: `${n.name}${t('sep')}${n.hill}`, sub: `${n.seal}${t('sep')}${n.virtue}`, text: n.info, em: '', d }; }

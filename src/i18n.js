@@ -216,6 +216,8 @@ const S = {
   discovered: ['發現台灣之美 {n}/{m}・＋1 靈光', 'Beauty of Taiwan {n}/{m} · +1 Spirit Light', '台湾の美を発見 {n}/{m}・＋1 霊光'],
   creditLink: ['臺北旅遊網・{name}', 'Travel Taipei · {name}', '台北観光サイト・{name}'],
   creditPre: ['介紹與照片：', 'Text and photos: ', '紹介と写真：'],
+  photoPre: ['照片：', 'Photos: ', '写真：'],
+  photoPost: ['（Wikimedia Commons）', ' (Wikimedia Commons)', '（ウィキメディア・コモンズ）'],
   creditPost: ['（臺北市政府觀光傳播局）', ' (Department of Information and Tourism, Taipei City Government)', '（台北市政府観光伝播局）'],
   meters: ['{n} 公尺', '{n} m', '{n} m'],
   km: ['{n} 公里', '{n} km', '{n} km'],

@@ -49,7 +49,7 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #hud .ico{pointer-events:auto}
 .ico svg{width:22px;height:22px}
 .ico.on{border-color:rgba(255,207,90,.8);color:var(--gold)}
-#mini{position:absolute;left:0;top:54px;width:132px;height:132px;border-radius:18px;border:1.5px solid rgba(255,255,255,.45);background:#1c4678;image-rendering:pixelated;
+#mini{position:absolute;left:0;top:54px;width:min(58vw,240px);height:min(58vw,240px);border-radius:18px;border:1.5px solid rgba(255,255,255,.45);background:#1c4678;image-rendering:pixelated;
   box-shadow:0 10px 30px rgba(0,0,0,.35);opacity:0;transform:translateY(-6px) scale(.96);transform-origin:top left;transition:opacity .25s,transform .25s;pointer-events:none}
 #mini.show{opacity:1;transform:none}
 #dexBtn{position:relative}
@@ -357,7 +357,7 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
 #ending h2{margin:0;font-size:clamp(26px,7vw,40px);letter-spacing:.2em}
 #ending .logo{font-size:clamp(36px,11vw,64px);font-weight:900;letter-spacing:.15em}
 #stats{color:var(--gold);font-size:14px;white-space:pre-line;line-height:1.7}
-@media (max-height:480px){#qtitle{font-size:18px}#qsub{display:none}#mini{width:96px;height:96px}.hint{display:none}}
+@media (max-height:480px){#qtitle{font-size:18px}#qsub{display:none}#mini{width:min(62vh,200px);height:min(62vh,200px)}.hint{display:none}}
 /* 橫式：任務卡＋台灣之美放左邊，其他按鈕排在右上；雷達改左右兩欄 */
 @media (orientation:landscape) and (max-height:600px){
   .topbar{right:calc(12px + var(--sr));max-width:none;margin:0;display:grid;grid-template-columns:min(340px,44vw) 1fr auto auto;align-items:start;gap:8px}

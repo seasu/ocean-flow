@@ -9,7 +9,7 @@ const WANT = {
   shandao: [['善導寺 (臺北市)'], 'Shandao Temple Taipei'], controlyuan: [['監察院大樓', '監察院'], 'Control Yuan building Taipei'],
   jinan: [['濟南基督長老教會'], 'Jinan Presbyterian Church Taipei'], guanghua: [['光華商場'], 'Guanghua Digital Plaza'],
   turtle: [['龜山島'], 'Guishan Island Yilan'], kuroshio: [['黑潮'], 'Qingshui Cliff Hualien'],
-  taroko: [['太魯閣峽谷', '太魯閣國家公園'], 'Taroko Gorge'], sunmoon: [['日月潭'], 'Sun Moon Lake Taiwan'],
+  taroko: [['太魯閣峽谷', '太魯閣國家公園'], 'Taroko Gorge'], sunmoon: [['日月潭'], 'Sun Moon Lake Lalu Island view'],
   yushan: [['玉山'], 'Yushan main peak'], alishan: [['阿里山神木', '阿里山國家森林遊樂區'], 'Alishan giant tree'], kenting: [['鵝鑾鼻燈塔'], 'Eluanbi Lighthouse'],
 };
 const MAX = 3, UA = 'ocean-flow-prototype/1.0 (https://github.com/seasu/ocean-flow)';
