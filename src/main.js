@@ -448,6 +448,7 @@ const FILM_KEY = 'oceanflow.filmSeen';
 const film = $('#film'), video = film.querySelector('video');
 function closeFilm() {
   video.pause(); film.classList.remove('show', 'muted');
+  window.armTitle?.();
   try { localStorage.setItem(FILM_KEY, '1'); } catch { }
 }
 // 手機直拿播直式（9:16），橫拿或電腦播橫式；播放中轉向就換檔、接著同一秒播
@@ -473,9 +474,38 @@ film.querySelector('.skip').addEventListener('click', e => { e.stopPropagation()
 film.querySelector('.sound').addEventListener('click', e => { e.stopPropagation(); video.muted = false; film.classList.remove('muted'); video.play().catch(() => { }); });
 film.addEventListener('click', () => { if (video.muted) { video.muted = false; film.classList.remove('muted'); } else if (video.paused) video.play().catch(() => { }); else video.pause(); });
 for (const b of document.querySelectorAll('.film-btn')) b.addEventListener('click', e => { e.stopPropagation(); openFilm(); });
-let filmSeen = false;
-try { filmSeen = !!localStorage.getItem(FILM_KEY); } catch { }
-if (!filmSeen && !params.has('play') && !params.has('geo') && !params.has('nofilm')) openFilm();
+// 每次開啟都先播介紹影片（可略過），之後才到主畫面
+const wantFilm = !params.has('play') && !params.has('geo') && !params.has('nofilm');
+
+// ---------- 開場：點一下開始 ----------
+// 瀏覽器不讓影片自己有聲播放，要先有一次點擊；趁這一頁提示「加到主畫面」
+const launch = $('#launch'), A2HS_KEY = 'oceanflow.a2hsShown';
+const standalone = matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches || navigator.standalone === true;
+const ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const mobile = ios || /Android/.test(ua);
+let a2hsShown = false, installEvt = null;
+try { a2hsShown = !!localStorage.getItem(A2HS_KEY); } catch { }
+const showA2hs = mobile && !standalone && !params.has('noa2hs');
+if (showA2hs) {
+  const box = launch.querySelector('.a2hs'), p = box.querySelector('p');
+  box.hidden = false;
+  // iOS 只有 Safari 能加到主畫面；LINE、FB、Chrome 等內建瀏覽器要先換到 Safari
+  if (ios) { const safari = !/CriOS|FxiOS|EdgiOS|Line\/|FBAN|FBAV|Instagram/.test(ua); p.innerHTML = t(safari ? 'a2hsIos' : 'a2hsIosApp'); launch.querySelector('.arrow').hidden = !safari || innerWidth > 700; }
+  else p.innerHTML = t('a2hsOther');
+}
+// Android Chrome 會給安裝事件，可以直接跳出「安裝」視窗
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; const b = launch.querySelector('.install'); b.hidden = false; launch.querySelector('.a2hs p').hidden = true; });
+launch.querySelector('.install').addEventListener('click', async e => { e.stopPropagation(); if (!installEvt) return; installEvt.prompt(); await installEvt.userChoice.catch(() => { }); installEvt = null; e.target.hidden = true; });
+if (!params.has('play') && !params.has('geo') && (wantFilm || (showA2hs && !a2hsShown))) {
+  launch.classList.add('show');
+  if (!wantFilm) launch.querySelector('small').hidden = true;
+  launch.querySelector('.go').addEventListener('click', () => {
+    launch.classList.remove('show');
+    try { localStorage.setItem(A2HS_KEY, '1'); } catch { }
+    if (wantFilm) openFilm();   // 這一下點擊讓影片可以直接有聲播放
+    else window.armTitle?.();
+  });
+}
 
 // ---------- 玩法 ----------
 function doSense() {

@@ -12,6 +12,7 @@
 ## 作品網址
 
 - 可玩版本（GitHub Pages）：https://seasu.github.io/ocean-flow/ （手機開啟，片頭按「啟程」可用真實定位）
+- 每次開啟都先出現「點一下開始」畫面，點了播介紹影片（有聲，可略過），之後才到主畫面；手機瀏覽器上同時提示加到主畫面。`?nofilm` 跳過影片、`?noa2hs` 關掉提示。
 - 程式碼：https://github.com/seasu/ocean-flow
 
 ## 玩法

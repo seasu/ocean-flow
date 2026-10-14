@@ -213,6 +213,18 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #battle .msg h3{margin:0 0 8px;color:var(--gold);font-size:17px;letter-spacing:.06em}
 #battle .msg p{margin:0 0 14px;font-size:13px;line-height:1.7;font-weight:500;white-space:pre-line;color:#dbe6f0}
 #battle .msg button{background:var(--gold);color:#3a2300;border-radius:10px;padding:10px 22px;font-weight:900;font-size:15px}
+/* 開場：點一下開始（讓影片能有聲播放）＋加到主畫面提示 */
+#launch{position:fixed;inset:0;z-index:30;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;
+  background:radial-gradient(ellipse at 50% 30%,#123a6e,#06101e 70%)}
+#launch.show{display:flex}
+#launch .logo{width:112px;height:112px;border-radius:26px;box-shadow:0 8px 40px rgba(111,227,255,.35)}
+#launch h2{margin:0;font-size:30px;font-weight:900;letter-spacing:.12em}
+#launch small{font-size:13px;color:var(--dim);font-weight:500}
+#launch .a2hs{max-width:22em;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(111,227,255,.25);font-size:14px;line-height:1.7}
+#launch .a2hs p{margin:6px 0 0;color:#d8e6f2}
+#launch .a2hs .ico{display:inline-block;padding:0 6px;border-radius:6px;background:rgba(111,227,255,.18);color:var(--cyan)}
+#launch .install{margin-top:10px;font-size:15px;font-weight:900;padding:10px 22px;border-radius:12px;background:rgba(111,227,255,.18);color:var(--cyan)}
+#launch .arrow{position:absolute;bottom:calc(8px + var(--sb));left:50%;transform:translateX(-50%);font-size:28px;color:var(--cyan);animation:blink 1.2s infinite}
 #film{position:fixed;inset:0;z-index:20;background:#000;display:none;align-items:center;justify-content:center}
 #film.show{display:flex}
 #film video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
@@ -275,6 +287,18 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 <div id="film"><video playsinline preload="none"></video>
   <button class="sound" data-i18n="tapSound">🔊 點一下開聲音</button>
   <button class="skip" data-i18n="skip">略過 ▸</button></div>
+<div id="launch">
+  <img src="icons/icon-192.png" alt="" class="logo">
+  <h2>洋流：起源</h2>
+  <div class="a2hs" hidden><b data-i18n="a2hsTitle">加到主畫面，像 App 一樣全螢幕玩</b><p></p><button class="install" data-i18n="a2hsInstall" hidden>📲 加到主畫面</button></div>
+  <button class="start go" data-i18n="launchGo">▶ 點一下開始</button>
+  <small data-i18n="launchSound">🔊 開啟聲音，會先播一段介紹影片</small>
+  <div class="arrow" hidden>↓</div>
+</div>
+<script>
+  // 開 app 第一個畫面就是影片入口：在主程式載入前就蓋上，避免先閃出主畫面
+  (() => { const q = new URLSearchParams(location.search); if (!['play', 'geo', 'nofilm'].some(k => q.has(k))) document.getElementById('launch').classList.add('show'); })();
+</script>
 <script type="module" src="src/main.js"></script>
 <script>
   // 收合任務面板（直式手機預設收合）
@@ -299,7 +323,10 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
       e.animate([{ transform: `translate(${dx}px,${dy}px) scale(${k})` }, { transform: 'none' }], { duration: calm ? 1200 : 600, easing: 'cubic-bezier(.22,.8,.24,1)' });
     });
   }
-  let tT = setTimeout(() => small() && flip(true), 3000);
+  // 主畫面真正出現（開場與影片都關掉）之後才開始倒數 3 秒
+  let tT = 0;
+  window.armTitle = () => { clearTimeout(tT); title.classList.remove('calm'); tT = setTimeout(() => small() && flip(true), 3000); };
+  if (!document.getElementById('launch').classList.contains('show')) armTitle();
   title.addEventListener('pointerdown', e => {
     if (e.target.closest('button:not(.more)')) return;
     flip(false); clearTimeout(tT);
