@@ -161,10 +161,10 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #lore .x{position:absolute;z-index:2;top:calc(14px + var(--st));right:calc(14px + var(--sr))}
 #lore .pages{flex:1;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 #lore .pages::-webkit-scrollbar{display:none}
-#lore section{flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+#lore section{flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:safe center;text-align:center;
   padding:calc(64px + var(--st)) calc(28px + var(--sr)) 12px calc(28px + var(--sl));overflow-y:auto}
 #lore section>*{max-width:30em}
-#lore img{width:min(68vw,40vh,340px);aspect-ratio:1;object-fit:cover;border-radius:50%;flex:none;
+#lore img{width:min(60vw,32vh,300px);aspect-ratio:1;object-fit:cover;border-radius:50%;flex:none;
   -webkit-mask-image:radial-gradient(circle,#000 58%,transparent 71%);mask-image:radial-gradient(circle,#000 58%,transparent 71%);
   transform:scale(.88);opacity:.5;transition:transform 1.1s cubic-bezier(.22,.8,.24,1),opacity 1.1s}
 #lore section.on img{transform:none;opacity:1}
@@ -172,9 +172,10 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #lore small em{font-style:normal;margin-left:10px;padding:2px 10px;border-radius:999px;font-size:13px;letter-spacing:.06em;color:#06263f;background:#bff4ff}
 #lore h2{margin:8px 0 4px;font-size:clamp(28px,8.5vw,38px);letter-spacing:.1em;font-weight:900;text-shadow:0 0 24px rgba(127,232,255,.35)}
 #lore b{font-size:16px;color:#bfd6ea;letter-spacing:.2em;font-weight:500}
-#lore p{margin:16px 0 0;font-size:17px;line-height:1.9;color:#e4eef8;font-weight:500;white-space:pre-line;text-wrap:pretty}
-#lore section p,#lore section b,#lore section h2,#lore section small{opacity:0;transform:translateY(10px);transition:opacity .9s .25s,transform .9s .25s}
-#lore section.on p,#lore section.on b,#lore section.on h2,#lore section.on small{opacity:1;transform:none}
+#lore blockquote{margin:16px 0 0;font-size:18px;line-height:1.6;color:#ffe2a0;font-weight:700}
+#lore p{margin:12px 0 0;font-size:17px;line-height:1.85;color:#e4eef8;font-weight:500;white-space:pre-line;text-wrap:pretty}
+#lore section p,#lore section blockquote,#lore section b,#lore section h2,#lore section small{opacity:0;transform:translateY(10px);transition:opacity .9s .25s,transform .9s .25s}
+#lore section.on p,#lore section.on blockquote,#lore section.on b,#lore section.on h2,#lore section.on small{opacity:1;transform:none}
 #lore .cover h2{font-size:clamp(56px,20vw,96px);letter-spacing:.2em;margin:10px 0}
 #lore .cover p{font-size:18px}
 #lore .hintSwipe{margin-top:36px;font-size:15px;color:var(--dim);animation:blink 1.6s infinite}
@@ -184,6 +185,8 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #lore .dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.28);transition:background .3s,transform .3s;cursor:pointer}
 html:not([lang^=zh]) #lore b,html:not([lang^=zh]) #lore small{letter-spacing:.06em}
 html:not([lang^=zh]) #lore h2{letter-spacing:.02em}
+html:not([lang^=zh]) #lore p{font-size:16px;line-height:1.6}
+html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
 #lore .dots i.on{background:var(--gold);transform:scale(1.35)}
 /* 台灣之美：發現卡與圖鑑 */
 #card{position:fixed;left:50%;bottom:calc(118px + var(--sb));transform:translate(-50%,8px);width:min(340px,calc(100vw - 32px));
