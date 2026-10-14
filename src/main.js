@@ -152,7 +152,7 @@ let stickId = null, stickO = [0, 0], camId = null, camLast = [0, 0];
 canvas.addEventListener('pointerdown', e => {
   if (G.state !== 'play') return;
   if (e.clientX < innerWidth * 0.45 && stickId === null) {
-    stickId = e.pointerId; stickO = [e.clientX, e.clientY]; $('.hint').style.display = 'none';
+    stickId = e.pointerId; stickO = [e.clientX, e.clientY]; $('.hint').style.display = 'none'; if (!hudEl.classList.contains('quiet')) wakeHud(1200);
     stick.style.left = e.clientX + 'px'; stick.style.top = e.clientY + 'px'; stick.classList.add('on');
   } else if (camId === null) { camId = e.pointerId; camLast = [e.clientX, e.clientY]; }
   canvas.setPointerCapture(e.pointerId);
@@ -290,6 +290,12 @@ geo.on(p => {
 
 const toast = text => { const el = $('#toast'); el.textContent = text; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); };
 const avail = () => G.collected + (G.bonus || 0) - G.spent;
+// 次要工具（小地圖、現世、圖鑑、靜音、境界）平常收起，點右上「⋯」叫出來；閒置幾秒或開始走路就再收起
+const hudEl = $('#hud');
+let quietT = 0;
+function wakeHud(ms = 5000) { $('.tray').style.top = Math.round($('#quest').getBoundingClientRect().bottom + 12) + 'px'; hudEl.classList.remove('quiet'); clearTimeout(quietT); quietT = setTimeout(() => hudEl.classList.add('quiet'), ms); }
+$('#menuBtn').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (hudEl.classList.contains('quiet')) wakeHud(6000); else { clearTimeout(quietT); hudEl.classList.add('quiet'); } });
+for (const b of ['#radarBtn', '#dexBtn', '#mute']) $(b).addEventListener('pointerdown', () => wakeHud(6000));
 let hudKey = '';
 function hud() {
   const found = SPOTS.filter(sp => sp.found).length;
@@ -305,25 +311,32 @@ function hud() {
       + (visited.size ? `<li class="sec">${t('secCulture')}</li>` + REAL.filter(x => visited.has(x.id)).map(x => `<li><b>${x.name}</b><small>${x.sub}</small><p>${x.text}</p></li>`).join('') : '')
       + `<li class="sec">${t('beauty')}</li>`
       + SPOTS.map(sp => sp.found ? `<li><b>${sp.name}</b><small>${sp.area}</small><p>${sp.text}</p></li>` : `<li class="lock"><b>？？？</b><small>${sp.area.split(/・|, | · /)[0]}</small></li>`).join('');
-    $('#qi').textContent = t('qi', { n: avail() });
+    $('#qi').textContent = t('qiOf', { n: avail(), cost: COST });
     $('#qibar').style.width = Math.min(100, avail() / COST * 100) + '%';
     const stars = n => ' ' + '★'.repeat(n.star);
+    const dots = list => list.map(n => `<i class="${n.awake ? 'done' : ''}"></i>`).join('');
+    let head, title, sub;
     if (!G.gateOpen && stage1Done()) {
-      const done2 = S2.filter(n => n.awake).length;
-      $('#qtitle').textContent = t('questTitle2', { n: done2 });
-      $('#qchips').innerHTML = S2.map(n => `<span class="${n.awake ? 'done' : ''}">${n.icon}${n.awake ? '✓' : ''}</span>`).join('');
+      const left = S2.filter(n => !n.awake);
+      head = t('stage2Head'); $('#qchips').innerHTML = dots(S2);
+      title = G.realm < REQ ? t('train2', { realm: REALMS[REQ] }) : t('wake2');
+      sub = G.realm < REQ ? xiuLine() : left.map(n => G.geo ? placeOf(n) : n.name).join(t('list'));
       $('#qlist').innerHTML = S2.map(n => `<li class="${n.awake ? 'done' : G.realm >= REQ ? '' : 'wait'}"><span>${n.awake ? '✓' : n.icon}</span>${n.seal}${t('sep')}${n.name}${stars(n)}<small>${n.awake ? n.virtue : (G.realm < REQ ? t('needRealmShort', { realm: REALMS[REQ], now: REALMS[G.realm] }) + t('sep') : '') + (G.geo ? t('questGeo', { place: placeOf(n), hill: n.hill }) : n.hill)}</small></li>`).join('')
         + `<li class="note">${t('questNote2', { cost: COST, realm: REALMS[REQ] })}</li><li class="note">${xiuLine()}</li>`;
     } else if (!G.gateOpen) {
-      $('#qtitle').textContent = t('questTitle', { n: G.awakened });
-      $('#qchips').innerHTML = S1.map(n => `<span class="${n.awake ? 'done' : ''}">${n.icon}${n.awake ? '✓' : ''}</span>`).join('');
+      const n = nextGate();
+      head = t('stage1Head'); $('#qchips').innerHTML = dots(S1);
+      title = t('goTo', { name: n.name });
+      sub = G.geo ? placeOf(n) + t('sep') + t('orIsland', { hill: n.hill }) : n.hint + t('sep') + n.hill;
       $('#qlist').innerHTML = S1.map(n => `<li class="${n.awake ? 'done' : n === nextGate() ? '' : 'wait'}"><span>${n.awake ? '✓' : n.icon}</span>${n.seal}${t('sep')}${n.name}${stars(n)}<small>${n.awake ? n.virtue : n !== nextGate() ? t('waitPrev') : G.geo ? t('questGeo', { place: placeOf(n), hill: n.hill }) : n.hint + t('sep') + n.hill}</small></li>`).join('')
         + `<li class="note">${t('questNote', { cost: COST })}</li><li class="note">${xiuLine()}</li>`;
     } else {
-      $('#qtitle').textContent = t('questDone');
-      $('#qchips').innerHTML = '<span class="done">⛩</span>';
+      head = t('stageDoneHead'); $('#qchips').innerHTML = '';
+      title = t('questDone'); sub = G.geo ? t('gateWaits') : t('xiWaits');
       $('#qlist').innerHTML = (G.geo ? `<li><span>⛩</span>${t('backVenue')}<small>${t('gateWaits')}</small></li>` : '') + `<li><span>⛩</span>${t('islandGate')}<small>${t('xiWaits')}</small></li>`;
     }
+    $('#qhead').textContent = head; $('#qtitle').textContent = title; $('#qsub').textContent = sub;
+    $('#quest .qi').style.display = G.gateOpen ? 'none' : '';
   }
   const sb = $('#btnSense');
   sb.style.setProperty('--cd', G.senseCd > 0 ? (G.senseCd / 9 * 100).toFixed(1) + '%' : '0%');
