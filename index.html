@@ -329,7 +329,7 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
 #radar .rwrap{position:relative;flex:none;width:min(380px,calc(100vw - 32px),52vh);max-width:100%}
 #rcv{display:block;width:100%;aspect-ratio:1;touch-action:none}
 /* 縮放：雙指或按鈕；準星按鈕回到「我＋目的地」 */
-.rbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;min-height:46px}
+.rbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:8px;min-height:46px}
 .rzoom{display:flex;gap:8px;flex:none}
 .rzoom button{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.4);
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:transform .12s,background .12s}
@@ -354,6 +354,9 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
 #rlist li.key em{color:var(--cyan)}#rlist li.done em{color:var(--gold)}
 #rlist li.near{outline:2px solid var(--gold)}
 #rlist li.target{background:rgba(255,207,90,.12);box-shadow:inset 3px 0 0 var(--gold)}
+#rlist li a.nav{flex:none;display:flex;align-items:center;gap:4px;padding:8px 12px;border-radius:999px;font-size:15px;font-weight:900;color:#bff4ff;background:rgba(127,232,255,.12);border:1px solid rgba(127,232,255,.35);text-decoration:none}
+#rlist li.target a.nav{color:#3a2300;background:var(--gold);border-color:var(--gold)}
+#rlist li a.nav svg{width:16px;height:16px}
 #rlist li button{background:var(--gold);color:#3a2300;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:900}
 #radar footer{width:min(520px,100%);display:grid;gap:8px;font-size:14px;color:var(--dim)}
 #radar footer label{display:flex;gap:6px;align-items:center;color:var(--ink)}
@@ -526,7 +529,7 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
 <div id="radar" class="page">
   <header class="phead"><div><b data-i18n="radarTitle">現世・靈脈雷達</b><small class="trail" data-i18n="trail">文化徑 × 山林徑・走一條路，認識台北這座城</small><small id="gstat"></small></div><button id="rClose" class="xbtn" aria-label="close" data-i18n-label="backSpirit"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
   <div class="rwrap"><canvas id="rcv"></canvas>
-    <div class="rbar"><div class="rtarget" id="rtarget"></div><div class="rzoom"><button data-z="in" aria-label="zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><button data-z="out" aria-label="zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><button data-z="fit" aria-label="fit" data-i18n-label="fitTarget"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button></div></div></div>
+    <div class="rbar"><div class="rzoom"><button data-z="in" aria-label="zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><button data-z="out" aria-label="zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><button data-z="fit" aria-label="fit" data-i18n-label="fitTarget"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button></div></div></div>
   <div id="enc"><span></span><button data-i18n="enter">進入機緣</button></div>
   <ul id="rlist"></ul>
   <footer><label><input type="checkbox" id="simT"> <span data-i18n="simLabel">模擬定位：點雷達或清單就走過去（展示用）</span></label>
