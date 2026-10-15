@@ -328,7 +328,7 @@ function dirFor(s) {
 }
 let guideOn = false;
 const guideEl = $('#guide'), guideArrow = guideEl.querySelector('i'), guideText = guideEl.querySelector('p');
-// 「帶我去」：直接打開雷達（島上是小地圖）標出目的地；遊戲畫面只留一顆小方向箭頭＋距離
+// 任務卡、雷達、靈界地圖都有「導航」（Google 地圖）和「指引」（靈界方向箭頭）
 // 主畫面的箭頭跟著角色走：量的是島上目標的步數；真實世界的距離和方向看雷達
 function guideTarget() {
   const n = nextGate();
@@ -340,17 +340,34 @@ function updateGuide() {
   guideArrow.style.transform = `rotate(${deg.toFixed(0)}deg)`;
   if (guideText.textContent !== text) guideText.textContent = text;
 }
-function showMini(ms = 8000) {
-  $('#mini').classList.add('show'); $('#mapBtn').classList.add('on');
-  clearTimeout(miniT); miniT = setTimeout(() => { $('#mini').classList.remove('show'); $('#mapBtn').classList.remove('on'); }, ms);
-}
+// 「指引」：留在靈界，畫面上出現方向箭頭＋地上一串金光指向下一站；不打開任何地圖
 function openGuide() {
   guideOn = true; guideEl.classList.add('show'); sfx.sense();
-  if (G.geo) { askCompass(); openRadar(); } else showMini();
+  closeRadar(); bigEl.hidden = true;
   updateGuide();
 }
-$('#guideBtn').addEventListener('click', e => { e.stopPropagation(); openGuide(); });
-guideEl.addEventListener('click', e => { if (e.target.closest('.x')) { guideOn = false; guideEl.classList.remove('show'); return; } e.stopPropagation(); G.geo ? openRadar() : showMini(); });
+// 金光一串串從腳下往目標方向流過去，走到了就停
+function guideTrail() {
+  if (!guideOn || G.state !== 'play') return;
+  const g = guideTarget(), dx = g.pos[0] - P.x, dz = g.pos[2] - P.z, d = Math.hypot(dx, dz);
+  if (d < 3) return;
+  const ux = dx / d, uz = dz / d, ph = (G.t * 2.4) % 1.2, L = Math.min(d - 1, 12);
+  for (let k = 1 + ph; k < L; k += 1.2) {
+    const a = Math.min(1, (k - 1) / 1.2) * Math.min(1, (L - k) / 3);
+    r.box(P.x + ux * k, P.y + 0.12, P.z + uz * k, 0.5, 0.08, 0.5, [1, 0.85, 0.4], 1, a, Math.atan2(ux, uz));
+  }
+}
+// 「導航」：用 Google 地圖帶你走到現世的目的地（步行）
+function openNav(s = radarTarget()) {
+  if (!s) return;
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}&travelmode=walking`;
+  const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.click();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('.navpair button'); if (!b) return;
+  e.stopPropagation(); b.classList.contains('navgo') ? openNav() : openGuide();
+}, true);
+guideEl.addEventListener('click', e => { e.stopPropagation(); if (e.target.closest('.x')) { guideOn = false; guideEl.classList.remove('show'); } });
 
 // ---------- 走路修行：走的路轉成修為，修為滿了到機緣點突破境界 ----------
 // 現地模式算真實走的公尺數（模擬定位也算），島上算角色走的步數；每升一境，淨化之戰多一步
@@ -962,7 +979,10 @@ function updateGame(dt) {
     if (n.stage === 2 && G.realm < REQ) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); toast(t('needRealm', { name: n.name, realm: REALMS[REQ], now: REALMS[G.realm] })); } continue; }
     if (!canOpen(n)) { if (d < 2.6 && G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); const nx = nextGate(); toast(t('outOfOrder', { name: n.name, next: nx.name, hill: nx.hill })); } continue; }
     if (d < 2.6 && Math.abs(P.y - n.pos[1]) < 3) {
-      if (avail() >= COST) act = { key: n.id, text: t('gateHere', { icon: n.icon, name: n.name }), btn: t('gateGo'), fn: () => fight(n, () => awaken(n)) };
+      // 現世模式：要先在現世走到這一處觸發過一次，靈界的門才會回應（模擬定位走過去也算）
+      const spot = G.geo && REAL.find(r => r.node === n.id);
+      if (spot && !visited.has(spot.id)) act = { key: 'real:' + n.id, text: t('gateReal', { name: n.name, place: spot.name }), btn: t('navBtn'), fn: () => openNav(spot) };
+      else if (avail() >= COST) act = { key: n.id, text: t('gateHere', { icon: n.icon, name: n.name }), btn: t('gateGo'), fn: () => fight(n, () => awaken(n)) };
       else if (G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); toast(t('notEnough', { cost: COST, n: avail() })); }
     } else n.charge = Math.max(0, n.charge - dt);
   }
@@ -1467,6 +1487,7 @@ function frame(dt) {
   }
   if (world.lamp) r.box(world.lamp[0], world.lamp[1], world.lamp[2], 30, 0.35, 0.7, [1, 0.95, 0.7], 1, 0.12 + s * 0.25, G.t * 0.9);
   for (const p of G.particles) r.box(p.x, p.y, p.z, 0.18, 0.18, 0.18, p.col, 1, Math.min(1, p.life), p.life * 4);
+  guideTrail();
   if (G.riding && P.swim) for (let i = 0; i < 3; i++) r.box(P.x + Math.sin(G.t * 7 + i * 2) * 0.6, WATER + 0.05, P.z + 0.6 + i * 0.7, 0.25, 0.05, 0.6, [0.8, 0.95, 1], 1, 0.5 - i * 0.12);
   r.blend(0);
 
