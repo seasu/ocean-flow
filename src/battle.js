@@ -12,7 +12,9 @@ import { match3 } from './games/match3.js';
 const GAMES = { elephant: sudoku, tiger: taphero, leopard: sigil, lion: match3, city: taphero, sea: sigil, peak: sudoku };
 // 測試用：?game=sudoku|taphero|sigil|match3 讓每一門都用同一種玩法
 const FORCE = { sudoku, taphero, sigil, match3 }[new URLSearchParams(location.search).get('game')];
-const gameOf = node => FORCE || GAMES[node.id] || match3;
+// 終極 BOSS 濁淵：四關連戰，依序是象（數獨）、虎（連點）、豹（畫符）、獅（三消）
+export const BOSS_PHASES = ['elephant', 'tiger', 'leopard', 'lion'];
+const gameOf = (node, ph = 0) => FORCE || GAMES[node.boss ? BOSS_PHASES[ph] : node.id] || match3;
 
 // 方塊元素：海、山、花、陽、石（顏色之外再用形狀區分），數獨與三消共用
 // 配色跟整體的夜海色調一致：飽和度降一點，像透光的寶石，不用糖果色
@@ -32,7 +34,7 @@ const msg = el.querySelector('.msg'), msgH = msg.querySelector('h3'), msgP = msg
 let S = null, raf = 0, last = 0;
 // 守門獸（設計圖：ocean-flow-origin/character-ref/beasts/）：被濁流纏住，淨化越多越露出原本的顏色
 // 第三階三流：城＝廟口的龍、海＝黑潮的海龜、山＝台灣黑熊
-const BEASTS = { elephant: 'elephant', tiger: 'tiger', leopard: 'leopard', lion: 'lion', city: 'dragon', sea: 'turtle', peak: 'bear' };
+const BEASTS = { elephant: 'elephant', tiger: 'tiger', leopard: 'leopard', lion: 'lion', city: 'dragon', sea: 'turtle', peak: 'bear', boss: 'boss' };
 const SPR = {};
 for (const [id, k] of Object.entries(BEASTS)) { const im = new Image(); im.src = `img/beasts/${k}.png`; SPR[id] = im; }
 const tint = document.createElement('canvas'), tg = tint.getContext('2d');
@@ -52,21 +54,23 @@ export function battle(node, lv = 0, realm = '') {
   return new Promise(resolve => {
     tries[node.id] = tries[node.id] || 0;
     el.classList.add('show');
-    el.querySelector('header b').textContent = `${node.name} ${'★'.repeat(node.star || 1)}`;
     loadMe();
     start(node, lv, resolve); quitB.setAttribute('aria-label', t('battleQuit'));
     const make = gameOf(node);
     const note = lv ? '\n' + t('realmPower', { realm, p: lv * 20 }) : '';
-    if (node.wild) showMsg(t('wildTitle', { name: node.name }), t('wildTip') + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
+    if (node.boss) showMsg(t('bossTitle', { name: node.name }), t('bossTip') + note + '\n\n' + t('bossPhase', { n: 1, m: BOSS_PHASES.length }) + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
+    else if (node.wild) showMsg(t('wildTitle', { name: node.name }), t('wildTip') + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
     else showMsg(SPR[node.id] ? t('battleBeast', { beast: t('beast_' + node.id) }) : t('battleTitle', { name: node.name }), t('battleTip_' + node.id) + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
     cancelAnimationFrame(raf); last = performance.now(); raf = requestAnimationFrame(tick);
   });
 }
 
-function start(node, lv, done) {
-  S = { node, lv, done, run: false, t: 0, pur: 0, fx: [], shots: [], hitT: 0, hurt: 0, rings: [], blink: 2, shake: 0, win: 0, lay: null, game: null };
+function start(node, lv, done, ph = 0) {
+  S = { node, lv, done, ph, run: false, t: 0, pur: 0, fx: [], shots: [], hitT: 0, hurt: 0, rings: [], blink: 2, shake: 0, win: 0, lay: null, game: null };
   size();
-  S.game = gameOf(node)(api, { star: node.star || 1, ease: Math.min(2, tries[node.id] || 0) });
+  el.querySelector('header b').textContent = `${node.name} ${'★'.repeat(node.star || 1)}` + (node.boss ? ` ${ph + 1}/${BOSS_PHASES.length}` : '');
+  // BOSS 不會因為輸過而變簡單
+  S.game = gameOf(node, ph)(api, { star: node.star || 1, ease: node.boss ? 0 : Math.min(2, tries[node.id] || 0) });
   bar.style.width = '0%';
 }
 
@@ -156,7 +160,13 @@ function win() {
   S.run = false; S.win = 0.001; S.pur = 100;
   const L = S.lay; api.burst(L.ex, L.ey, '#ffcf5a', 60, 320); api.burst(L.ex, L.ey, '#7fe8ff', 40, 240);
   sfx.purify();
-  const done = S.done;
+  const { done, node, lv, ph } = S;
+  // BOSS 還有下一關：同一個畫面接著打，濁淵身上的濁色一關一關褪掉
+  if (node.boss && ph < BOSS_PHASES.length - 1) {
+    const nx = gameOf(node, ph + 1);
+    setTimeout(() => { if (!S || S.node !== node) return; showMsg(t('bossNext', { n: ph + 1 }), t('bossPhase', { n: ph + 2, m: BOSS_PHASES.length }) + '\n' + t('how_' + nx.key), t('battleGo'), () => { start(node, lv, done, ph + 1); S.run = true; }); }, 1300);
+    return;
+  }
   setTimeout(() => { el.classList.remove('show'); S = null; done && done(true); }, 1800);
 }
 function lose() {
@@ -164,13 +174,14 @@ function lose() {
   S.run = false; sfx.deny();
   const { node, lv, done } = S; tries[node.id]++;
   // 野外的濁影：輸了就結束（外面會扣靈光），不給重來
+  if (node.boss) { showMsg(t('battleLose'), t('lose_' + gameOf(node, S.ph).key) + '\n' + t('bossLoseTip'), t('wildOk'), () => { S = null; el.classList.remove('show'); cancelAnimationFrame(raf); done(false); }); return; }
   if (node.wild) { showMsg(t('battleLose'), t('lose_' + gameOf(node).key), t('wildOk'), () => { S = null; el.classList.remove('show'); cancelAnimationFrame(raf); done(false); }); return; }
   showMsg(t('battleLose'), t('lose_' + gameOf(node).key) + '\n' + t('loseWalk'), t('battleRetry'), () => { start(node, lv, done); S.run = true; });
 }
 
 // ---------- 繪製 ----------
 function draw(L) {
-  const { w, h } = L, p = Math.min(1, S.pur / 100), win = S.win ? Math.min(1, S.win / 1.2) : 0, T = S.t;
+  const { w, h } = L, p = S.node.boss ? Math.min(1, (S.ph + S.pur / 100) / BOSS_PHASES.length) : Math.min(1, S.pur / 100), win = S.win ? Math.min(1, S.win / 1.2) : 0, T = S.t;
   g.clearRect(0, 0, w, h);
   const bg = g.createRadialGradient(L.ex, L.ey, 10, w / 2, h * 0.45, Math.max(w, h) * 0.8);
   bg.addColorStop(0, `rgba(${lerp(40, 60, p)},${lerp(30, 120, p)},${lerp(70, 150, p)},.94)`);
@@ -301,3 +312,5 @@ function drawBeast(L, spr, p, win, T) {
   if (win) { tg.fillStyle = `rgba(255,220,140,${0.35 * Math.sin(win * 3.14)})`; tg.fillRect(0, 0, px, px); }
   g.save(); g.translate(cx, cy + sz * 0.5); g.scale(1 + wob * 0.12, 1 - wob * 0.12); g.drawImage(tint, -sz / 2, -sz, sz, sz); g.restore();
 }
+// 測試用：在主控台把這一關直接淨化滿
+window.__battle = { fill() { if (S && S.run) S.pur = 100; } };
