@@ -1012,7 +1012,7 @@ function drawRadar() {
   const crowd = range > 700;
   for (const s of REAL) {
     if (s === tg || !shown(s)) continue;
-    const [x, y] = s.tale ? edge(...P2(s)) : P2(s), near = meters(geo.pos, s) <= s.r, key = s.node || s.id === 'venue' || s.tale;
+    const [x, y, out] = s.tale ? edge(...P2(s)) : P2(s), near = meters(geo.pos, s) <= s.r, key = s.node || s.id === 'venue' || s.tale;
     const done = visited.has(s.id) || (s.node && NODES.find(n => n.id === s.node).awake);
     g.globalAlpha = near ? 0.35 + 0.25 * Math.sin(G.t * 6) : 0.14;
     g.fillStyle = s.id === 'venue' ? '#ffcf5a' : s.tale ? '#ffa78c' : s.node ? '#6fe3ff' : '#ffffff';
@@ -1020,7 +1020,7 @@ function drawRadar() {
     g.globalAlpha = crowd && !key ? 0.5 : 0.85;
     g.beginPath(); g.arc(x, y, (key ? 5 : 3.5) * d, 0, 7); g.fill(); g.globalAlpha = 1;
     if (done) { g.strokeStyle = '#ffcf5a'; g.lineWidth = 2 * d; g.stroke(); }
-    if (!crowd || s.id === 'venue' || (s.tale && range > 1500)) { g.fillStyle = 'rgba(238,243,248,.75)'; g.font = `${12 * d}px sans-serif`; g.fillText(s.name, x, y - 9 * d); }
+    if (!out && (!crowd || s.id === 'venue' || (s.tale && range > 1500))) { g.fillStyle = 'rgba(238,243,248,.75)'; g.font = `${12 * d}px sans-serif`; g.fillText(s.name, x, y - 9 * d); }
   }
   // 目的地：金色、脈動、名字放大；超出範圍就貼在邊緣
   if (tg) {
