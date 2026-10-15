@@ -867,7 +867,7 @@ function openSpot() {
   if (d?.src === 'commons') {
     cr.append(t('photoPre'));
     const seen = new Set();
-    imgs.forEach(im => { const label = [im.author, im.license].filter(Boolean).join('・') || 'Wikimedia Commons'; if (seen.has(label)) return;
+    imgs.forEach(im => { const label = [/^No machine-readable/i.test(im.author || '') ? '' : im.author, im.license].filter(Boolean).join('・') || 'Wikimedia Commons'; if (seen.has(label)) return;
       const a = document.createElement('a'); a.href = im.page; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label; cr.append(seen.size ? '、' : '', a); seen.add(label); });
     cr.append(t('photoPost'));
   } else if (d) {

@@ -84,6 +84,10 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #qlist li.wait{opacity:.5}
 #qlist li.note{display:block;color:var(--dim);font-weight:500;font-size:14px}
 .quest.min #qlist{display:none}
+/* 任務卡展開時，其他按鈕和操作先藏起來，畫面只留任務 */
+#hud :is(.tools,#act,#near,#guide,#stick,#btnSense,#btnJump,.hint,#chaps,#tag){transition:opacity .25s}
+#hud:has(#quest:not(.min):not(.fold)) :is(.tools,#act,#near,#guide,#stick,#btnSense,#btnJump,.hint,#chaps,#tag){opacity:0!important;pointer-events:none!important}
+body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:none!important}
 #guide{position:absolute;right:16px;bottom:calc(176px + var(--sb));display:none;align-items:center;gap:8px;
   background:rgba(14,24,40,.6);border:1px solid rgba(255,207,90,.4);border-radius:999px;padding:4px 4px 4px 4px;pointer-events:auto;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 #guide.show{display:flex}
@@ -567,6 +571,8 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
     quest.classList.toggle('min');
     clearTimeout(qT); if (!quest.classList.contains('min')) qT = setTimeout(() => quest.classList.add('min'), 8000);
   });
+  // 展開時點任務卡以外的地方，就收回去
+  addEventListener('pointerdown', e => { if (!quest.classList.contains('min') && !e.target.closest('#quest')) { quest.classList.add('min'); clearTimeout(qT); } }, true);
   // 片頭：手機上 3 秒後標語淡出，「洋流」邊上移邊放大、「啟程」往下；點空白處展開，再閒置 8 秒又收起
   const title = document.getElementById('title'), keep = [title.querySelector('h1'), title.querySelector('.start')];
   function flip(calm) {
