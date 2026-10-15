@@ -25,7 +25,7 @@ el.id = 'battle';
 el.innerHTML = `<canvas></canvas>
   <header><b></b><div class="bar"><i></i></div><span class="hp"></span></header>
   <div class="msg"><h3></h3><p></p><button></button></div>
-  <div class="vic"><div class="vimg"><img class="vb" alt=""><img class="vxi" src="img/cast/xi.png" alt=""></div><small class="vk"></small><h2></h2><p class="vs"></p>
+  <div class="vic"><div class="vimg"><img class="vb" alt=""></div><h2></h2><p class="vs"></p>
     <div class="vstat"><span><b class="vt"></b><small></small></span><span><b class="vh"></b><small></small></span><span><b class="vr"></b><small></small></span></div>
     <div class="vrw"><small></small><ul></ul></div><button></button></div>
   <button class="xbtn quit" aria-label="leave"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`;
@@ -182,7 +182,6 @@ function win() {
 function victory(node, done) {
   const { t: sec, hits } = TOTAL, star = hits === 0 ? 3 : hits <= 2 ? 2 : 1;
   vic.querySelector('.vb').src = SPR[node.id]?.src || '';
-  vic.querySelector('.vk').textContent = t('vicKick');
   vic.querySelector('h2').textContent = t('vicTitle');
   vic.querySelector('.vs').textContent = node.boss ? t('vicBoss') : t('vicSub', { name: SPR[node.id] && !node.wild ? t('beast_' + node.id) : node.name });
   vic.querySelector('.vt').textContent = `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}`;

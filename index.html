@@ -534,10 +534,9 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   padding:18px 20px 22px;border-radius:24px;background:rgba(14,24,40,.78);border:1px solid rgba(255,207,90,.45);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 0 60px rgba(255,207,90,.25)}
 #battle .vic.show{display:block;animation:vicIn .55s cubic-bezier(.2,1.4,.4,1)}
 @keyframes vicIn{from{opacity:0;transform:translate(-50%,-50%) scale(.7)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-#battle .vimg{position:relative;height:150px;margin:-4px 0 4px}
-#battle .vb{position:absolute;left:50%;top:0;height:140px;transform:translateX(-62%);filter:drop-shadow(0 0 18px rgba(255,207,90,.55))}
-#battle .vxi{position:absolute;left:50%;bottom:-6px;height:118px;transform-origin:50% 100%;animation:xiDance 1.1s ease-in-out infinite;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
-@keyframes xiDance{0%,100%{transform:translateX(8%) rotate(-10deg) translateY(0) scaleY(.95)}25%{transform:translateX(8%) rotate(0) translateY(-20px) scaleY(1.03)}50%{transform:translateX(8%) rotate(10deg) translateY(0) scaleY(.95)}75%{transform:translateX(8%) rotate(0) translateY(-14px) scaleY(1.03)}}
+#battle .vimg{position:relative;height:160px;margin:-4px 0 6px;background:radial-gradient(closest-side,rgba(255,207,90,.35),transparent 75%)}
+#battle .vb{position:absolute;left:50%;top:0;height:150px;transform:translateX(-50%);animation:vbGlow 2.2s ease-in-out infinite}
+@keyframes vbGlow{0%,100%{filter:drop-shadow(0 0 10px rgba(255,207,90,.55)) drop-shadow(0 0 24px rgba(127,232,255,.35)) brightness(1.05)}50%{filter:drop-shadow(0 0 22px rgba(255,207,90,.95)) drop-shadow(0 0 44px rgba(127,232,255,.6)) brightness(1.2)}}
 #battle .vic .vk{display:inline-block;font-size:14px;font-weight:900;letter-spacing:.2em;color:#3a2300;background:var(--gold);border-radius:999px;padding:3px 12px}
 #battle .vic h2{margin:8px 0 4px;font-size:32px;font-weight:900;color:var(--gold);letter-spacing:.08em;text-shadow:0 0 18px rgba(255,207,90,.6)}
 #battle .vic .vs{margin:0 0 14px;font-size:16px;color:#dbe6f0}
