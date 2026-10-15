@@ -108,6 +108,10 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #guide .arrow{flex:none;width:36px;height:36px;border-radius:50%;background:var(--gold);display:grid;place-items:center}
 #guide .arrow i{width:14px;height:18px;background:#3a2300;clip-path:polygon(50% 0,100% 100%,50% 76%,0 100%);transition:transform .15s linear}
 #guide.nodir .arrow i{clip-path:circle(35%)}
+#guide .gt{display:flex;flex-direction:column;line-height:1.2}
+#guide small{font-size:14px;font-weight:700;color:var(--dim);white-space:nowrap}
+#guide.next{animation:gNext .9s ease-out}
+@keyframes gNext{0%{transform:scale(1)}25%{transform:scale(1.12);box-shadow:0 0 0 6px rgba(255,207,90,.45)}100%{transform:scale(1)}}
 #guide p{margin:0;font-size:16px;font-weight:900;color:var(--gold);white-space:nowrap;font-variant-numeric:tabular-nums}
 #guide .x{flex:none;width:32px;height:32px;display:grid;place-items:center;background:none;border:0;padding:0;color:var(--dim)}
 #guide .x svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
@@ -643,7 +647,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   </div>
   <div id="act"><p></p><button></button></div>
   <div id="near"><span class="arrow"><i></i></span><p></p></div>
-  <div id="guide" role="button"><span class="arrow"><i></i></span><p></p><button class="x" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div id="guide" role="button"><span class="arrow"><i></i></span><span class="gt"><small></small><p></p></span><button class="x" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div id="pop"></div>
   <div id="toast"></div>
   <div id="prog"><span data-i18n="charging">啟流中</span></div>

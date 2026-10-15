@@ -328,16 +328,36 @@ function dirFor(s) {
   const [x, y] = offset(geo.pos, s); return relWord(((Math.atan2(x, y) * 180 / Math.PI - h + 540) % 360) - 180);
 }
 let guideOn = false;
-const guideEl = $('#guide'), guideArrow = guideEl.querySelector('i'), guideText = guideEl.querySelector('p');
+const guideEl = $('#guide'), guideArrow = guideEl.querySelector('i'), guideText = guideEl.querySelector('p'), guideNm = guideEl.querySelector('small');
 // 任務卡、雷達、靈界地圖都有「導航」（Google 地圖）和「指引」（靈界方向箭頭）
 // 主畫面的箭頭跟著角色走：量的是島上目標的步數；真實世界的距離和方向看雷達
+// 指引永遠跟著任務卡現在那一項走：第一階下一座門 → 城市故事（最近還沒去的那個，只在現世）→ 第二階（現世取最近的那一處）→ 台北靈門
 function guideTarget() {
+  if (talesStage()) { const s = radarTarget(); if (s) return { name: s.name, real: s }; }
+  if (!G.gateOpen && stage1Done() && G.geo) {
+    const s = radarTarget(), n = s && NODES.find(m => m.id === s.node && !m.awake);
+    if (n) return { name: n.name, pos: n.pos };
+  }
   const n = nextGate();
   return n ? { name: n.name, pos: n.pos } : { name: t('gateName'), pos: GATE };
 }
+let guideName = '';
 function updateGuide() {
   if (!guideOn) return;
-  const g = guideTarget(), [, n, deg] = islandRel(g.pos), text = n < 3 ? t('guideArrived') : t('guideSteps', { n });
+  const g = guideTarget();
+  let deg = 0, text;
+  if (g.real) {
+    // 城市故事只在現世：箭頭指真實方向（有指南針或走出方向時），字寫距離
+    const h = heading ?? course, [x, y] = offset(geo.pos, g.real), d = meters(geo.pos, g.real);
+    if (h != null) deg = ((Math.atan2(x, y) * 180 / Math.PI - h + 540) % 360) - 180;
+    guideEl.classList.toggle('nodir', h == null);
+    text = d <= (g.real.r || 60) ? t('guideArrived') : (h == null ? dirName(geo.pos, g.real) + ' ' : '') + fmt(d);
+  } else {
+    const [, n, a] = islandRel(g.pos); deg = a; guideEl.classList.remove('nodir');
+    text = n < 3 ? t('guideArrived') : t('guideSteps', { n });
+  }
+  // 目標換了（上一項完成）：亮一下，讓人知道指引已經換到下一站
+  if (g.name !== guideName) { if (guideName) { sfx.sense(); guideEl.classList.remove('next'); void guideEl.offsetWidth; guideEl.classList.add('next'); } guideName = g.name; guideNm.textContent = g.name; }
   guideArrow.style.transform = `rotate(${deg.toFixed(0)}deg)`;
   if (guideText.textContent !== text) guideText.textContent = text;
 }
@@ -350,7 +370,8 @@ function openGuide() {
 // 金光一串串從腳下往目標方向流過去，走到了就停
 function guideTrail() {
   if (!guideOn || G.state !== 'play') return;
-  const g = guideTarget(), dx = g.pos[0] - P.x, dz = g.pos[2] - P.z, d = Math.hypot(dx, dz);
+  const g = guideTarget(); if (!g.pos) return;
+  const dx = g.pos[0] - P.x, dz = g.pos[2] - P.z, d = Math.hypot(dx, dz);
   if (d < 3) return;
   const ux = dx / d, uz = dz / d, ph = (G.t * 2.4) % 1.2, L = Math.min(d - 1, 12);
   for (let k = 1 + ph; k < L; k += 1.2) {
@@ -398,7 +419,7 @@ function xiuLine() {
 // 現世走路帶動靈界：離真實目的地近了幾成，阿流就在島上朝下一座門走幾成，真的走到時島上也剛好到門前
 let sync = null;
 function syncIsland(p) {
-  const tg = radarTarget(), it = guideTarget(); if (!tg || tg.tale || G.state === 'title') return;
+  const tg = radarTarget(), it = guideTarget(); if (!tg || tg.tale || !it.pos || G.state === 'title') return;
   const d = meters(p, tg), key = tg.id + (geo.sim ? 's' : 'g');
   const left = () => Math.max(0, Math.hypot(it.pos[0] - P.x, it.pos[2] - P.z) - 2.4);
   if (!sync || sync.key !== key || Math.abs(d - sync.last) > 250) { sync = { key, d0: Math.max(d, 30), f: 0, L0: left(), last: d }; G.auto = 0; return; }
@@ -553,8 +574,9 @@ function drawMap(cv, mg, big) {
   const dot = (x, z, col, rad) => { mg.fillStyle = col; mg.beginPath(); mg.arc(x * k, z * k, rad * q, 0, 7); mg.fill(); };
   for (const n of NODES) dot(n.pos[0], n.pos[2], n.awake ? '#ffcf5a' : n.stage === 2 && !stage1Done() ? 'rgba(150,165,180,.7)' : `rgba(255,190,110,${0.6 + 0.4 * Math.sin(G.t * 4)})`, n.stage === 2 ? 2.2 : 3.2);
   dot(GATE[0], GATE[2], G.gateOpen ? '#ffcf5a' : '#b9483c', 3.2);
-  if (guideOn || big) { // 「帶我去」的目的地：金色脈動圈＋虛線
-    const g = guideTarget(), x = g.pos[0] * k, z = g.pos[2] * k;
+  const gt = guideTarget();
+  if ((guideOn || big) && gt.pos) { // 指引的目的地：金色脈動圈＋虛線（城市故事只在現世，島上不畫）
+    const g = gt, x = g.pos[0] * k, z = g.pos[2] * k;
     mg.setLineDash([3 * q, 3 * q]); mg.strokeStyle = 'rgba(255,207,90,.85)'; mg.lineWidth = q; mg.beginPath(); mg.moveTo(P.x * k, P.z * k); mg.lineTo(x, z); mg.stroke(); mg.setLineDash([]);
     mg.lineWidth = 1.4 * q; mg.beginPath(); mg.arc(x, z, (6 + 2 * Math.sin(G.t * 4)) * q, 0, 7); mg.stroke();
     const m = 14 * q, lx = x0 * k + m, rx = x0 * k + cw - m, tz = z0 * k + 96 * dpr, bz = z0 * k + ch - m;
@@ -924,7 +946,7 @@ function updatePlayer(dt) {
   const fx = Math.sin(cam.yaw), fz = Math.cos(cam.yaw);
   let mx = fx * iy - fz * ix, mz = fz * iy + fx * ix;
   // 現世走路累積的距離：玩家沒操作時，阿流自己朝下一座門走
-  if (G.auto > 0 && mag < 0.1 && G.state === 'play') {
+  if (G.auto > 0 && mag < 0.1 && G.state === 'play' && guideTarget().pos) {
     const tp = guideTarget().pos, dx = tp[0] - P.x, dz = tp[2] - P.z, L = Math.hypot(dx, dz);
     if (L < 2.4) G.auto = 0;
     else { mx = dx / L; mz = dz / L; mag = 1; G.auto -= (P.swim ? 3.8 : 7) * dt; }
