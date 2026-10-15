@@ -222,6 +222,29 @@ $('#loreBtn').addEventListener('click', () => { settings.hidden = true; openLore
 $('#realmBtn').addEventListener('click', () => { settings.hidden = true; openRealms({ realms: REALMS, need: NEED, now: G.state === 'title' ? -1 : G.realm, geo: G.geo }); });
 // 個人資訊：點左上角頭像，滿版顯示走了多少步、境界與收集進度
 const meEl = $('#me');
+// 頭像：預設用角色設計圖裡的六個角色，也能換成自己的照片（縮成 256px 存在這台裝置）
+const AVATARS = ['liu', 'xi', 'orange', 'green', 'pink', 'purple'], avSrc = id => `img/avatars/${id}.jpg`;
+let avatar = 'liu';
+try { avatar = localStorage.getItem('of-avatar') || 'liu'; } catch { }
+function setAvatar(v, save) {
+  avatar = v; const src = v.startsWith('data:') ? v : avSrc(v);
+  $('#avImg').src = src; $('#meBtn .avm').src = src; $('#meBtn').classList.add('has');
+  for (const b of document.querySelectorAll('#avList button')) b.classList.toggle('on', b.dataset.av === v);
+  if (save) try { localStorage.setItem('of-avatar', v); } catch { }
+}
+$('#avList').innerHTML = AVATARS.map(id => `<li><button data-av="${id}"><img src="${avSrc(id)}" alt=""></button></li>`).join('');
+setAvatar(avatar);
+$('#avBtn').addEventListener('click', e => { e.stopPropagation(); $('#avPick').hidden = !$('#avPick').hidden; });
+$('#avList').addEventListener('click', e => { const b = e.target.closest('button[data-av]'); if (!b) return; setAvatar(b.dataset.av, true); $('#avPick').hidden = true; });
+$('#avPick input').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image(); img.onload = () => {
+    const c = document.createElement('canvas'), k = Math.min(img.width, img.height); c.width = c.height = 256;
+    c.getContext('2d').drawImage(img, (img.width - k) / 2, (img.height - k) / 2, k, k, 0, 0, 256, 256);
+    setAvatar(c.toDataURL('image/jpeg', 0.85), true); $('#avPick').hidden = true; URL.revokeObjectURL(img.src);
+  };
+  img.src = URL.createObjectURL(f); e.target.value = '';
+});
 $('#meBtn').addEventListener('click', e => { e.stopPropagation(); hudKey = ''; hud(); meEl.hidden = false; });
 meEl.addEventListener('click', e => { if (e.target.closest('.xbtn')) meEl.hidden = true; });
 // 小地圖：點地圖 icon 才展開，8 秒後自動收起

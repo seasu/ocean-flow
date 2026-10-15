@@ -196,6 +196,8 @@ const S = {
   secFlows: ['第三階・城海山三流', 'Stage 3 · Three Flows', '第三章・三流'],
   cardSub2: ['第三階・{seal}・{virtue}', 'Stage 3 · {seal} · {virtue}', '第三章・{seal}・{virtue}'],
   cardEm2: ['城海山三流 {n}/3・{virtue}', 'Three Flows {n}/3 · {virtue}', '三流 {n}/3・{virtue}'],
+  avPick: ['選擇頭像', 'Choose avatar', 'アバターを選ぶ'],
+  avUpload: ['用自己的照片', 'Use my photo', '自分の写真を使う'],
   goTitle: ['洋流怎麼玩', 'How Ocean Flow works', '洋流の遊び方'],
   goS1: ['<b>走路累積修為</b>真的走路，修為就會增加，滿了能突破境界。', '<b>Walk to build cultivation</b>real walking raises it; when full, you can break through.', '<b>歩いて修為をためる</b>実際に歩くと修為が増え、満ちると境地を突破できる。'],
   goS2: ['<b>在靈界地圖收集靈光</b>用左邊搖桿走動，撿起發光的靈光。', '<b>Collect Spirit Light on the spirit map</b>move with the left stick and pick up the glowing light.', '<b>霊界マップで霊光を集める</b>左のスティックで動いて、光る霊光を拾う。'],

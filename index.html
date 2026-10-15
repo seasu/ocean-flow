@@ -187,8 +187,21 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #mapSub{font-size:16px;color:var(--gold)}
 #me .panel{max-width:30em;margin:0 auto;gap:18px}
 #me .panel>header{display:flex;align-items:center;gap:14px}
-#me .av{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:rgba(127,232,255,.18);border:1.5px solid rgba(127,232,255,.5);color:#bff4ff}
-#me .av svg{width:32px;height:32px}
+#me .av{position:relative;width:76px;height:76px;padding:0;flex:none;border-radius:50%;overflow:visible;background:rgba(127,232,255,.18);border:2px solid var(--gold);cursor:pointer}
+#me .av img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+#me .av .pen{position:absolute;right:-4px;bottom:-4px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#0b1a2c}
+#me .av .pen svg{width:16px;height:16px}
+#me .avpick{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14)}
+#me .avpick[hidden]{display:none}
+#me .avpick>b{font-size:18px}
+#avList{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+#avList button{width:100%;aspect-ratio:1;padding:0;border-radius:50%;overflow:hidden;border:3px solid transparent;background:none;cursor:pointer}
+#avList button.on{border-color:var(--gold)}
+#avList img{width:100%;height:100%;object-fit:cover;display:block}
+#me .upload{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:999px;font-size:17px;font-weight:900;color:#bff4ff;background:rgba(127,232,255,.12);border:1px solid rgba(127,232,255,.35);cursor:pointer}
+#me .upload svg{width:22px;height:22px}
+#meBtn .avm{display:none;width:100%;height:100%;border-radius:50%;object-fit:cover}
+#meBtn.has .avm{display:block}#meBtn.has svg{display:none}#meBtn.has{padding:0;overflow:hidden;border-color:var(--gold)}
 #me .panel>header b{display:block;font-size:22px}
 #me .panel>header .lv{display:inline-block;margin-top:6px;font-size:15px;background:var(--gold);color:#2a1c00;border-radius:999px;padding:2px 12px}
 #me .big{display:flex;flex-direction:column;align-items:center;padding:18px 0;border-radius:20px;background:rgba(255,255,255,.07)}
@@ -509,7 +522,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
       </div>
     <div class="tools">
       <div class="side">
-      <button class="ico" id="meBtn" aria-label="me" data-i18n-label="meTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.5c.8-4 3.8-6 7.5-6s6.7 2 7.5 6"/></svg></button>
+      <button class="ico" id="meBtn" aria-label="me" data-i18n-label="meTitle"><img class="avm" alt=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.5c.8-4 3.8-6 7.5-6s6.7 2 7.5 6"/></svg></button>
       <button class="ico" id="mapBtn" aria-label="map" data-i18n-label="miniMap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6.5l5-2.5 7 3 5-2.5v13l-5 2.5-7-3-5 2.5z"/><path d="M8.5 4v13M15.5 7v13"/></svg></button>
         <canvas id="mini"></canvas>
       </div>
@@ -544,7 +557,8 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 </div></div>
 <div id="bigmap" class="overlay page" hidden><header class="phead"><div><b data-i18n="mapTitle">靈界地圖</b><small id="mapSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><canvas id="bigcv"></canvas></div>
 <div id="me" class="overlay page" hidden><header class="phead"><div><b data-i18n="meTitle">個人資訊</b></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><div class="panel">
-  <header><span class="av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.5c.8-4 3.8-6 7.5-6s6.7 2 7.5 6"/></svg></span><div><b data-i18n="traveler">旅人・阿流</b><small class="lv" id="lv">感流境</small></div></header>
+  <header><button class="av" id="avBtn" aria-label="avatar" data-i18n-label="avPick"><img id="avImg" alt=""><i class="pen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></i></button><div><b data-i18n="traveler">旅人・阿流</b><small class="lv" id="lv">感流境</small></div></header>
+  <div class="avpick" id="avPick" hidden><b data-i18n="avPick">選擇頭像</b><ul id="avList"></ul><label class="upload"><input type="file" accept="image/*" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span data-i18n="avUpload">用自己的照片</span></label></div>
   <div class="big"><small data-i18n="meSteps">走了</small><b id="meSteps">0</b><span id="meDist"></span></div>
   <div class="xiu"><div class="xb"><i id="xbar"></i></div><p id="meXiu"></p></div>
   <ul class="grid" id="meGrid"></ul>
