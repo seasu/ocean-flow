@@ -369,12 +369,19 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
 .screen .alt{font-size:16px;font-weight:900;padding:11px 28px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 
 /* 對話框 */
-#dialog{position:fixed;left:50%;bottom:calc(18px + var(--sb));transform:translate(-50%,20px);width:min(560px,calc(100vw - 24px));background:rgba(10,18,30,.88);
-  border:2px solid rgba(255,176,46,.6);border-radius:14px;padding:12px 16px 10px;opacity:0;pointer-events:none;transition:.3s}
-#dialog.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
-#dialog b{color:#ffb02e;font-size:15px}
-#dialog p{margin:6px 0 8px;font-size:18px;line-height:1.6;font-weight:500}
-#dialog small{display:block;text-align:right;color:var(--dim);font-size:13px;animation:blink 1.2s infinite}
+/* 對話時什麼都不能做，所以對話放大置中、其他控制項先藏起來 */
+#dialog{position:fixed;z-index:11;left:50%;top:50%;transform:translate(-50%,-46%);width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 48px - var(--st) - var(--sb));overflow:auto;
+  background:rgba(10,18,30,.82);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 0 0 200vmax rgba(6,12,22,.45),0 18px 50px rgba(0,0,0,.4);
+  border:2px solid rgba(255,176,46,.6);border-radius:24px;padding:24px 24px 18px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s}
+#dialog.show{opacity:1;transform:translate(-50%,-50%);pointer-events:auto}
+#dialog b{display:block;color:#ffb02e;font-size:20px;font-weight:900;letter-spacing:.08em}
+#dialog p{margin:12px 0 16px;font-size:23px;line-height:1.65;font-weight:600;color:#fff}
+#dialog small{display:block;text-align:right;color:#c9d8e6;font-size:16px;animation:blink 1.2s infinite}
+#dialog.em{border-color:var(--gold)}
+#dialog.em b{color:var(--gold);font-size:24px}
+#dialog.em small{animation:none;text-align:center;margin:4px auto 0;width:min(100%,280px);padding:14px 0;border-radius:999px;font-size:20px;font-weight:900;color:#0b1a2c;background:var(--gold)}
+body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;transition:opacity .3s}
+@media (orientation:landscape) and (max-height:500px){#dialog{width:min(720px,calc(100vw - 48px));padding:18px 22px 14px}#dialog p{font-size:21px;margin:8px 0 10px}}
 @keyframes blink{50%{opacity:.3}}
 
 /* 片頭與片尾 */
