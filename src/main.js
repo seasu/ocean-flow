@@ -232,6 +232,15 @@ function openBigMap() { clearTimeout(miniT); $('#mini').classList.remove('show')
 $('#mapBtn').addEventListener('click', e => { e.stopPropagation(); openBigMap(); });
 $('#mini').addEventListener('click', e => { e.stopPropagation(); openBigMap(); });
 bigEl.addEventListener('click', e => { if (e.target.closest('.xbtn')) bigEl.hidden = true; });
+{ // 雙指縮放／滾輪縮放滿版地圖
+  const pts = new Map(); let d0 = 0, z0 = 4;
+  const dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+  const setZ = z => { bigZoom = clamp(z, 1.5, 8); };
+  bigCv.addEventListener('pointerdown', e => { pts.set(e.pointerId, e); if (pts.size === 2) { d0 = dist(); z0 = bigZoom; } });
+  bigCv.addEventListener('pointermove', e => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, e); if (pts.size === 2 && d0) setZ(z0 * dist() / d0); });
+  for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) bigCv.addEventListener(ev, e => { pts.delete(e.pointerId); d0 = 0; });
+  bigCv.addEventListener('wheel', e => { e.preventDefault(); setZ(bigZoom * Math.exp(-e.deltaY / 400)); }, { passive: false });
+}
 addEventListener('keydown', e => { input.keys[e.code] = true; if (e.code === 'Space') input.jump = true; if (e.code === 'KeyE' || e.code === 'KeyQ') doSense(); if ((e.code === 'Enter' || e.code === 'Space') && talk) nextLine(); });
 addEventListener('keyup', e => { input.keys[e.code] = false; if (e.code === 'Space') input.jump = false; });
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -443,13 +452,16 @@ function drawMini() {
     if ($('#mapSub').textContent !== sub) $('#mapSub').textContent = sub;
   }
 }
+let bigZoom = 4;   // 滿版地圖的放大倍數（短邊看到全島的 1/bigZoom），可雙指縮放
 function drawMap(cv, mg, big) {
-  // 滿版時以「我」為中心放大約 2.4 倍（碰到地圖邊就停），小地圖則看整座島
-  const dpr = Math.min(devicePixelRatio, 2), s = cv.width = cv.height = Math.round(cv.clientWidth * dpr);
-  if (!s) return;
-  const W = big ? Math.round(N / 2.4) : N, x0 = big ? clamp(Math.round(P.x - W / 2), 0, N - W) : 0, z0 = big ? clamp(Math.round(P.z - W / 2), 0, N - W) : 0;
-  const k = s / W, q = (s / N) * Math.sqrt(S) * (big ? 1.5 : 1);   // q：標記大小，島變大時標記不會縮成一點
-  mg.imageSmoothingEnabled = false; mg.drawImage(base, x0, z0, W, W, 0, 0, s, s);
+  // 滿版時鋪滿整個螢幕、以「我」為中心放大（碰到地圖邊就停），小地圖則看整座島
+  const dpr = Math.min(devicePixelRatio, 2), cw = cv.width = Math.round(cv.clientWidth * dpr), ch = cv.height = big ? Math.round(cv.clientHeight * dpr) : cw;
+  if (!cw || !ch) return;
+  const s = Math.min(cw, ch), k = big ? s * bigZoom / N : s / N, wx = Math.min(N, cw / k), wz = Math.min(N, ch / k);
+  const x0 = big ? clamp(P.x - wx / 2, 0, N - wx) : 0, z0 = big ? clamp(P.z - wz / 2, 0, N - wz) : 0;
+  const q = (s / N) * Math.sqrt(S) * (big ? 1.5 : 1);   // q：標記大小，島變大時標記不會縮成一點
+  mg.imageSmoothingEnabled = false; mg.fillStyle = '#0b2a44'; mg.fillRect(0, 0, cw, ch);
+  mg.drawImage(base, x0, z0, wx, wz, 0, 0, wx * k, wz * k);
   mg.save(); mg.translate(-x0 * k, -z0 * k);
   const dot = (x, z, col, rad) => { mg.fillStyle = col; mg.beginPath(); mg.arc(x * k, z * k, rad * q, 0, 7); mg.fill(); };
   for (const n of NODES) dot(n.pos[0], n.pos[2], n.awake ? '#ffcf5a' : n.stage === 2 && !stage1Done() ? 'rgba(150,165,180,.7)' : `rgba(255,190,110,${0.6 + 0.4 * Math.sin(G.t * 4)})`, n.stage === 2 ? 2.2 : 3.2);
@@ -458,6 +470,13 @@ function drawMap(cv, mg, big) {
     const g = guideTarget(), x = g.pos[0] * k, z = g.pos[2] * k;
     mg.setLineDash([3 * q, 3 * q]); mg.strokeStyle = 'rgba(255,207,90,.85)'; mg.lineWidth = q; mg.beginPath(); mg.moveTo(P.x * k, P.z * k); mg.lineTo(x, z); mg.stroke(); mg.setLineDash([]);
     mg.lineWidth = 1.4 * q; mg.beginPath(); mg.arc(x, z, (6 + 2 * Math.sin(G.t * 4)) * q, 0, 7); mg.stroke();
+    const m = 14 * q, lx = x0 * k + m, rx = x0 * k + cw - m, tz = z0 * k + 96 * dpr, bz = z0 * k + ch - m;
+    if (big && (x < lx || x > rx || z < tz || z > bz)) { // 下一站在畫面外：在邊緣放一顆金色箭頭指過去
+      const px = P.x * k, pz = P.z * k, dx = x - px, dz = z - pz, a = Math.atan2(dz, dx);
+      const f = Math.min(dx ? ((dx > 0 ? rx : lx) - px) / dx : 1e9, dz ? ((dz > 0 ? bz : tz) - pz) / dz : 1e9), ex = px + dx * f, ez = pz + dz * f;
+      mg.save(); mg.translate(ex, ez); mg.rotate(a); mg.fillStyle = '#ffcf5a'; mg.strokeStyle = 'rgba(6,14,26,.85)'; mg.lineWidth = 2 * dpr;
+      mg.beginPath(); mg.moveTo(8 * q, 0); mg.lineTo(-6 * q, 6 * q); mg.lineTo(-6 * q, -6 * q); mg.closePath(); mg.stroke(); mg.fill(); mg.restore();
+    }
   }
   for (const [k2, c] of CHAPS.entries()) {
     const x = clamp(c.x, 7 * q / k, N - 7 * q / k) * k, z = clamp(c.z, 7 * q / k, N - 7 * q / k) * k, rr = 5 * q;
@@ -471,7 +490,7 @@ function drawMap(cv, mg, big) {
     mg.fillStyle = 'rgba(88,176,234,.25)'; mg.beginPath(); mg.arc(px, pz, pr * 1.6, 0, 7); mg.fill();
     mg.strokeStyle = '#fff'; mg.lineWidth = 1.2 * q; mg.beginPath(); mg.arc(px, pz, pr, 0, 7); mg.stroke();
     mg.font = `900 ${16 * dpr}px sans-serif`; mg.textAlign = 'center'; mg.lineWidth = 4 * dpr; mg.strokeStyle = 'rgba(6,14,26,.85)';
-    const ty = pz - pr * 1.6 - 6 * dpr - z0 * k < 20 * dpr ? pz + pr * 1.6 + 20 * dpr : pz - pr * 1.6 - 6 * dpr;
+    const ty = pz - pr * 1.6 - 6 * dpr - z0 * k < 90 * dpr ? pz + pr * 1.6 + 20 * dpr : pz - pr * 1.6 - 6 * dpr;
     mg.strokeText(t('youHere'), px, ty); mg.fillStyle = '#fff'; mg.fillText(t('youHere'), px, ty);
   }
   const ps = big ? 1.8 : 1;

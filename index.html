@@ -181,8 +181,9 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 .switch[aria-checked="true"] i{transform:translateX(23px)}
 .overlay .close{font-size:17px;padding:13px 0;border-radius:999px}
 /* 個人資訊：滿版 */
-#bigmap{justify-content:flex-start}
-#bigcv{width:min(100%,calc(100dvh - 150px - var(--st) - var(--sb)),720px);aspect-ratio:1;border-radius:20px;border:1.5px solid rgba(255,255,255,.3);image-rendering:pixelated;flex:none;margin:auto 0}
+#bigmap{padding:0;overflow:hidden}
+#bigcv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;touch-action:none}
+#bigmap .phead{position:absolute;z-index:1;top:calc(10px + var(--st));left:calc(12px + var(--sl));right:calc(12px + var(--sr));width:auto;max-width:none;padding:12px 14px;border-radius:18px;background:rgba(8,18,32,.55);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18)}
 #mapSub{font-size:16px;color:var(--gold)}
 #me .panel{max-width:30em;margin:0 auto;gap:18px}
 #me .panel>header{display:flex;align-items:center;gap:14px}
