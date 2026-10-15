@@ -30,8 +30,6 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #hud.on{opacity:1}
 #hud .playonly{opacity:0;transition:opacity .4s}
 #hud.play .playonly{opacity:1}
-#guideBtn{flex:none;padding:0 16px;height:40px;font-size:16px}
-#guideBtn::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M15.5 8.5l-2 5-5 2 2-5z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M15.5 8.5l-2 5-5 2 2-5z'/%3E%3C/svg%3E")}
 /* 下一步卡：現在要做的事，大而清楚 */
 .quest{position:relative;width:100%;pointer-events:auto;
   background:rgba(14,24,40,.55);border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:12px 14px 12px 16px;
@@ -137,11 +135,9 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #tag{position:absolute;left:0;top:0;font-size:12px;background:rgba(232,100,28,.9);color:#fff;padding:2px 8px;border-radius:6px;opacity:0;white-space:nowrap}
 
 /* 遊戲中的按鈕：跟主畫面「啟程」、影片「跳過」同一套毛玻璃 */
-#dexBtn,#guideBtn,#guide a,.ico,.btn,#rClose,.xbtn,#enc button,.overlay .close,.switch{color:#fff;font-weight:900;border-radius:999px;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.4);
+#dexBtn,.navpair button,#guide a,.ico,.btn,#rClose,.xbtn,#enc button,.overlay .close,.switch{color:#fff;font-weight:900;border-radius:999px;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.4);
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 8px 30px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.22);text-shadow:0 1px 6px rgba(0,0,0,.35);transition:transform .12s,background .12s}
-#guideBtn{display:inline-flex;align-items:center;gap:7px}
-#guideBtn::before{content:"";width:18px;height:18px;flex:none;background:currentColor;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
-#dexBtn:active,#guideBtn:active,#guide a:active,.ico:active,.btn:active,#rClose:active,.xbtn:active,#enc button:active{transform:scale(.95);background:rgba(255,255,255,.28)}
+#dexBtn:active,.navpair button:active,#guide a:active,.ico:active,.btn:active,#rClose:active,.xbtn:active,#enc button:active{transform:scale(.95);background:rgba(255,255,255,.28)}
 /* 觸控按鈕 */
 .btn{position:absolute;pointer-events:auto;border-radius:50%;display:grid;place-items:center;font-weight:900;touch-action:none;
   color:#fff}
@@ -182,6 +178,14 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 .overlay .close{font-size:17px;padding:13px 0;border-radius:999px}
 /* 個人資訊：滿版 */
 #bigmap{padding:0;overflow:hidden}
+.navpair{display:flex;gap:8px;flex:none}
+.navpair button{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;font-size:16px;white-space:nowrap}
+.navpair svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.navpair .guidego{background:var(--gold);border-color:var(--gold);color:#3a2300}
+.rbar .navpair{margin-right:auto}
+#bigmap .navpair{position:absolute;z-index:1;left:50%;transform:translateX(-50%);bottom:calc(20px + var(--sb))}
+#bigmap .navpair button{height:48px;padding:0 20px;background:rgba(8,18,32,.62);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+#bigmap .navpair .guidego{background:var(--gold)}
 #bigcv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;touch-action:none}
 #bigmap .phead{position:absolute;z-index:1;top:calc(10px + var(--st));left:calc(12px + var(--sl));right:calc(12px + var(--sr));width:auto;max-width:none;padding:12px 14px;border-radius:18px;background:rgba(8,18,32,.55);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18)}
 #mapSub{font-size:16px;color:var(--gold)}
@@ -567,7 +571,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
         <div class="qtop"><span id="qhead"></span><span class="r"><span id="qchips"></span><button class="qfold" id="qFold" aria-label="fold" data-i18n-label="foldQuest"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button></span></div>
         <b id="qtitle"></b>
         <p id="qsub"></p>
-        <div class="qrow"><span class="qi"><span class="bar"><i id="qibar"></i></span><span id="qi">靈光 0</span></span><button id="guideBtn" data-i18n="guideBtn">帶我去</button></div>
+        <div class="qrow"><span class="qi"><span class="bar"><i id="qibar"></i></span><span id="qi">靈光 0</span></span><div class="navpair"><button class="navgo" type="button"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8z"/></svg><span data-i18n="navBtn">導航</span></button><button class="guidego" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span data-i18n="guideBtn">指引</span></button></div></div>
         <ul id="qlist"></ul>
       </div>
     <div class="tools">
@@ -605,7 +609,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   <div class="row"><span class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg><span data-i18n="demoLabel">Demo 階段</span></span><div class="seg" id="demoSt"></div></div>
   <div class="row ver-row"><span class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5v.01"/></svg><span data-i18n="verLabel">版本</span></span><span class="vv"><b id="verV"></b><small id="verB"></small></span></div>
 </div></div>
-<div id="bigmap" class="overlay page" hidden><header class="phead"><div><b data-i18n="mapTitle">靈界地圖</b><small id="mapSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><canvas id="bigcv"></canvas></div>
+<div id="bigmap" class="overlay page" hidden><header class="phead"><div><b data-i18n="mapTitle">靈界地圖</b><small id="mapSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><canvas id="bigcv"></canvas><div class="navpair"><button class="navgo" type="button"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8z"/></svg><span data-i18n="navBtn">導航</span></button><button class="guidego" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span data-i18n="guideBtn">指引</span></button></div></div>
 <div id="me" class="overlay page" hidden><header class="phead"><div><b data-i18n="meTitle">個人資訊</b></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><div class="panel">
   <header><button class="av" id="avBtn" aria-label="avatar" data-i18n-label="avPick"><img id="avImg" alt=""><i class="pen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></i></button><div><b data-i18n="traveler">旅人・阿流</b><small class="lv" id="lv">感流境</small></div></header>
   <div class="avpick" id="avPick" hidden><b data-i18n="avPick">選擇頭像</b><ul id="avList"></ul><label class="upload"><input type="file" accept="image/*" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span data-i18n="avUpload">用自己的照片</span></label></div>
@@ -617,7 +621,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 <div id="radar" class="page">
   <header class="phead"><div><b data-i18n="radarTitle">現世・靈脈雷達</b><small class="trail" data-i18n="trail">文化徑 × 山林徑・走一條路，認識台北這座城</small><small id="gstat"></small></div><button id="rClose" class="xbtn" aria-label="close" data-i18n-label="backSpirit"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
   <div class="rwrap"><canvas id="rcv"></canvas>
-    <div class="rbar"><div class="rzoom"><button data-z="in" aria-label="zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><button data-z="out" aria-label="zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><button data-z="fit" aria-label="fit" data-i18n-label="fitTarget"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button></div></div></div>
+    <div class="rbar"><div class="navpair"><button class="navgo" type="button"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8z"/></svg><span data-i18n="navBtn">導航</span></button><button class="guidego" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span data-i18n="guideBtn">指引</span></button></div><div class="rzoom"><button data-z="in" aria-label="zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><button data-z="out" aria-label="zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><button data-z="fit" aria-label="fit" data-i18n-label="fitTarget"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button></div></div></div>
   <div id="enc"><span></span><button data-i18n="enter">進入機緣</button></div>
   <ul id="rlist"></ul>
   <footer><label><input type="checkbox" id="simT"> <span data-i18n="simLabel">模擬定位：點雷達或清單就走過去（展示用）</span></label>
@@ -674,7 +678,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   const quest = document.getElementById('quest'), small = () => innerWidth < 600;
   let qT = 0;
   quest.addEventListener('pointerdown', e => {
-    if (e.target.closest('#guideBtn,#qFold') || quest.classList.contains('fold')) return;
+    if (e.target.closest('.navpair,#qFold') || quest.classList.contains('fold')) return;
     quest.classList.toggle('min');
     clearTimeout(qT); if (!quest.classList.contains('min')) qT = setTimeout(() => quest.classList.add('min'), 8000);
   });
