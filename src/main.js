@@ -219,6 +219,7 @@ for (const b of document.querySelectorAll('#menuBtn, #title .more')) b.addEventL
 soundT.addEventListener('click', () => { setMuted(!muted); syncSound(); });
 settings.addEventListener('click', e => { if (e.target.closest('.xbtn')) settings.hidden = true; });
 $('#loreBtn').addEventListener('click', () => { settings.hidden = true; openLore(); });
+$('#howBtn').addEventListener('click', () => { settings.hidden = true; say([{ title: t('goTitle'), steps: [t('goS1'), t('goS2'), t('goS3')] }]); });
 $('#realmBtn').addEventListener('click', () => { settings.hidden = true; openRealms({ realms: REALMS, need: NEED, now: G.state === 'title' ? -1 : G.realm, geo: G.geo }); });
 // 個人資訊：點左上角頭像，滿版顯示走了多少步、境界與收集進度
 const meEl = $('#me');
@@ -710,6 +711,8 @@ addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = 
 launch.querySelector('.install').addEventListener('click', async e => { e.stopPropagation(); if (!installEvt) return; installEvt.prompt(); await installEvt.userChoice.catch(() => { }); installEvt = null; e.target.hidden = true; });
 // 已從主畫面開啟（獨立模式）：跳過開場提醒和介紹影片，直接到「啟程」主畫面（影片之後還能從選單看）
 if (standalone) launch.classList.remove('show');
+// 電腦版：不需要加到主畫面，直接播介紹影片（有聲被擋就先靜音播，點一下開聲音）
+else if (!mobile) { launch.classList.remove('show'); if (wantFilm) openFilm(); }
 else if (!params.has('play') && !params.has('geo') && !params.has('demo') && (wantFilm || (showA2hs && !a2hsShown))) {
   launch.classList.add('show');
   if (!wantFilm) launch.querySelector('.tip').hidden = true;

@@ -201,7 +201,7 @@ const S = {
   goTitle: ['洋流怎麼玩', 'How Ocean Flow works', '洋流の遊び方'],
   goS1: ['<b>走路累積修為</b>真的走路，修為就會增加，滿了能突破境界。', '<b>Walk to build cultivation</b>real walking raises it; when full, you can break through.', '<b>歩いて修為をためる</b>実際に歩くと修為が増え、満ちると境地を突破できる。'],
   goS2: ['<b>在靈界地圖收集靈光</b>用左邊搖桿走動，撿起發光的靈光。', '<b>Collect Spirit Light on the spirit map</b>move with the left stick and pick up the glowing light.', '<b>霊界マップで霊光を集める</b>左のスティックで動いて、光る霊光を拾う。'],
-  goS3: ['<b>到特定地點開啟機緣</b>照雷達走到現實中的地點，就能開靈門、聽故事。', '<b>Go to real places to open encounters</b>follow the radar to open gates and hear stories.', '<b>決まった場所で縁を開く</b>レーダーに沿って現地へ行くと、霊門が開き物語が聞ける。'],
+  goS3: ['<b>到特定地點開啟機緣</b>照雷達走到現實地點觸發機緣，打怪通關、開啟靈門。', '<b>Go to real places to trigger encounters</b>follow the radar, fight the monsters, clear the trial and open the gate.', '<b>決まった場所で縁を開く</b>レーダーに沿って現地へ行き、魔物を倒してクリアし、霊門を開く。'],
   xiuTitle: ['走路修行', 'Walking Cultivation', '歩く修行'],
   gotIt: ['我知道了', 'Got it', 'わかった'],
   xiuIntro: ['邊走邊累積修為，滿了就到機緣點突破境界。境界越高，淨化力越強。', 'Walking builds cultivation. When it is full, break through at an encounter. Higher realms purify harder.', '歩くほど修為がたまる。満ちたら縁の場所で境地を突破。境地が高いほど浄化力が強くなる。'],

@@ -1,2 +1,2 @@
 // 對外顯示的版本號（語意版本）：大改版動第一位、新功能動第二位、修正動第三位
-export const VERSION = '1.7.4';
+export const VERSION = '1.7.5';
