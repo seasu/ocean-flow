@@ -219,6 +219,45 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #me .xb{height:10px;border-radius:10px;background:rgba(0,0,0,.4);overflow:hidden}
 #me .xb i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffcf5a,#ffe9a8);transition:width .3s}
 #me .xiu p{margin:8px 0 0;font-size:16px;font-weight:500;color:#dbe6f0;line-height:1.6}
+#me .achbtn{display:flex;align-items:center;gap:12px;width:100%;padding:16px;border-radius:16px;background:rgba(255,207,90,.1);border:1px solid rgba(255,207,90,.4);color:#fff;font:inherit;font-size:18px;font-weight:900;cursor:pointer;text-align:left}
+#me .achbtn svg{width:26px;height:26px;color:var(--gold);flex:none}
+#me .achbtn span{flex:1}
+#me .achbtn em{font-style:normal;font-size:16px;color:var(--gold);font-variant-numeric:tabular-nums}
+#me .achbtn .chev{width:10px;height:10px;border-right:2px solid var(--dim);border-top:2px solid var(--dim);transform:rotate(45deg)}
+#me .achbtn:active{transform:scale(.98)}
+#ach{z-index:13}
+#achList{list-style:none;margin:0 auto;padding:0;width:100%;max-width:30em;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#achList button{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:#fff;font:inherit;text-align:center;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#achList button.on{border-color:rgba(255,207,90,.55);background:rgba(255,207,90,.08)}
+#achList button:active{transform:scale(.96)}
+#achList b{font-size:17px;line-height:1.3}
+#achList small{font-size:14px;color:var(--dim);line-height:1.4}
+#achList .on small{color:var(--gold)}
+#achList .ic{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,rgba(255,207,90,.28),rgba(255,207,90,.04) 70%);border:2px solid var(--gold);overflow:hidden}
+#achList .ic img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 6px rgba(255,207,90,.6))}
+#achList .ic.n4{grid-template-columns:1fr 1fr;padding:10px;gap:0}#achList .ic.n4 img{width:34px;height:34px}
+#achList .ic.n3{grid-template-columns:1fr 1fr;padding:10px}#achList .ic.n3 img{width:36px;height:36px}#achList .ic.n3 img:first-child{grid-column:1/3;justify-self:center}
+#achList .ic.n1{padding:8px}
+#achList .ic.book svg{width:46px;height:46px;color:var(--gold)}
+#achList .chd{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:14px;padding-bottom:10px;border-bottom:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+#achList .chd:first-child{margin-top:0}
+#achList .chd img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--c)}
+#achList .chd span{flex:1;display:flex;flex-direction:column;line-height:1.25}
+#achList .chd small{font-size:14px;color:var(--dim)}
+#achList .chd b{font-size:20px;color:var(--c)}
+#achList .chd em{font-style:normal;font-size:15px;color:var(--c);font-variant-numeric:tabular-nums}
+#achList .chd.shut img{filter:grayscale(1) brightness(.6)}
+#achList .chd.shut b{color:#9fb0c0}#achList .chd.shut em{color:var(--dim)}
+#achList .ghosts{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;justify-items:center}
+#achList .ghosts span{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.04);border:1.5px dashed rgba(255,255,255,.22);color:rgba(190,205,220,.45)}
+#achList .ghosts svg{width:28px;height:28px}
+#achList .lock .ic{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.05)}
+#achList .lock .ic img,#achList .lock .ic svg{filter:grayscale(1) brightness(.45);opacity:.6;color:#9aa}
+#achList .lock b{color:#9fb0c0}
+#achList .nope{animation:nope .4s}@keyframes nope{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+/* 成就重播淨化完成卡：不顯示戰鬥畫面 */
+#battle.replay{z-index:21;background:radial-gradient(ellipse at 50% 45%,rgba(40,30,10,.95),rgba(4,8,18,.98) 70%)}
+#battle.replay>:not(.vic){display:none}
 #me .grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
 #me .grid li{padding:14px;border-radius:16px;background:rgba(255,255,255,.07)}
 #me .grid small{display:block;font-size:14px;color:var(--dim)}
@@ -703,7 +742,10 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   <div class="big"><small data-i18n="meSteps">走了</small><b id="meSteps">0</b><span id="meDist"></span></div>
   <div class="xiu"><div class="xb"><i id="xbar"></i></div><p id="meXiu"></p></div>
   <ul class="grid" id="meGrid"></ul>
+  <button class="achbtn" id="achBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M16 5h3v2a3 3 0 0 1-3 3M8 5H5v2a3 3 0 0 0 3 3"/><path d="M12 13v4M8.5 20h7M10 17h4"/></svg><span data-i18n="achBtn">成就</span><em id="achN">0/8</em><i class="chev"></i></button>
 </div></div>
+<div id="ach" class="overlay page" hidden><header class="phead"><div><b data-i18n="achTitle">成就</b><small id="achSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <ul id="achList"></ul></div>
 <div id="dex" class="page"><header class="phead"><div><b data-i18n="dexTitle">台灣之美 圖鑑</b><small id="dexSub"></small></div><button id="dexClose" class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><ul id="dexList"></ul></div>
 <div id="radar" class="page">
   <header class="phead"><div><b data-i18n="radarTitle">現世・靈脈雷達</b><small class="trail" data-i18n="trail">文化徑 × 山林徑・走一條路，認識台北這座城</small><small id="gstat"></small></div><button id="rClose" class="xbtn" aria-label="close" data-i18n-label="backSpirit"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
