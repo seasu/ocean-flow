@@ -596,7 +596,12 @@ function nextLine() {
   if (talk.i >= talk.lines.length) { const d = talk.done; talk = null; $('#dialog').classList.remove('show'); d && d(); return; }
   showLine();
 }
-$('#dialog').addEventListener('pointerdown', e => { e.preventDefault(); nextLine(); });
+// 對話時點畫面任何地方都能繼續；重要說明（金框）要點框裡的「我知道了」才關，其他地方的點擊先擋掉
+addEventListener('pointerdown', e => {
+  if (!talk || !$('#dialog').classList.contains('show')) return;
+  e.preventDefault(); e.stopPropagation();
+  if (!$('#dialog').classList.contains('em') || e.target.closest('#dialog')) nextLine();
+}, true);
 
 function start(mode) {
   initAudio();
