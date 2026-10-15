@@ -244,7 +244,6 @@ const S = {
   vicTitle: ['淨化完成', 'Purified', '浄化完了'],
   vicSub: ['{name}身上的濁流散去了', 'The Murk has lifted from {name}', '{name}の濁流が晴れた'],
   vicBoss: ['濁淵化開，四獸的影子回到山裡', 'Zhuoyuan dissolves; the four shadows return to the hills', '濁淵がほどけ、四獣の影が山へ帰った'],
-  vicStat: [['用時', '受擊', '評價'], ['Time', 'Hits', 'Rating'], ['タイム', '被弾', '評価']],
   vicReward: ['獲得獎勵', 'Rewards', '獲得報酬'],
   vicTake: ['收下獎勵', 'Collect', '受け取る'],
   vicOk: ['好', 'OK', 'OK'],

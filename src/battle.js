@@ -26,7 +26,6 @@ el.innerHTML = `<canvas></canvas>
   <header><b></b><div class="bar"><i></i></div><span class="hp"></span></header>
   <div class="msg"><h3></h3><p></p><button></button></div>
   <div class="vic"><div class="vimg"><img class="vb" alt=""></div><h2></h2><p class="vs"></p>
-    <div class="vstat"><span><b class="vt"></b><small></small></span><span><b class="vh"></b><small></small></span><span><b class="vr"></b><small></small></span></div>
     <div class="vrw"><small></small><ul></ul></div><button></button></div>
   <button class="xbtn quit" aria-label="leave"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`;
 document.body.appendChild(el);
@@ -52,14 +51,14 @@ quitB.addEventListener('click', e => {
   const done = S.done; S = null; msg.classList.remove('show'); el.classList.remove('show'); cancelAnimationFrame(raf); sfx.deny(); done && done(false);
 });
 const tries = {};
-// 這一場的結算：獎勵由呼叫的地方給（開門、靈光…），用時與受擊跨 BOSS 四關累計
-let REWARD = [], TOTAL = { t: 0, hits: 0 };
+// 這一場的獎勵由呼叫的地方給（開門、靈光…）
+let REWARD = [];
 
 // 星等（node.star）決定這一戰多難，每種玩法各自調整；lv：走路修行的境界，每一境淨化力 +20%；realm：境界名稱
 export function battle(node, lv = 0, realm = '', reward = []) {
   return new Promise(resolve => {
     tries[node.id] = tries[node.id] || 0;
-    REWARD = reward; TOTAL = { t: 0, hits: 0 }; vic.classList.remove('show');
+    REWARD = reward; vic.classList.remove('show');
     el.classList.add('show');
     loadMe();
     start(node, lv, resolve); quitB.setAttribute('aria-label', t('battleQuit'));
@@ -101,7 +100,7 @@ const api = {
   burst(x, y, col, n = 14, sp = 160) {
     for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, s = sp * (0.3 + Math.random()); S.fx.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 0.5 + Math.random() * 0.4, col }); }
   },
-  hurt() { S.shake = 0.3; TOTAL.hits++; sfx.hurt(); try { navigator.vibrate && navigator.vibrate([30, 40, 30]); } catch { } },
+  hurt() { S.shake = 0.3; sfx.hurt(); try { navigator.vibrate && navigator.vibrate([30, 40, 30]); } catch { } },
   shake(s = 0.3) { S.shake = s; },
   buzz(ms = 12) { try { navigator.vibrate && navigator.vibrate(ms); } catch { } },
   lose() { lose(); },
@@ -145,7 +144,7 @@ function tick(now) {
   if (!S) return;
   const L = size();
   S.t += dt;
-  if (S.run) { S.game.tick(dt); TOTAL.t += dt; }
+  if (S.run) S.game.tick(dt);
   if (S.party != null && (S.party -= dt) < 0) { S.party = 0.7; confetti(L); }
   if (S.run && S.pur >= 99.99 && !S.game.busy?.()) win();   // 留一點誤差：100/格數 加總可能差一點點才滿
   for (const s of S.shots) {
@@ -178,16 +177,11 @@ function win() {
   }
   setTimeout(() => { if (S && S.node === node) victory(node, done); }, 1300);
 }
-// 恭喜過關：守門獸恢復原本的樣子、用時／受擊／評價、這一場拿到的獎勵，按「收下獎勵」才回到世界
+// 淨化完成：發亮的守門獸與這一場拿到的獎勵，按「收下獎勵」才回到世界
 function victory(node, done) {
-  const { t: sec, hits } = TOTAL, star = hits === 0 ? 3 : hits <= 2 ? 2 : 1;
   vic.querySelector('.vb').src = SPR[node.id]?.src || '';
   vic.querySelector('h2').textContent = t('vicTitle');
   vic.querySelector('.vs').textContent = node.boss ? t('vicBoss') : t('vicSub', { name: SPR[node.id] && !node.wild ? t('beast_' + node.id) : node.name });
-  vic.querySelector('.vt').textContent = `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}`;
-  vic.querySelector('.vh').textContent = hits;
-  vic.querySelector('.vr').textContent = '★'.repeat(star) + '☆'.repeat(3 - star);
-  const [l1, l2, l3] = t('vicStat'); const sm = vic.querySelectorAll('.vstat small'); sm[0].textContent = l1; sm[1].textContent = l2; sm[2].textContent = l3;
   vic.querySelector('.vrw small').textContent = t('vicReward');
   vic.querySelector('.vrw').hidden = !REWARD.length;
   vic.querySelector('ul').innerHTML = REWARD.map(r => `<li>${r}</li>`).join('');

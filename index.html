@@ -534,16 +534,12 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   padding:18px 20px 22px;border-radius:24px;background:rgba(14,24,40,.78);border:1px solid rgba(255,207,90,.45);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 0 60px rgba(255,207,90,.25)}
 #battle .vic.show{display:block;animation:vicIn .55s cubic-bezier(.2,1.4,.4,1)}
 @keyframes vicIn{from{opacity:0;transform:translate(-50%,-50%) scale(.7)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-#battle .vimg{position:relative;height:160px;margin:-4px 0 6px;background:radial-gradient(closest-side,rgba(255,207,90,.35),transparent 75%)}
-#battle .vb{position:absolute;left:50%;top:0;height:150px;transform:translateX(-50%);animation:vbGlow 2.2s ease-in-out infinite}
+#battle .vimg{position:relative;height:230px;margin:-4px 0 6px;background:radial-gradient(closest-side,rgba(255,207,90,.35),transparent 75%)}
+#battle .vb{position:absolute;left:50%;top:0;height:220px;transform:translateX(-50%);animation:vbGlow 2.2s ease-in-out infinite}
 @keyframes vbGlow{0%,100%{filter:drop-shadow(0 0 10px rgba(255,207,90,.55)) drop-shadow(0 0 24px rgba(127,232,255,.35)) brightness(1.05)}50%{filter:drop-shadow(0 0 22px rgba(255,207,90,.95)) drop-shadow(0 0 44px rgba(127,232,255,.6)) brightness(1.2)}}
 #battle .vic .vk{display:inline-block;font-size:14px;font-weight:900;letter-spacing:.2em;color:#3a2300;background:var(--gold);border-radius:999px;padding:3px 12px}
 #battle .vic h2{margin:8px 0 4px;font-size:32px;font-weight:900;color:var(--gold);letter-spacing:.08em;text-shadow:0 0 18px rgba(255,207,90,.6)}
 #battle .vic .vs{margin:0 0 14px;font-size:16px;color:#dbe6f0}
-#battle .vstat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-#battle .vstat span{background:rgba(255,255,255,.07);border-radius:14px;padding:8px 4px}
-#battle .vstat b{display:block;font-size:20px;color:#fff;font-variant-numeric:tabular-nums}#battle .vstat b.vr{color:var(--gold);letter-spacing:.05em}
-#battle .vstat small{font-size:13px;color:var(--dim)}
 #battle .vrw{text-align:left;margin-bottom:18px}#battle .vrw>small{display:block;font-size:14px;font-weight:900;color:var(--gold);letter-spacing:.12em;margin-bottom:6px}
 #battle .vrw ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 #battle .vrw li{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;color:#fff;background:rgba(255,207,90,.1);border:1px solid rgba(255,207,90,.28);border-radius:12px;padding:9px 12px}
@@ -551,8 +547,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 #battle .vic button{width:100%;height:52px;border-radius:999px;border:0;background:var(--gold);color:#3a2300;font-size:18px;font-weight:900}
 #battle .vic button:active{transform:scale(.97)}
 #battle:has(.vic.show) .quit,#battle:has(.vic.show) header{display:none}
-@media (orientation:landscape) and (max-height:600px){#battle .vic{width:min(620px,calc(100vw - 32px));display:none;padding:14px 18px 16px}#battle .vic.show{display:grid;grid-template-columns:200px 1fr;column-gap:18px;align-items:center}#battle .vimg{grid-row:1/span 6;height:180px}#battle .vic h2{font-size:26px;margin:4px 0 2px}#battle .vic .vk{justify-self:center}#battle .vic .vs{margin-bottom:8px}#battle .vstat{margin-bottom:8px}#battle .vstat span{padding:4px}#battle .vstat b{font-size:17px}#battle .vrw{margin-bottom:10px}#battle .vrw li{padding:6px 10px}#battle .vic button{height:44px}}
-#battle .msg h3{margin:0 0 12px;color:var(--gold);font-size:21px;letter-spacing:.06em}
+@media (orientation:landscape) and (max-height:600px){#battle .vic{width:min(620px,calc(100vw - 32px));display:none;padding:14px 18px 16px}#battle .vic.show{display:grid;grid-template-columns:240px 1fr;column-gap:18px;align-items:center}#battle .vimg{grid-row:1/span 6;height:min(240px,calc(100dvh - 80px));margin:0}#battle .vic .vb{height:auto;max-height:100%;max-width:100%;top:50%;transform:translate(-50%,-50%)}#battle .vic h2{font-size:26px;margin:4px 0 2px}#battle .vic .vk{justify-self:center}#battle .vic .vs{margin-bottom:8px}#battle .msg h3{margin:0 0 12px;color:var(--gold);font-size:21px;letter-spacing:.06em}
 #battle .msg p{margin:0 0 20px;font-size:16px;line-height:1.75;text-align:left;font-weight:500;white-space:pre-line;color:#dbe6f0}
 #battle .msg button{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.45);color:#fff;border-radius:999px;padding:12px 30px;font-weight:900;font-size:17px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 /* 開場：啟程前的提醒（點一下才能讓影片有聲播放）＋加到主畫面 */
