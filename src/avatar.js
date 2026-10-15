@@ -56,11 +56,13 @@ function parts(r, base, list, c, glow) {
 // a：{ phase, move(0..1), air, swim, t, wave }
 export function drawAvatar(r, c, x, y, z, yaw, a, glow = 0) {
   const root = M.ident(); M.translate(root, x, y, z); M.rotY(root, yaw);
+  if (a.dance) M.rotZ(root, Math.sin(a.t * 6) * 0.14);   // 跳舞：身體左右擺
   const sw = a.swim ? 0 : Math.sin(a.phase) * 0.75 * a.move;
   const breathe = Math.sin(a.t * 2) * 0.012;
   // 腿
   for (const s of [-1, 1]) {
     const m = M.copy(root); M.translate(m, s * 0.2, 0.8, 0);
+    if (a.dance) M.rotX(m, s * Math.sin(a.t * 12) * 0.35); else
     M.rotX(m, a.air ? (s * 0.25 - 0.2) : a.swim ? Math.sin(a.t * 6 + s * 1.5) * 0.4 + 0.3 : s * sw);
     parts(r, m, LEG, c, glow);
   }
@@ -70,7 +72,8 @@ export function drawAvatar(r, c, x, y, z, yaw, a, glow = 0) {
   // 手臂
   for (const s of [-1, 1]) {
     const m = M.copy(body); M.translate(m, s * 0.6, 1.56, 0);
-    if (a.wave && s === 1) { M.rotZ(m, 2.6 + Math.sin(a.t * 8) * 0.3); }
+    if (a.dance) M.rotZ(m, s * (2.5 + Math.sin(a.t * 12 + (s > 0 ? 0 : Math.PI)) * 0.45));   // 雙手舉高輪流揮
+    else if (a.wave && s === 1) { M.rotZ(m, 2.6 + Math.sin(a.t * 8) * 0.3); }
     else if (a.air) M.rotX(m, -2.8);
     else if (a.swim) M.rotX(m, a.t * 5 + (s > 0 ? Math.PI : 0));
     else M.rotX(m, -s * sw);
