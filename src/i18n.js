@@ -217,7 +217,7 @@ const S = {
   stage2Open: ['第三階開啟：城之回聲、海之流痕、山之鐘聲（需{realm}）', 'Stage 3 opens: Echo of the City, Trace of the Sea, Bell of the Mountain (needs {realm})', '第三章が開いた：街のこだま、海の流れ痕、山の鐘の音（{realm}が必要）'],
   flowsUnite: ['三流歸一', 'The Three Flows Unite', '三流が一つに'],
   flowsSub: ['城、海、山三道流匯在一起，台北靈門要開了', 'City, sea and mountain flow together; the Taipei Spirit Gate is about to open', '城・海・山の流れが一つになり、台北霊門が開こうとしている'],
-  talesAllTitle: ['台北誌完成了', 'The Taipei Chronicle Is Complete', '台北誌が完成した'],
+  talesAllTitle: ['《台北誌》成書', 'The Taipei Chronicle Is Bound', '『台北誌』成る'],
   taipeiBook: ['台北誌', 'Taipei', '台北誌'],
   talesAllSub: ['七個故事收成一本書，城海山三流開始甦醒', 'Seven stories bound into one book; the three flows begin to stir', '七つの物語が一冊の本に。三つの流れが目覚めはじめる'],
   secFlows: ['第三階・城海山三流', 'Stage 3 · Three Flows', '第三章・三流'],
