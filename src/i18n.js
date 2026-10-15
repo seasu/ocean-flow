@@ -139,6 +139,9 @@ const S = {
   trail: ['文化徑 × 山林徑・走一條路，認識台北這座城', 'Culture Trail × Mountain Trail · Walk one path, get to know Taipei', '文化の道 × 山林の道・一本の道で、台北を知る'],
   backSpirit: ['回到靈界', 'Back to Spirit World', '霊界へ戻る'],
   enter: ['進入機緣', 'Enter encounter', '縁に入る'],
+  simSet: ['模擬定位', 'Simulated location', '位置シミュレーション'],
+  simNote: ['測試用：雷達清單會出現走路圖示，點了就走過去', 'For testing: a walk icon appears in the radar list; tap it to go there', 'テスト用：レーダー一覧に歩くアイコンが出て、押すとそこへ移動'],
+  simGo: ['模擬走過去', 'Walk there (simulated)', 'シミュレーションで移動'],
   simLabel: ['模擬定位：點雷達或清單就走過去（展示用）', 'Simulated location: tap the radar or list to walk there (for demos)', '位置のシミュレーション：レーダーか一覧をタップすると移動（デモ用）'],
   safety: ['請走人行道、注意來車，過馬路時不要看手機。', 'Stay on the sidewalk, watch for traffic, and don\'t look at your phone while crossing.', '歩道を歩き、車に注意してください。横断中はスマホを見ないでください。'],
   tapNext: ['點一下繼續 ▸', 'Tap to continue ▸', 'タップで次へ ▸'],
@@ -341,8 +344,8 @@ const S = {
     'Walk one path, get to know Taipei.\nFour Beasts Resonance · Taipei Spirit Gate opened  Elephant · Tiger · Leopard · Lion 4/4\nTime {time}  Spirit Light {qi}/{qim}  Beauty of Taiwan {b}/{bm}',
     '一本の道で、台北を知る。\n四獣共鳴・台北霊門が開いた　象・虎・豹・獅 4/4\nタイム {time}　霊光 {qi}/{qim}　台湾の美 {b}/{bm}'],
   noGeo: ['這個瀏覽器不支援定位', 'This browser does not support location', 'このブラウザは位置情報に対応していません'],
-  geoDenied: ['沒有定位權限，已改用模擬定位', 'No location permission; using simulated location', '位置情報の許可がないため、シミュレーションに切り替えました'],
-  geoFail: ['暫時抓不到定位，已改用模擬定位', 'Can\'t get your location right now; using simulated location', '位置情報を取得できないため、シミュレーションに切り替えました'],
+  geoDenied: ['沒有定位權限；測試可到設定開啟模擬定位', 'No location permission; turn on simulated location in Settings to test', '位置情報の許可がありません。テストは設定でシミュレーションをオンに'],
+  geoFail: ['暫時抓不到定位；測試可到設定開啟模擬定位', 'Can\'t get your location right now; turn on simulated location in Settings to test', '位置情報を取得できません。テストは設定でシミュレーションをオンに'],
 };
 const IDX = { zh: 0, en: 1, ja: 2 }[lang];
 export function t(key, vars) {

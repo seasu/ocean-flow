@@ -67,9 +67,11 @@ export function offset(a, b) {
 }
 export function dirName(a, b) { const [x, y] = offset(a, b); return DIR_NAMES[(Math.round(Math.atan2(x, y) / (Math.PI / 4)) + 8) % 8]; }
 
-// 定位：真實 GPS，失敗時改用模擬（點地點就走過去）
+// 定位：真實 GPS；只有在設定裡開了「模擬定位」才改用模擬（雷達清單點走路 icon 就走過去）
+let simPref = false;
+try { simPref = localStorage.getItem('of-sim') === '1'; } catch { }
 export const geo = {
-  pos: { ...VENUE }, acc: null, sim: true, watching: false, error: '', listeners: [],
+  pos: { ...VENUE }, acc: null, sim: simPref, watching: false, error: '', listeners: [],
   on(f) { this.listeners.push(f); },
   emit() { for (const f of this.listeners) f(this.pos); },
   start() {
@@ -79,15 +81,14 @@ export const geo = {
     navigator.geolocation.watchPosition(p => {
       if (!this.sim) { this.pos = { lat: p.coords.latitude, lng: p.coords.longitude }; this.acc = p.coords.accuracy; }
       this.error = ''; this.real = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy };
-      if (this.sim && !this.userSim) { this.sim = false; this.pos = { lat: this.real.lat, lng: this.real.lng }; this.acc = this.real.acc; }
       this.emit();
     }, e => {
-      this.watching = false; this.sim = true;
+      this.watching = false;
       this.error = e.code === 1 ? t('geoDenied') : t('geoFail');
       this.emit();
     }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 });
   },
-  setSim(on) { this.sim = on; this.userSim = on; if (!on && this.real) { this.pos = { lat: this.real.lat, lng: this.real.lng }; this.acc = this.real.acc; } this.emit(); },
+  setSim(on) { this.sim = on; try { localStorage.setItem('of-sim', on ? '1' : '0'); } catch { } if (!on && this.real) { this.pos = { lat: this.real.lat, lng: this.real.lng }; this.acc = this.real.acc; } this.emit(); },
   // 模擬模式：用 1.5 秒走到目標
   walkTo(t) {
     const from = { ...this.pos }, t0 = performance.now();

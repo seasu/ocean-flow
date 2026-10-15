@@ -236,7 +236,7 @@ hold($('#btnSense'), () => doSense());
 const settings = $('#settings'), soundT = $('#soundT');
 const syncSound = () => soundT.setAttribute('aria-checked', String(!muted));
 syncSound();
-for (const b of document.querySelectorAll('#menuBtn, #title .more')) b.addEventListener('click', e => { e.stopPropagation(); syncSound(); settings.hidden = false; });
+for (const b of document.querySelectorAll('#menuBtn, #title .more')) b.addEventListener('click', e => { e.stopPropagation(); syncSound(); syncSim(); settings.hidden = false; });
 soundT.addEventListener('click', () => { setMuted(!muted); syncSound(); });
 settings.addEventListener('click', e => { if (e.target.closest('.xbtn')) settings.hidden = true; });
 $('#loreBtn').addEventListener('click', () => { settings.hidden = true; openLore(); });
@@ -1152,7 +1152,8 @@ function openRadar() { if (G.state !== 'play' && G.state !== 'ending') return; r
 function closeRadar() { radarOpen = false; radar.classList.remove('show'); }
 $('#radarBtn').addEventListener('click', e => { e.stopPropagation(); openRadar(); });
 $('#rClose').addEventListener('click', closeRadar);
-$('#simT').addEventListener('change', e => geo.setSim(e.target.checked));
+const simT = $('#simT'), syncSim = () => simT.setAttribute('aria-checked', String(geo.sim));
+simT.addEventListener('click', () => { geo.setSim(!geo.sim); syncSim(); renderList.html = ''; if (radarOpen) renderList(); });
 $('#enc button').addEventListener('click', () => encSpot && encounter(encSpot));
 function inRange() {
   return REAL.filter(shown).map(s => ({ s, d: meters(geo.pos, s) })).filter(o => o.d <= o.s.r && (!visited.has(o.s.id) || o.s.id === 'venue')).sort((a, b) => a.d - b.d)[0]?.s || null;
@@ -1178,6 +1179,7 @@ function renderList() {
     return `<li data-id="${s.id}" class="${done ? 'done' : ''} ${d <= s.r ? 'near' : ''} ${node ? 'key' : ''} ${s === tg ? 'target' : ''}">`
       + (no ? `<i class="no${ok ? ' ok' : ''}">${ok ? '✓' : no}</i>` : '') + `<div><b>${s.name}</b><em>${tag}</em><small>${t('distDir', { d: fmt(d), dir: dirFor(s) })}</small></div>`
       + (s.id === 'venue' && d <= s.r ? '' : `<a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}&travelmode=walking"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>${t('navGo')}</a>`)
+      + (geo.sim ? `<button class="sim" data-sim="${s.id}" aria-label="${t('simGo')}"><svg viewBox="0 0 24 24"><circle cx="13.5" cy="4.5" r="2"/><path d="M9 21l2.2-6.2 3 3V21M6.5 12.5l2.2-3.8 4.3-1 2.8 3.6 3 1M11.2 14.8L9.6 10"/></svg></button>` : '')
       + (calib ? `<button data-cal="${s.id}">${t('setHere')}</button>` : '') + `</li>`;
   };
   const html = groups.map((g, gi) => {
@@ -1193,9 +1195,11 @@ $('#rlist').addEventListener('click', e => {
   const cal = e.target.closest('[data-cal]');
   if (cal) { const s = REAL.find(x => x.id === cal.dataset.cal), p = geo.real || geo.pos; s.lat = p.lat; s.lng = p.lng; saveSpot(s); renderList(); toast(t('setDone', { name: s.name })); return; }
   if (e.target.closest('a.nav')) return;
+  const sim = e.target.closest('[data-sim]');
+  if (sim) { if (geo.sim) geo.walkTo(REAL.find(x => x.id === sim.dataset.sim)); return; }
   const li = e.target.closest('li[data-id]'); if (!li) return;
   const s = REAL.find(x => x.id === li.dataset.id);
-  if (geo.sim) geo.walkTo(s); else toast(t('walkThere', { name: s.name, dir: dirFor(s), d: fmt(meters(geo.pos, s)) }));
+  toast(t('walkThere', { name: s.name, dir: dirFor(s), d: fmt(meters(geo.pos, s)) }));
 });
 rcv.addEventListener('click', e => {
   if (!geo.sim || performance.now() < noClick) return;
@@ -1273,7 +1277,6 @@ function drawRadar() {
   const tr = $('#radar .trail'); if (tr.textContent !== trail) tr.textContent = trail;
   // 狀態列與機緣按鈕
   $('#gstat').textContent = geo.sim ? t('simStat', { err: geo.error ? t('sep') + geo.error : '' }) : t('gpsStat', { n: Math.round(geo.acc || 0) });
-  $('#simT').checked = geo.sim;
   const s = inRange(); encSpot = s;
   const enc = $('#enc');
   if (s) {
