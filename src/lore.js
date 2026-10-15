@@ -2,7 +2,7 @@
 // 圖來自 docs/lore/eight-stages.png，切成 img/lore/ch0–7.jpg；中文文案來自專案的 world-chapters.md
 import { lang, t } from './i18n.js';
 
-const CH = [
+export const CH = [
   { no: ['序章', 'Prologue', '序章'], name: ['起源', 'Origin', '起源'], sub: ['覺醒台灣', 'Awakening in Taiwan', '台湾の目覚め'],
     epi: ['這裡，是一切開始被看見的地方。', 'This is where everything was first seen.', 'ここは、すべてが見えはじめた場所。'],
     text: ["我們一直以為，世界只有眼睛看見的樣子。\n直到有一天，有人在山中聽見不存在的鐘聲，有人在海邊看見逆光流動的痕跡。\n山有脈，海有流，人亦有自己的道。\n台灣，成為人類第一個重新啟流的地方。", "We always thought the world was only what our eyes could see.\nThen one day, someone heard a bell in the mountains that did not exist, and someone saw traces flowing against the light by the sea.\nMountains have veins, the sea has currents, and people have their own way.\nTaiwan became the first place where humanity set the Flow moving again.", "世界は目に見えるものだけだと、ずっと思っていた。\nある日、山で存在しない鐘の音を聞いた人がいて、海辺で光に逆らって流れる跡を見た人がいた。\n山には脈があり、海には流れがあり、人にもそれぞれの道がある。\n台湾は、人類が初めてふたたび流れを起こした場所になった。"] },
@@ -63,10 +63,11 @@ function openBook(html) {
 }
 const cover = (kicker, title, intro, swipe) => `<section class="cover"><small>${kicker}</small><h2>${title}</h2><p>${intro}</p><span class="hintSwipe">${swipe}</span></section>`;
 
-export function openLore() {
+export function openLore(at = 0) {
   openBook(cover(t('loreKicker'), t('loreTitle'), t('loreIntro'), t('loreSwipe'))
     + CH.map((c, i) => `<section class="ch"><img src="img/lore/ch${i}.jpg" alt="" loading="${i < 2 ? 'eager' : 'lazy'}">
       <small>${c.no[L]}${i === 0 ? `<em>${t('loreHere')}</em>` : ''}</small><h2>${t('loreName', { name: c.name[L] })}</h2><b>— ${c.sub[L]} —</b><blockquote>${c.epi[L]}</blockquote><p>${c.text[L]}</p></section>`).join(''));
+  if (at) requestAnimationFrame(() => { pages.scrollLeft = (at + 1) * pages.clientWidth; mark(); });
 }
 
 // 境界：走路修行的五個境界；核心問題取自世界觀聖經第 11 章

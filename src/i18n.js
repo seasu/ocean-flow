@@ -30,6 +30,8 @@ const S = {
   xi: ['阿汐', 'A-Xi', 'アシー'],
   traveler: ['旅人・阿流', 'Traveler · A-Liu', '旅人・アリュウ'],
   stage1Head: ['第一階・四獸靈門', 'Stage 1 · Four Beast Gates', '第一章・四獣霊門'],
+  chapLocked: ['{no}・{name}：尚未開啟', '{no} · {name}: not open yet', '{no}・{name}：まだ開いていない'],
+  chapRead: ['看章節', 'Read', '章を読む'],
   talesHead: ['第二階・台北城市故事', 'Stage 2 · Taipei City Stories', '第二章・台北の街の物語'],
   talesTitle: ['找出台北的七個故事（{n}/{m}）', 'Find Taipei\'s seven stories ({n}/{m})', '台北の七つの物語を探そう（{n}/{m}）'],
   talesNote: ['不分順序，走到地點就會解鎖故事・七個都找到，城海山三流就會甦醒', 'Any order; reach a place to unlock its story · Find all seven and the City, Sea and Mountain flows awaken', '順番は自由、その場所に着くと物語が開く・七つそろうと街・海・山の三流が目覚める'],

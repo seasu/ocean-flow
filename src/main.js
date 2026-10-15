@@ -1,14 +1,14 @@
 // 《洋流：起源》mobile web prototype：主迴圈、操作、任務流程
 import { M, clamp, lerp, rng, hex, mixColor, smooth } from './math.js';
 import { Renderer, Builder } from './gl.js';
-import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, bellMesh, beastMesh, N, S, WATER, T, PLACES, CURRENT, curX } from './world.js';
+import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, portalMesh, bellMesh, beastMesh, N, S, WATER, T, PLACES, CURRENT, curX } from './world.js';
 import { drawAvatar, BLUE, ORANGE } from './avatar.js';
 import { initAudio, unlockAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
 import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
 import { TALES } from './stories.js';
 import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
 import { battle } from './battle.js';
-import { openLore, openRealms } from './lore.js';
+import { openLore, openRealms, CH } from './lore.js';
 import { VERSION } from './version.js';
 
 applyStatic();
@@ -94,6 +94,25 @@ for (const n of NODES) {
   if (n.stage === 1) { n.beast = r.mesh(beastMesh(n.id)); n.face = Math.atan2(PLACES.spawn[0] - n.pos[0], PLACES.spawn[1] - n.pos[2]) + Math.PI; }
 }
 const GATE = at(PLACES.gate);
+
+// 序章就是這座島；海的盡頭放著後面七章的入口（鎖著），圖示和世界觀頁同一套
+// 方位：流域在北、星航在東北的天上、連界在東、歸源在黑潮底下、新生在東南、萬象在南、無界在最遠的角落
+const HS = 1 + (S - 1) * 0.5;
+const CHAPS = [
+  { i: 1, x: 64 * S, z: 5 * S, col: '#7fe8ff' },
+  { i: 2, x: 123 * S, z: 56 * S, col: '#ffd27a' },
+  { i: 3, x: 106 * S, z: 14 * S, y: 34 * HS, col: '#c9a8ff' },
+  { i: 4, x: 64 * S, z: 123 * S, col: '#9ef0a8' },
+  { i: 5, x: Math.round(curX(84 * S)), z: 84 * S, y: WATER - 5, col: '#5fd3e6' },
+  { i: 6, x: 118 * S, z: 104 * S, col: '#ffb3c7' },
+  { i: 7, x: 124 * S, z: 124 * S, col: '#ffffff' },
+].map(c => ({ ...c, y: c.y ?? WATER - 0.2, mesh: r.mesh(portalMesh(hex(c.col))), no: CH[c.i].no[lang === 'en' ? 1 : lang === 'ja' ? 2 : 0], name: CH[c.i].name[lang === 'en' ? 1 : lang === 'ja' ? 2 : 0] }));
+const chapEl = document.createElement('div'); chapEl.id = 'chaps';
+chapEl.innerHTML = CHAPS.map(c => `<button data-i="${c.i}" style="--c:${c.col}"><img src="img/lore/ch${c.i}.jpg" alt=""><span><small>${c.no}</small><b>${c.name}</b></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>`).join('');
+$('#tag').before(chapEl);
+for (const c of CHAPS) c.el = chapEl.querySelector(`[data-i="${c.i}"]`);
+chapEl.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { e.stopPropagation(); openLore(+b.dataset.i); } });
+const chapImg = CHAPS.map(c => { const im = new Image(); im.src = `img/lore/ch${c.i}.jpg`; return im; });
 
 // 靈光：散在城市、洋流上、山坡與各地
 const motes = [];
@@ -425,6 +444,12 @@ function drawMini() {
     const g = guideTarget(), x = g.pos[0] * k, z = g.pos[2] * k;
     mg.setLineDash([3 * q, 3 * q]); mg.strokeStyle = 'rgba(255,207,90,.85)'; mg.lineWidth = q; mg.beginPath(); mg.moveTo(P.x * k, P.z * k); mg.lineTo(x, z); mg.stroke(); mg.setLineDash([]);
     mg.lineWidth = 1.4 * q; mg.beginPath(); mg.arc(x, z, (6 + 2 * Math.sin(G.t * 4)) * q, 0, 7); mg.stroke();
+  }
+  for (const [k2, c] of CHAPS.entries()) {
+    const x = clamp(c.x, 7 * q / k, N - 7 * q / k) * k, z = clamp(c.z, 7 * q / k, N - 7 * q / k) * k, rr = 5 * q;
+    mg.save(); mg.beginPath(); mg.arc(x, z, rr, 0, 7); mg.closePath(); mg.fillStyle = '#0b1a2c'; mg.fill(); mg.clip();
+    if (chapImg[k2].complete && chapImg[k2].naturalWidth) mg.drawImage(chapImg[k2], x - rr, z - rr, rr * 2, rr * 2);
+    mg.restore(); mg.strokeStyle = c.col; mg.lineWidth = 0.9 * q; mg.beginPath(); mg.arc(x, z, rr, 0, 7); mg.stroke();
   }
   for (const sp of SPOTS) if (sp.r) { mg.strokeStyle = '#fff'; mg.lineWidth = q * 0.8; mg.beginPath(); mg.arc((sp.pos[0] + 0.5) * k, (sp.pos[1] + 0.5) * k, 2 * q, 0, 7); sp.found ? (mg.fillStyle = '#fff', mg.fill()) : mg.stroke(); }
   mg.save(); mg.translate(P.x * k, P.z * k); mg.rotate(-P.yaw); mg.scale(q / k, q / k);
@@ -763,6 +788,7 @@ function updateGame(dt) {
     G.gateT += dt;
     if (Math.abs(P.x - GATE[0]) < 2.6 && Math.abs(P.z - GATE[2]) < 2.2) act = { key: 'gate', text: t('finalHere'), btn: t('finalGo'), fn: ending };
   }
+  for (const c of CHAPS) if (Math.hypot(c.x - P.x, c.z - P.z) < 8 && Math.abs(P.y - c.y) < 12) act = { key: 'ch' + c.i, text: t('chapLocked', { no: c.no, name: c.name }), btn: t('chapRead'), fn: () => openLore(c.i) };
   setAct(G.state === 'play' ? act : null);
   // 感知
   G.sense = Math.max(0, G.sense - dt); G.senseCd = Math.max(0, G.senseCd - dt);
@@ -1165,6 +1191,7 @@ function frame(dt) {
     if (n.vein) r.draw(n.vein, I, [1, 1, 1], 0.6 + 0.4 * Math.sin(G.t * 3));
   }
   if (s > 0.01) { const m = M.ident(); M.translate(m, 0, -(1 - smooth(0, 0.6, s)) * 50, 0); r.draw(floats, m, [1, 1, 1], 0.05); }
+  for (const c of CHAPS) { const m = M.ident(); M.translate(m, c.x, c.y + Math.sin(G.t * 0.8 + c.i) * 0.3, c.z); M.rotY(m, Math.atan2(64 * S - c.x, 64 * S - c.z)); r.draw(c.mesh, m, [1, 1, 1], 0.12 + 0.08 * Math.sin(G.t * 1.6 + c.i)); }
   const pa = { phase: P.phase, move: P.move, air: !P.onGround && !P.swim, swim: P.swim, t: G.t };
   drawAvatar(r, BLUE, P.x, P.ry - (P.swim ? 0.0 : 0), P.z, P.yaw, pa, G.state === 'ending' ? 0.3 : 0);
   const xg = ground(XI.x, XI.z);
@@ -1209,6 +1236,14 @@ function frame(dt) {
   const tag = $('#tag'), pj = M.project(vp, XI.x, xg + 2.6, XI.z);
   if (pj && G.state !== 'title' && pj[0] > 0 && pj[0] < 1 && pj[1] > 0 && pj[1] < 1) { tag.style.transform = `translate(${pj[0] * innerWidth}px,${pj[1] * innerHeight}px) translate(-50%,-100%)`; tag.style.opacity = 1; }
   else tag.style.opacity = 0;
+  // 章節入口的圖示：靠近海邊才看得到，越近越清楚
+  for (const c of CHAPS) {
+    const d = Math.hypot(c.x - P.x, c.z - P.z), pc = G.state === 'play' && d < 110 && M.project(vp, c.x, c.y + 9.5, c.z);
+    if (pc && pc[0] > 0.04 && pc[0] < 0.96 && pc[1] > -0.5 && pc[1] < 0.9) {
+      c.el.style.transform = `translate(${pc[0] * innerWidth}px,${Math.max(pc[1], 0.34) * innerHeight}px) translate(-50%,-100%) scale(${clamp(1.25 - d / 120, 0.6, 1).toFixed(2)})`;
+      c.el.style.opacity = clamp((110 - d) / 30, 0, 1).toFixed(2); c.el.style.pointerEvents = 'auto';
+    } else { c.el.style.opacity = 0; c.el.style.pointerEvents = 'none'; }
+  }
 }
 
 let last = performance.now();

@@ -13,12 +13,12 @@ const WANT = {
   yushan: [['玉山'], 'Yushan main peak'], alishan: [['阿里山神木', '阿里山國家森林遊樂區'], 'Alishan giant tree'], kenting: [['鵝鑾鼻燈塔'], 'Eluanbi Lighthouse'],
   // 第二階・台北城市故事
   wufenpu: [['五分埔'], 'Wufenpu Songshan Taipei'], cihcheng: [['士林慈諴宮', '慈諴宮'], 'Cihcheng Temple Shilin'],
-  xinzhuang: [['新莊慈祐宮', '新莊老街'], 'Xinzhuang Ciyou Temple'], wanhua: [['加蚋仔', '萬華區'], 'Wanhua Taipei Bangka'],
+  xinzhuang: [['新莊慈祐宮', '新莊老街'], 'Xinzhuang Ciyou Temple'], wanhua: [['加蚋仔', '萬華區'], 'Lungshan Temple Taipei Bangka'],
   baoan: [['大龍峒保安宮'], 'Dalongdong Baoan Temple'], zaichun: [['中山橋 (臺北市)', '明治橋'], 'Zhongshan Bridge Taipei Meiji'],
-  shipai: [['石牌夜市', '石牌 (臺北市)'], 'Shipai Taipei Beitou'],
+  shipai: [['石牌 (臺北市)'], 'Shipai Stele Beitou'],
 };
 const MAX = 3, UA = 'ocean-flow-prototype/1.0 (https://github.com/seasu/ocean-flow)';
-const SKIP = /protest|rally|demonstration|抗議|遊行|Guilin|桂林|China|總統|president|典禮|ceremony|election|選舉|campaign|parade|logo|map|flag|icon|locator|location|seal|emblem|coat|diagram|chart|關係|位置|地圖|標誌|\.svg$|\.gif$/i;
+const SKIP = /KFC|store|restaurant|shop|Telecom|Administration|bank|7-Eleven|McDonald|protest|rally|demonstration|抗議|遊行|Guilin|桂林|China|總統|president|典禮|ceremony|election|選舉|campaign|parade|logo|map|flag|icon|locator|location|seal|emblem|coat|diagram|chart|關係|位置|地圖|標誌|\.svg$|\.gif$/i;
 
 async function api(host, params) {
   const u = `https://${host}/w/api.php?` + new URLSearchParams({ format: 'json', formatversion: '2', origin: '*', ...params });

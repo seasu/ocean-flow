@@ -125,6 +125,11 @@ button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 #prog::before{content:"";position:absolute;inset:7px;border-radius:50%;background:rgba(10,18,30,.8)}
 #prog span{position:relative;font-size:13px;color:var(--gold)}
 #prog.show{opacity:1}
+#chaps button{position:absolute;left:0;top:0;opacity:0;display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;color:#fff;background:rgba(8,18,32,.55);border:1.5px solid var(--c);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transform-origin:50% 100%;white-space:nowrap;transition:opacity .3s;font:inherit}
+#chaps img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+#chaps span{display:flex;flex-direction:column;align-items:flex-start;line-height:1.2}
+#chaps small{font-size:13px;color:var(--c)}#chaps b{font-size:16px}
+#chaps svg{width:18px;height:18px;opacity:.75}
 #tag{position:absolute;left:0;top:0;font-size:12px;background:rgba(232,100,28,.9);color:#fff;padding:2px 8px;border-radius:6px;opacity:0;white-space:nowrap}
 
 /* 遊戲中的按鈕：跟主畫面「啟程」、影片「跳過」同一套毛玻璃 */
