@@ -6,6 +6,7 @@ import { drawAvatar, BLUE, ORANGE } from './avatar.js';
 import { initAudio, unlockAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
 import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
 import { TALES } from './stories.js';
+import { quiz } from './quiz.js';
 import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
 import { battle } from './battle.js';
 import { openLore, openRealms, openCast, CH } from './lore.js';
@@ -1195,8 +1196,8 @@ function encounter(s) {
     }
     return;
   }
-  visited.add(s.id);
   if (s.tale) { taleFound(s); return; }
+  visited.add(s.id);
   const node = s.node && NODES.find(n => n.id === s.node);
   if (node) {
     P.x = node.pos[0]; P.z = node.pos[2] + 4; P.y = P.ry = footGround(P.x, P.z) + 0.2; P.vy = 0; P.swim = false;
@@ -1228,20 +1229,22 @@ $('#card').addEventListener('click', e => { e.stopPropagation(); openSpot(); });
 $('#dexBtn').addEventListener('click', e => { e.stopPropagation(); $('#card').classList.remove('show'); $('#dex').classList.toggle('show'); });
 $('#dexClose').addEventListener('click', () => $('#dex').classList.remove('show'));
 
-// 第二階：走到台北城市故事的地點，阿汐說故事、收進圖鑑；七個都找到就開第三階
+// 第二階：走到台北城市故事的地點，阿汐說故事；讀完故事答 3 題，全對才收進圖鑑；七個都通關就開第三階
+const QUIZ_REWARD = 3;
 function taleFound(s) {
-  G.bonus += 2; sfx.pick(); setTimeout(() => sfx.pick(), 150);
+  sfx.pick(); setTimeout(() => sfx.pick(), 150);
   burst(P.x, P.y + 1.5, P.z, [1, 0.75, 0.6], 40, 5);
-  const n = TALES.filter(x => visited.has(x.id)).length;
   G.state = 'talk';
-  say(s.lines, () => {
+  say(s.lines, () => quiz(s, QUIZ_REWARD).then(ok => {
     G.state = 'play';
+    if (!ok) { toast(t('quizLeft', { name: s.name })); return; }
+    visited.add(s.id); G.bonus += QUIZ_REWARD;
     setTimeout(() => showCard(s.name, s.sub, s.text, s.fact, s.id), 400);
     if (talesDone()) setTimeout(() => {
       pop(t('talesAll'), 'gold'); sfx.bell(196); setTimeout(() => sfx.bell(220), 240); setTimeout(() => sfx.bell(293.7), 480);
       setTimeout(() => toast(t('stage2Open', { realm: REALMS[REQ] })), 2600);
     }, 1600);
-  });
+  }));
 }
 
 function ending() {
