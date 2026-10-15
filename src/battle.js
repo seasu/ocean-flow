@@ -25,7 +25,7 @@ el.id = 'battle';
 el.innerHTML = `<canvas></canvas>
   <header><b></b><div class="bar"><i></i></div><span class="hp"></span></header>
   <div class="msg"><h3></h3><p></p><button></button></div>
-  <div class="vic"><div class="vimg"><img class="vb" alt=""><img class="vxi" src="img/cast/xi.png" alt=""></div><h2></h2><p class="vs"></p>
+  <div class="vic"><div class="vimg"><img class="vb" alt=""></div><h2></h2><p class="vs"></p>
     <div class="vstat"><span><b class="vt"></b><small></small></span><span><b class="vh"></b><small></small></span><span><b class="vr"></b><small></small></span></div>
     <div class="vrw"><small></small><ul></ul></div><button></button></div>
   <button class="xbtn quit" aria-label="leave"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`;
