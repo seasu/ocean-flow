@@ -2,7 +2,7 @@
   "source": "Wikimedia Commons（照片取自中文維基百科條目）",
   "sourceUrl": "https://commons.wikimedia.org/",
   "license": "各照片依其標示的自由授權使用（作者與授權見 images[].author / license）",
-  "fetchedAt": "2026-10-15T02:27:34.350Z",
+  "fetchedAt": "2026-10-15T02:29:39.492Z",
   "spots": {
     "leopard": {
       "src": "commons",
@@ -81,10 +81,10 @@
         },
         {
           "file": "data/photos/c-sea-3.jpg",
-          "subject": "Northeast and Yilan Coast National Scenic Area, Tourism Administration 1",
-          "author": "Tourism Administration, MOTC",
-          "license": "Attribution",
-          "page": "https://commons.wikimedia.org/wiki/File:Northeast_and_Yilan_Coast_National_Scenic_Area,_Tourism_Administration_1.jpg"
+          "subject": "龜山戴帽-攝影者吳裕隆",
+          "author": "Neycnsa",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:%E9%BE%9C%E5%B1%B1%E6%88%B4%E5%B8%BD-%E6%94%9D%E5%BD%B1%E8%80%85%E5%90%B3%E8%A3%95%E9%9A%86.jpg"
         }
       ]
     },
@@ -249,10 +249,10 @@
         },
         {
           "file": "data/photos/c-turtle-3.jpg",
-          "subject": "Northeast and Yilan Coast National Scenic Area, Tourism Administration 1",
-          "author": "Tourism Administration, MOTC",
-          "license": "Attribution",
-          "page": "https://commons.wikimedia.org/wiki/File:Northeast_and_Yilan_Coast_National_Scenic_Area,_Tourism_Administration_1.jpg"
+          "subject": "龜山戴帽-攝影者吳裕隆",
+          "author": "Neycnsa",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:%E9%BE%9C%E5%B1%B1%E6%88%B4%E5%B8%BD-%E6%94%9D%E5%BD%B1%E8%80%85%E5%90%B3%E8%A3%95%E9%9A%86.jpg"
         }
       ]
     },
@@ -473,24 +473,24 @@
       "images": [
         {
           "file": "data/photos/c-wanhua-1.jpg",
-          "subject": "Wanhua, Taipei - Wanhua5037",
-          "author": "lumoplank",
-          "license": "CC0",
-          "page": "https://commons.wikimedia.org/wiki/File:Wanhua,_Taipei_-_Wanhua5037.jpg"
+          "subject": "Longshan Temple, Taipei 01",
+          "author": "Bernard Gagnon",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Longshan_Temple,_Taipei_01.jpg"
         },
         {
           "file": "data/photos/c-wanhua-2.jpg",
-          "subject": "Wanhua District Administration Center and Bangka Park (3021078235)",
-          "author": "Alan Sung",
-          "license": "CC BY 2.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Wanhua_District_Administration_Center_and_Bangka_Park_(3021078235).jpg"
+          "subject": "Taipei Taiwan Mengjia-Longshan-Temple-00",
+          "author": "CEphoto, Uwe Aranas",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Taiwan_Mengjia-Longshan-Temple-00.jpg"
         },
         {
           "file": "data/photos/c-wanhua-3.jpg",
-          "subject": "2017-06-29 Bangka Qingshan Temple, Wanhua District, Taipei",
-          "author": "Felix Filnkoessl",
-          "license": "CC BY-SA 2.0",
-          "page": "https://commons.wikimedia.org/wiki/File:2017-06-29_Bangka_Qingshan_Temple,_Wanhua_District,_Taipei.jpg"
+          "subject": "Taipei Taiwan Mengjia-Longshan-Temple-05",
+          "author": "CEphoto, Uwe Aranas",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Taiwan_Mengjia-Longshan-Temple-05.jpg"
         }
       ]
     },
@@ -554,20 +554,6 @@
           "author": "Peellden",
           "license": "CC BY-SA 4.0",
           "page": "https://commons.wikimedia.org/wiki/File:Shipai_Stele,_Beitou.jpg"
-        },
-        {
-          "file": "data/photos/c-shipai-2.jpg",
-          "subject": "KFC Taipei Shipai Restaurant 20120115",
-          "author": "Mega Hammond",
-          "license": "CC BY-SA 2.0",
-          "page": "https://commons.wikimedia.org/wiki/File:KFC_Taipei_Shipai_Restaurant_20120115.jpg"
-        },
-        {
-          "file": "data/photos/c-shipai-3.jpg",
-          "subject": "Far Eastone Telecommunications Beitou Shipai Store 20161210",
-          "author": "Solomon203",
-          "license": "CC BY-SA 4.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Far_Eastone_Telecommunications_Beitou_Shipai_Store_20161210.jpg"
         }
       ]
     }
