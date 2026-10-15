@@ -238,6 +238,7 @@ const S = {
   wildWin: ['淨化了濁影，靈光 +{n}', 'Shade purified. Spirit Light +{n}', '濁影を浄化した。霊光 +{n}'],
   wildLose: ['被濁影打退了，靈光 −{n}', 'The shade drove you back. Spirit Light −{n}', '濁影に押し返された。霊光 −{n}'],
   wildLose0: ['被濁影打退了，還好身上沒有靈光可以搶', 'The shade drove you back, but you had no Spirit Light to lose', '濁影に押し返された。霊光がなくて助かった'],
+  taleLater: ['你走到了{name}：這裡藏著一個城市故事，先開完四獸靈門它才會浮現', 'You reached {name}: a city story is hidden here. Open the four beast gates first and it will appear', '{name}に着いた：ここには街の物語が眠っている。四獣の霊門を開けば現れる'],
   // 第一章終極 BOSS：濁淵
   beast_boss: ['濁淵', 'Zhuoyuan', '濁淵'],
   bossTitle: ['終極 BOSS・{name}', 'Final Boss · {name}', '最終ボス・{name}'],
