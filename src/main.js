@@ -9,7 +9,7 @@ import { TALES } from './stories.js';
 import { quiz } from './quiz.js';
 import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
 import { roar } from './roar.js';
-import { battle } from './battle.js';
+import { battle, replayVictory } from './battle.js';
 import { openLore, openRealms, openCast, CH } from './lore.js';
 import { VERSION } from './version.js';
 
@@ -271,6 +271,51 @@ $('#avPick input').addEventListener('change', e => {
 });
 $('#meBtn').addEventListener('click', e => { e.stopPropagation(); hudKey = ''; hud(); meEl.hidden = false; });
 meEl.addEventListener('click', e => { if (e.target.closest('.xbtn')) meEl.hidden = true; });
+// ---------- 成就：完成過的階段用 icon 排成格子，點一下重播當時的過關動畫 ----------
+// 達成過就記在這台裝置（重新整理也還在）；跳階測試時依目前進度補記
+const ACH = [
+  ...['elephant', 'tiger', 'leopard', 'lion'].map(id => ({ id: 'g:' + id, img: [id], live: () => NODES.find(n => n.id === id).awake, play: () => replayVictory(NODES.find(n => n.id === id)), name: () => t('achGate', { beast: t('beast_' + id) }), hint: () => t('achHintGate', { name: NODES.find(n => n.id === id).name }) })),
+  { id: 'four', img: ['elephant', 'tiger', 'leopard', 'lion'], live: stage1Done, play: () => roar(t('resSub')), name: () => t('resonance'), hint: () => t('achHintFour') },
+  { id: 'tales', book: true, live: () => G.geo && stage1Done() && TALES.every(s => visited.has(s.id)), play: () => roar(t('talesAllSub'), { kind: 'tales', title: t('talesAllTitle'), book: t('taipeiBook'), lamps: TALES.map(x => x.name) }), name: () => t('talesAllTitle'), hint: () => t('achHintTales') },
+  { id: 'flows', img: ['dragon', 'turtle', 'bear'], live: () => S2.every(n => n.awake), play: () => roar(t('flowsSub'), { kind: 'flows', title: t('flowsUnite'), beasts: S2.map(n => n.id) }), name: () => t('flowsUnite'), hint: () => t('achHintFlows') },
+  { id: 'boss', img: ['boss'], live: () => G.bossDone, play: () => replayVictory({ id: 'boss', boss: true, name: t('beast_boss') }), name: () => t('achBoss'), hint: () => t('achHintBoss') },
+];
+let achGot = new Set();
+try { achGot = new Set(JSON.parse(localStorage.getItem('of-ach') || '[]')); } catch { }
+function syncAch() {
+  let add = false;
+  for (const a of ACH) if (!achGot.has(a.id) && G.state !== 'title' && a.live()) { achGot.add(a.id); add = true; }
+  if (add) try { localStorage.setItem('of-ach', JSON.stringify([...achGot])); } catch { }
+  $('#achN').textContent = `${ACH.filter(a => achGot.has(a.id)).length}/${ACH.length}`;
+}
+const achEl = $('#ach'), BOOK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 18a2 2 0 0 1 2-2h11"/><path d="M9 7v6"/></svg>';
+// 成就依世界觀八章分區：章節圖當分隔；序章放已開放的成就，後面的章節先放灰色 icon（尚未開放）
+const CH_GLYPH = [, '<path d="M3 9c3-3 6 3 9 0s6 3 9 0M3 15c3-3 6 3 9 0s6 3 9 0"/>', '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  '<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>', '<path d="M12 21v-8M12 13c-4 0-7-3-7-7 4 0 7 3 7 7zM12 13c4 0 7-3 7-7-4 0-7 3-7 7z"/>',
+  '<path d="M12 12a2 2 0 1 0 2 2 4 4 0 0 0-4-4 6 6 0 0 0-6 6M12 12a6 6 0 0 1 6 6"/><circle cx="12" cy="12" r="9"/>', '<path d="M12 20v-7M12 13c0-3 2-5 5-5 0 3-2 5-5 5zM12 15c0-3-2-5-5-5 0 3 2 5 5 5z"/>',
+  '<path d="M6 9a3 3 0 1 0 0 6c3 0 9-6 12-6a3 3 0 1 1 0 6c-3 0-9-6-12-6z"/>'];
+const CH_COL = ['#ffcf5a', '#7fe8ff', '#ffd27a', '#c9a8ff', '#9ef0a8', '#5fd3e6', '#ffb3c7', '#ffffff'];
+function renderAch() {
+  syncAch();
+  const L = lang === 'en' ? 1 : lang === 'ja' ? 2 : 0, BIMG = { city: 'dragon', sea: 'turtle', peak: 'bear' };
+  $('#achSub').textContent = t('achSub', { n: ACH.filter(a => achGot.has(a.id)).length, m: ACH.length });
+  const head = (i, open) => `<li class="chd${open ? '' : ' shut'}" style="--c:${CH_COL[i]}"><img src="img/lore/ch${i}.jpg" alt=""><span><small>${CH[i].no[L]}</small><b>${CH[i].name[L]}</b></span><em>${open ? `${ACH.filter(a => achGot.has(a.id)).length}/${ACH.length}` : t('achSoon')}</em></li>`;
+  const tile = (a, i) => {
+    const on = achGot.has(a.id);
+    const icon = a.book ? `<span class="ic book">${BOOK_SVG}</span>` : `<span class="ic n${a.img.length}">${a.img.map(k => `<img src="img/beasts/${BIMG[k] || k}.png" alt="">`).join('')}</span>`;
+    return `<li><button class="${on ? 'on' : 'lock'}" data-i="${i}">${icon}<b>${a.name()}</b><small>${on ? t('achReplay') : a.hint()}</small></button></li>`;
+  };
+  const ghost = i => `<li class="ghosts">${[0, 1, 2, 3].map(() => `<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${CH_GLYPH[i]}</svg></span>`).join('')}</li>`;
+  $('#achList').innerHTML = head(0, true) + ACH.map(tile).join('') + [1, 2, 3, 4, 5, 6, 7].map(i => head(i, false) + ghost(i)).join('');
+}
+$('#achBtn').addEventListener('click', () => { renderAch(); achEl.hidden = false; });
+achEl.addEventListener('click', e => {
+  if (e.target.closest('.xbtn')) { achEl.hidden = true; return; }
+  const b = e.target.closest('button[data-i]'); if (!b) return;
+  const a = ACH[+b.dataset.i];
+  if (!achGot.has(a.id)) { sfx.deny(); b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); return; }   // 還沒達成：搖一下，提示就寫在格子裡
+  initAudio(); a.play();
+});
 // 小地圖：點地圖 icon 才展開，8 秒後自動收起
 let miniT = 0;
 // 靈界地圖：點地圖 icon（或角落的小地圖）直接滿版，一次只看「我在哪裡、下一站在哪」
@@ -484,6 +529,7 @@ function hud() {
       + (REAL.some(x => !x.tale && visited.has(x.id)) ? `<li class="sec">${t('secCulture')}</li>` + REAL.filter(x => !x.tale && visited.has(x.id)).map(x => ent('r:' + x.id, x.id, x.name, x.sub, x.text)).join('') : '')
       + sec(t('beauty'), SPOTS, x => x.found)
       + SPOTS.map(sp => sp.found ? ent('s:' + sp.id, sp.id, sp.name, sp.area, sp.text) : `<li class="lock open" data-k="xs:${sp.id}"><div class="t"><b>？？？</b><small>${sp.area.split(/・|, | · /)[0]}</small></div><i class="chev"></i></li>`).join('');
+    syncAch();
     $('#qi').textContent = t('qiOf', { n: avail(), cost: COST });
     $('#qibar').style.width = Math.min(100, avail() / COST * 100) + '%';
     const stars = n => ' ' + '★'.repeat(n.star);

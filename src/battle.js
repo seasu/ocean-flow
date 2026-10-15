@@ -190,6 +190,19 @@ function victory(node, done) {
   try { navigator.vibrate && navigator.vibrate([40, 50, 40, 50, 120]); } catch { }
   b.onclick = e => { e.stopPropagation(); vic.classList.remove('show'); el.classList.remove('show'); S = null; cancelAnimationFrame(raf); done && done(true); };
 }
+// 成就裡重播：只出淨化完成卡（不打仗、沒有獎勵），按「好」收起
+export function replayVictory(node) {
+  return new Promise(res => {
+    REWARD = []; el.classList.add('show', 'replay');
+    vic.querySelector('.vb').src = SPR[node.id]?.src || '';
+    vic.querySelector('h2').textContent = t('vicTitle');
+    vic.querySelector('.vs').textContent = node.boss ? t('vicBoss') : t('vicSub', { name: t('beast_' + node.id) });
+    vic.querySelector('.vrw').hidden = true;
+    const b = vic.querySelector('button'); b.textContent = t('vicOk');
+    vic.classList.add('show'); sfx.victory();
+    b.onclick = e => { e.stopPropagation(); vic.classList.remove('show'); el.classList.remove('show', 'replay'); res(); };
+  });
+}
 // 彩帶：金、青、粉的小方塊從上方灑下來
 function confetti(L) {
   const cols = ['#ffcf5a', '#7fe8ff', '#df86a6', '#ffffff', '#45a884'];
