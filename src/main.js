@@ -503,7 +503,7 @@ const avail = () => G.collected + (G.bonus || 0) - G.spent;
 let hudKey = '';
 function hud() {
   const found = SPOTS.filter(sp => sp.found).length;
-  const key = [Math.round(G.walked), visited.size, G.geo, G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, G.realm, Math.ceil(G.xiu), found].join();
+  const key = [Math.round(G.walked), visited.size, G.wildWins, G.geo, G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, G.realm, Math.ceil(G.xiu), found].join();
   if (key !== hudKey) {
     hudKey = key;
     $('#lv').textContent = REALMS[G.realm];
@@ -512,7 +512,9 @@ function hud() {
     $('#meSteps').textContent = t('stepsN', { n: steps.toLocaleString() });
     $('#meDist').textContent = G.geo ? t('meDist', { d: fmt(G.walked) }) : '';
     $('#meXiu').textContent = xiuLine();
-    $('#meGrid').innerHTML = [[t('meSeals'), `${G.awakened}/${S1.length + S2.length}`], [t('meQi'), avail()], [t('beauty'), `${found}/${SPOTS.length}`], [t('meChances'), visited.size]]
+    // 跟著現在的玩法：淨化了幾隻守門獸（四獸＋三流）、城市故事（只在現世）、打贏幾次濁影、手上的靈光
+    const tales = TALES.filter(x => visited.has(x.id)).length;
+    $('#meGrid').innerHTML = [[t('meBeasts'), `${G.awakened}/${S1.length + S2.length}`], [t('meTales'), G.geo ? `${tales}/${TALES.length}` : `<span class="na">${t('meGeoOnly')}</span>`], [t('meWilds'), G.wildWins || 0], [t('meQi'), avail()]]
       .map(([k, v]) => `<li><small>${k}</small><b>${v}</b></li>`).join('');
     // 圖鑑總數：靈門、城市故事（現世）與台灣地景
     const dn = G.awakened + (G.geo ? TALES.filter(x => visited.has(x.id)).length : 0) + found, dm = S1.length + S2.length + (G.geo ? TALES.length : 0) + SPOTS.length;
@@ -890,12 +892,12 @@ function updateWilds(dt) {
 }
 function wildFight(w) {
   G.wildCd = 8; w.chase = false;
-  if (params.has('nobattle')) { w.gone = 45; G.bonus += WILD_GAIN; return; }
+  if (params.has('nobattle')) { w.gone = 45; G.bonus += WILD_GAIN; G.wildWins = (G.wildWins || 0) + 1; return; }
   const node = { id: w.kind, wild: true, star: 1, name: t('wildName', { beast: t('beast_' + w.kind) }) };
   G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show'); sfx.battle(true);
   battle(node, G.realm, REALMS[G.realm], [t('rwLight', { n: WILD_GAIN })]).then(ok => {
     sfx.battle(false); G.state = 'play'; $('#hud').classList.add('play', 'on'); G.wildCd = 8;
-    if (ok) { xiDance(); w.gone = 45; G.bonus += WILD_GAIN; burst(w.x, ground(w.x, w.z) + 1.5, w.z, [1, 0.85, 0.5], 40, 5); pop(t('wildWin', { n: WILD_GAIN }), 'gold'); }
+    if (ok) { xiDance(); w.gone = 45; G.bonus += WILD_GAIN; G.wildWins = (G.wildWins || 0) + 1; burst(w.x, ground(w.x, w.z) + 1.5, w.z, [1, 0.85, 0.5], 40, 5); pop(t('wildWin', { n: WILD_GAIN }), 'gold'); }
     else {
       const loss = Math.min(WILD_LOSS, avail()); G.bonus -= loss;
       // 被打退：往後退幾步，濁影也先離開
