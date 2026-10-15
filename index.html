@@ -235,6 +235,21 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #lore .facts small{display:block;margin:0;font-size:14px;letter-spacing:.04em;color:var(--dim);opacity:1;transform:none}
 #lore .facts b{display:block;margin-top:2px;font-size:19px;letter-spacing:0;color:#fff;font-weight:900;opacity:1;transform:none}
 #lore .dots{display:flex;gap:8px}
+/* 橫向：圖放左邊、文字放右邊 */
+@media (orientation: landscape) and (min-aspect-ratio: 5/4){
+  #lore section:has(>img,>.emblem){display:grid;grid-template-columns:auto minmax(0,30em);grid-auto-rows:min-content;column-gap:clamp(24px,5vw,56px);align-content:safe center;justify-content:center;text-align:left;
+    padding-left:calc(24px + var(--sl));padding-right:calc(72px + var(--sr))}
+  #lore section:has(>img,>.emblem)>:is(img,.emblem){grid-column:1;grid-row:1/span 8;align-self:center;width:min(36vw,62vh,320px)}
+  #lore section:has(>img,>.emblem)>:not(img,.emblem){grid-column:2;justify-self:start}
+  #lore section:has(>img,>.emblem){padding-top:calc(20px + var(--st));padding-bottom:8px}
+  #lore section:has(>img,>.emblem) h2{font-size:clamp(26px,3.6vw,34px);margin:4px 0 2px}
+  #lore section:has(>img,>.emblem) small{margin-top:0}
+  #lore section:has(>img,>.emblem) blockquote{margin-top:10px;font-size:17px}
+  #lore section:has(>img,>.emblem) p{margin-top:8px;font-size:16px;line-height:1.7}
+  #lore section:has(>img,>.emblem) .facts{margin-top:12px}
+  #lore section:has(>img,>.emblem) .facts li{padding:8px 12px}
+  #lore section:has(>img,>.emblem) .facts{justify-self:stretch}
+}
 #lore .dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.28);transition:background .3s,transform .3s;cursor:pointer}
 html:not([lang^=zh]) #lore b,html:not([lang^=zh]) #lore small{letter-spacing:.06em}
 html:not([lang^=zh]) #lore h2{letter-spacing:.02em}
