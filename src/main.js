@@ -377,11 +377,25 @@ const guideEl = $('#guide'), guideArrow = guideEl.querySelector('i'), guideText 
 // 任務卡、雷達、靈界地圖都有「導航」（Google 地圖）和「指引」（靈界方向箭頭）
 // 主畫面的箭頭跟著角色走：量的是島上目標的步數；真實世界的距離和方向看雷達
 // 指引永遠跟著任務卡現在那一項走：第一階下一座門 → 城市故事（最近還沒去的那個，只在現世）→ 第二階（現世取最近的那一處）→ 台北靈門
+// 第三階三流沿途的台灣之美：城＝台北 101；海＝龜山島、黑潮、鵝鑾鼻；山＝玉山、阿里山、日月潭、太魯閣
+const FLOW_SPOTS = { city: ['101'], sea: ['turtle', 'kuroshio', 'kenting'], peak: ['yushan', 'alishan', 'sunmoon', 'taroko'] };
+const spotPos = sp => [sp.pos[0] + 0.5, 0, sp.pos[1] + 0.5];
+const flowSpots = n => (FLOW_SPOTS[n.id] || []).map(id => SPOTS.find(sp => sp.id === id));
 function guideTarget() {
   if (talesStage()) { const s = radarTarget(); if (s) return { name: s.name, real: s }; }
-  if (!G.gateOpen && stage1Done() && G.geo) {
-    const s = radarTarget(), n = s && NODES.find(m => m.id === s.node && !m.awake);
-    if (n) return { name: n.name, pos: n.pos };
+  if (!G.gateOpen && stage1Done()) {
+    let n;
+    if (G.geo) { const s = radarTarget(); n = s && NODES.find(m => m.id === s.node && !m.awake); }
+    n = n || nextGate();
+    if (n) {
+      // 喚醒三流時順便帶去沿途還沒收的台灣之美：境界還不夠時先去最近的地景（邊走邊修行）；
+      // 境界夠了就往這一流走，但這一流的地景比門還近時先繞過去
+      const d = p => Math.hypot(p[0] - P.x, p[2] - P.z), left = sp => !sp.found;
+      const pool = G.realm < REQ ? S2.filter(m => !m.awake).flatMap(flowSpots).filter(left) : flowSpots(n).filter(left);
+      const sp = pool.sort((a, b) => d(spotPos(a)) - d(spotPos(b)))[0];
+      if (sp && (G.realm < REQ || d(spotPos(sp)) < d(n.pos))) return { name: t('beauty') + t('sep') + sp.name, pos: spotPos(sp), spot: true };
+      return { name: n.name, pos: n.pos };
+    }
   }
   const n = nextGate();
   return n ? { name: n.name, pos: n.pos } : { name: t('gateName'), pos: GATE };
@@ -464,7 +478,7 @@ function xiuLine() {
 // 現世走路帶動靈界：離真實目的地近了幾成，阿流就在島上朝下一座門走幾成，真的走到時島上也剛好到門前
 let sync = null;
 function syncIsland(p) {
-  const tg = radarTarget(), it = guideTarget(); if (!tg || tg.tale || !it.pos || G.state === 'title') return;
+  const tg = radarTarget(), tn = tg && NODES.find(n => n.id === tg.node), it = tn ? { pos: tn.pos } : guideTarget(); if (!tg || tg.tale || !it.pos || G.state === 'title') return;
   const d = meters(p, tg), key = tg.id + (geo.sim ? 's' : 'g');
   const left = () => Math.max(0, Math.hypot(it.pos[0] - P.x, it.pos[2] - P.z) - 2.4);
   if (!sync || sync.key !== key || Math.abs(d - sync.last) > 250) { sync = { key, d0: Math.max(d, 30), f: 0, L0: left(), last: d }; G.auto = 0; return; }
@@ -549,7 +563,7 @@ function hud() {
       head = t('stage2Head'); $('#qchips').innerHTML = dots(S2);
       title = G.realm < REQ ? t('train2', { realm: REALMS[REQ] }) : t('wake2');
       sub = G.realm < REQ ? xiuLine() : left.map(n => G.geo ? placeOf(n) : n.name).join(t('list'));
-      $('#qlist').innerHTML = S2.map(n => `<li class="${n.awake ? 'done' : G.realm >= REQ ? '' : 'wait'}"><span>${n.awake ? '✓' : n.icon}</span>${n.seal}${t('sep')}${n.name}${stars(n)}<small>${n.awake ? n.virtue : (G.realm < REQ ? t('needRealmShort', { realm: REALMS[REQ], now: REALMS[G.realm] }) + t('sep') : '') + (G.geo ? t('questGeo', { place: placeOf(n), hill: n.hill }) : n.hill)}</small></li>`).join('')
+      $('#qlist').innerHTML = S2.map(n => `<li class="${n.awake ? 'done' : G.realm >= REQ ? '' : 'wait'}"><span>${n.awake ? '✓' : n.icon}</span>${n.seal}${t('sep')}${n.name}${stars(n)}<small>${n.awake ? n.virtue : (G.realm < REQ ? t('needRealmShort', { realm: REALMS[REQ], now: REALMS[G.realm] }) + t('sep') : '') + (G.geo ? t('questGeo', { place: placeOf(n), hill: n.hill }) : n.hill)}${FLOW_SPOTS[n.id] ? `<em class="fs">${t('flowSpots', { list: flowSpots(n).map(sp => (sp.found ? '✓' : '') + sp.name).join(t('list')) })}</em>` : ''}</small></li>`).join('')
         + `<li class="note">${t('questNote2', { cost: COST, realm: REALMS[REQ] })}</li><li class="note">${xiuLine()}</li>`;
     } else if (!G.gateOpen) {
       const n = nextGate();
@@ -1130,7 +1144,7 @@ let spotData = null;
 function showCard(title, sub, text, em, key) {
   // 地標標籤：一行名字＋地區，點了才開滿版介紹；沒點就自己淡出
   const c = $('#card'), d = key && spotInfo(key);
-  spotData = { title, sub, text, em, d };
+  spotData = { title, sub, text, em, d, key };
   c.querySelector('b').textContent = title; c.querySelector('small').textContent = sub;
   c.classList.add('show');
   clearTimeout(showCard.t); showCard.t = setTimeout(() => c.classList.remove('show'), 12000);
@@ -1161,7 +1175,35 @@ function openSpot() {
     a.textContent = t('creditLink', { name: dl.name || d.name }); cr.append(t('creditPre'), a, t('creditPost'));
   }
   spotEl.hidden = false; spotEl.scrollTop = 0;
+  setupRead(spotData.key);
 }
+// 讀完有獎：滑到介紹最下面（而且至少看了幾秒）就能領靈光，每個地點一次
+const READ_GAIN = 1, readGot = new Set(), readBtn = spotEl.querySelector('.readrw');
+let readKey = null, readT0 = 0, readTimer = 0;
+function readState(s) {
+  readBtn.className = 'readrw' + (s === 'lock' ? '' : ' ' + s); readBtn.disabled = s !== 'ready';
+  readBtn.querySelector('b').textContent = t(s === 'got' ? 'readGot' : s === 'ready' ? 'readTake' : 'readLock', { n: READ_GAIN });
+  readBtn.querySelector('small').textContent = t(s === 'got' ? 'readGotSub' : s === 'ready' ? 'readTakeSub' : 'readLockSub', { n: READ_GAIN });
+}
+function setupRead(key) {
+  clearTimeout(readTimer); readKey = key || null;
+  readBtn.hidden = !readKey || G.state === 'title';
+  if (readBtn.hidden) return;
+  readT0 = performance.now(); readState(readGot.has(readKey) ? 'got' : 'lock');
+  readTimer = setTimeout(checkRead, 3200);   // 內容很短、不用滑也能看完的，看幾秒後也算讀完
+}
+function checkRead() {
+  if (!readKey || readGot.has(readKey) || readBtn.classList.contains('ready') || spotEl.hidden) return;
+  const r = readBtn.getBoundingClientRect(), seen = r.bottom <= innerHeight + 4;
+  if (seen && performance.now() - readT0 > 3000) { readState('ready'); sfx.sense(); }
+  else if (seen) { clearTimeout(readTimer); readTimer = setTimeout(checkRead, 3000 - (performance.now() - readT0) + 50); }
+}
+spotEl.addEventListener('scroll', checkRead, { passive: true });
+readBtn.addEventListener('click', () => {
+  if (!readBtn.classList.contains('ready')) return;
+  readGot.add(readKey); G.bonus += READ_GAIN; readState('got');
+  sfx.pick(); setTimeout(() => sfx.pick(), 120); pop(t('readPop', { n: READ_GAIN }), 'gold');
+});
 spotPh.addEventListener('scroll', () => { const k = Math.round(spotPh.scrollLeft / spotPh.clientWidth); spotDots.querySelectorAll('i').forEach((el, n) => el.classList.toggle('on', n === k)); }, { passive: true });
 $('#dexList').addEventListener('click', e => {
   const li = e.target.closest('li[data-k]'); if (!li) return;
@@ -1173,6 +1215,7 @@ $('#dexList').addEventListener('click', e => {
   else if (kind === 'xt') { const x = TALES.find(r => r.id === id), area = x.sub.split('・')[1]; spotData = { title: '？？？', sub: area, text: t('lockedTale', { area }), em: '', d: null }; }
   else if (kind === 'r') { const x = REAL.find(r => r.id === id); spotData = { title: x.name, sub: x.sub, text: x.text, em: '', d }; }
   else { const sp = SPOTS.find(q => q.id === id); spotData = { title: sp.name, sub: sp.area, text: sp.text, em: '', d }; }
+  if (kind[0] !== 'x') spotData.key = id;   // 還沒解鎖的不能領
   openSpot();
 });
 spotEl.querySelector('.xbtn').addEventListener('click', () => { spotEl.hidden = true; });
