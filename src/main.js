@@ -1029,14 +1029,32 @@ function inRange() {
 }
 function fmt(d) { return d < 1000 ? t('meters', { n: Math.round(d) }) : t('km', { n: (d / 1000).toFixed(1) }); }
 function renderList() {
-  const tg = radarTarget(), items = REAL.filter(shown).map(s => ({ s, d: meters(geo.pos, s) })).sort((a, b) => (b.s === tg) - (a.s === tg) || a.d - b.d);   // 目的地排第一
-  const html = items.map(({ s, d }) => {
-    const done = visited.has(s.id), node = s.node ? NODES.find(n => n.id === s.node) : null;
+  // 依階段分組、照要走的順序編號：第一階四門 → 第二階城市故事 → 第三階三流 → 終點
+  const tg = radarTarget(), atNode = n => REAL.find(r => r.node === n.id);
+  const cur = !stage1Done() ? 0 : talesStage() ? 1 : 2;
+  const groups = [
+    { h: t('stage1Head'), list: S1.map(atNode) },
+    { h: t('talesHead'), list: TALES.filter(shown), lock: !stage1Done() },
+    { h: t('stage2Head'), list: S2.map(atNode), lock: cur < 2 },
+    { h: t('rFinish'), list: REAL.filter(s => s.id === 'venue'), fin: true },
+  ];
+  const used = new Set(groups.flatMap(g => g.list.filter(Boolean).map(s => s.id)));
+  const rest = REAL.filter(s => shown(s) && !used.has(s.id));
+  if (rest.length) groups.splice(3, 0, { h: t('rOther'), list: rest.sort((a, b) => meters(geo.pos, a) - meters(geo.pos, b)), free: true });
+  const row = (s, no) => {
+    const d = meters(geo.pos, s), done = visited.has(s.id), node = s.node ? NODES.find(n => n.id === s.node) : null;
     const tag = s.tale ? (done ? t('taleFound') : t('taleTag')) : s.id === 'venue' ? (G.gateOpen ? t('canOpen') : t('startEnd')) : node ? (node.awake ? t('opened', { icon: node.icon, name: node.name }) : node === nextGate() ? `${node.seal}${t('sep')}${node.icon} ${node.name}` : node.seal + t('sep') + node.name) : done ? t('bound') : t('chance');
-    return `<li data-id="${s.id}" class="${done ? 'done' : ''} ${d <= s.r ? 'near' : ''} ${node ? 'key' : ''} ${s === tg ? 'target' : ''}"><div><b>${s.name}</b><small>${s.sub}</small></div>`
-      + `<span><em>${tag}</em>${t('distDir', { d: fmt(d), dir: dirFor(s) })}</span>`
+    const ok = node ? node.awake : done;
+    return `<li data-id="${s.id}" class="${done ? 'done' : ''} ${d <= s.r ? 'near' : ''} ${node ? 'key' : ''} ${s === tg ? 'target' : ''}">`
+      + (no ? `<i class="no${ok ? ' ok' : ''}">${ok ? '✓' : no}</i>` : '') + `<div><b>${s.name}</b><em>${tag}</em><small>${t('distDir', { d: fmt(d), dir: dirFor(s) })}</small></div>`
       + (s.id === 'venue' && d <= s.r ? '' : `<a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}&travelmode=walking"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>${t('navGo')}</a>`)
       + (calib ? `<button data-cal="${s.id}">${t('setHere')}</button>` : '') + `</li>`;
+  };
+  const html = groups.map((g, gi) => {
+    const list = g.list.filter(Boolean), isCur = gi === cur && !g.fin && !g.free;
+    const doneN = list.filter(s => s.node ? NODES.find(n => n.id === s.node)?.awake : visited.has(s.id)).length;
+    const head = `<li class="sec${isCur ? ' cur' : ''}${g.lock ? ' lock' : ''}"><b>${g.h}</b>${g.fin || g.free ? '' : `<small>${g.lock ? t('rLocked') : `${doneN}/${list.length}`}</small>`}</li>`;
+    return head + (g.lock ? '' : list.map((s, i) => row(s, g.fin || g.free ? 0 : i + 1)).join(''));   // 還沒開的階段只留標題
   }).join('');
   if (html !== renderList.html) { renderList.html = html; $('#rlist').innerHTML = html; }   // 沒變就不重畫，點擊才不會被吃掉
   if (calib) $('#calOut').textContent = JSON.stringify(Object.fromEntries(REAL.map(s => [s.id, [+s.lat.toFixed(6), +s.lng.toFixed(6)]])));
@@ -1045,7 +1063,7 @@ $('#rlist').addEventListener('click', e => {
   const cal = e.target.closest('[data-cal]');
   if (cal) { const s = REAL.find(x => x.id === cal.dataset.cal), p = geo.real || geo.pos; s.lat = p.lat; s.lng = p.lng; saveSpot(s); renderList(); toast(t('setDone', { name: s.name })); return; }
   if (e.target.closest('a.nav')) return;
-  const li = e.target.closest('li'); if (!li) return;
+  const li = e.target.closest('li[data-id]'); if (!li) return;
   const s = REAL.find(x => x.id === li.dataset.id);
   if (geo.sim) geo.walkTo(s); else toast(t('walkThere', { name: s.name, dir: dirFor(s), d: fmt(meters(geo.pos, s)) }));
 });

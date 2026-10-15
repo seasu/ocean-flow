@@ -356,6 +356,14 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
 #rlist li span{text-align:right;font-size:14px;color:#cfe0ee;white-space:nowrap}
 #rlist li em{display:block;font-style:normal;font-size:13px;color:var(--dim)}
 #rlist li.key em{color:var(--cyan)}#rlist li.done em{color:var(--gold)}
+#rlist li.sec{cursor:default;background:none;padding:14px 4px 2px;justify-content:flex-start;align-items:baseline;gap:10px}
+#rlist li.sec b{font-size:18px;color:#dfeaf3;letter-spacing:.06em}#rlist li.sec small{display:inline;font-size:15px;color:var(--dim)}
+#rlist li.sec.cur b{color:var(--gold)}#rlist li.sec.lock b{color:var(--dim)}
+#rlist li i.no{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:16px;font-weight:900;color:#dfeaf3;border:1.5px solid rgba(255,255,255,.4)}
+#rlist li i.no.ok{color:#0b1a2c;background:var(--gold);border-color:var(--gold)}
+#rlist li.target i.no{color:#0b1a2c;background:var(--gold);border-color:var(--gold)}
+#rlist li > div{flex:1}
+#rlist li > div em{display:block;font-size:15px;margin-top:2px}#rlist li > div small{font-size:15px;color:#cfe0ee}
 #rlist li.near{outline:2px solid var(--gold)}
 #rlist li.target{background:rgba(255,207,90,.12);box-shadow:inset 3px 0 0 var(--gold)}
 #rlist li a.nav{flex:none;display:flex;align-items:center;gap:4px;padding:8px 12px;border-radius:999px;font-size:15px;font-weight:900;color:#bff4ff;background:rgba(127,232,255,.12);border:1px solid rgba(127,232,255,.35);text-decoration:none}
