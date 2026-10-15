@@ -601,7 +601,7 @@ function start(mode) {
   if (G.geo) geo.start();
   say(G.geo ? GEO_LINES : LINES, () => {
     G.state = 'play'; $('#hud').classList.add('play'); XI.wave = false;
-    pop(t('firstSeal'), 'gold'); setTimeout(() => toast(t('xiuIntro')), 2600);
+    pop(t('firstSeal'), 'gold');
     // 不直接跳進雷達：讓雷達按鈕發光＋小提示，由玩家自己點開
     if (G.geo) setTimeout(nudgeRadar, 900);
   });
