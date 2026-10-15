@@ -78,6 +78,8 @@ const NODES = [
 ];
 localize(NODES);
 const S1 = NODES.filter(n => n.stage === 1), S2 = NODES.filter(n => n.stage === 2);
+// 守門獸圖（img/beasts/）：四獸山，加上第三階三流的龍、龜、熊
+const BEAST_IMG = { elephant: 'elephant', tiger: 'tiger', leopard: 'leopard', lion: 'lion', city: 'dragon', sea: 'turtle', peak: 'bear' };
 const REQ = 2;   // 第二階需要的境界（化流境）
 const stage1Done = () => S1.every(n => n.awake);
 // 第二階：台北城市故事（只在現世模式；島上模式直接跳過）
@@ -409,15 +411,20 @@ function hud() {
     $('#meXiu').textContent = xiuLine();
     $('#meGrid').innerHTML = [[t('meSeals'), `${G.awakened}/${S1.length + S2.length}`], [t('meQi'), avail()], [t('beauty'), `${found}/${SPOTS.length}`], [t('meChances'), visited.size]]
       .map(([k, v]) => `<li><small>${k}</small><b>${v}</b></li>`).join('');
-    $('#dexN').textContent = found; $('#dexSub').textContent = t('dexSub', { n: found, m: SPOTS.length });
+    // 圖鑑總數：靈門、城市故事（現世）與台灣地景
+    const dn = G.awakened + (G.geo ? TALES.filter(x => visited.has(x.id)).length : 0) + found, dm = S1.length + S2.length + (G.geo ? TALES.length : 0) + SPOTS.length;
+    $('#dexN').textContent = dn; $('#dexSub').textContent = t('dexSub', { n: dn, m: dm });
     // 已收集的項目可以點開，用景點介紹頁再看一次；有照片就放縮圖
     const ent = (k, key, title, sub, text) => { const im = spotInfo(key)?.images?.[0]?.file; return `<li class="open" data-k="${k}"><div class="t"><b>${title}</b><small>${sub}</small><p>${text}</p></div>${im ? `<img src="${im}" alt="">` : ''}<i class="chev"></i></li>`; };
-    const gate = n => n.awake ? ent('g:' + n.id, n.id, `${n.icon} ${n.name}${t('sep')}${n.hill}`, `${n.seal}${t('sep')}${n.virtue}`, n.info) : `<li class="lock open" data-k="xg:${n.id}"><div class="t"><b>${n.icon} ？？？</b><small>${n.seal}</small></div><i class="chev"></i></li>`;
-    $('#dexList').innerHTML = `<li class="sec">${t('secMountain')}</li>` + S1.map(gate).join('')
-      + (stage1Done() && G.geo ? `<li class="sec">${t('secTales')}</li>` + TALES.map(s => visited.has(s.id) ? ent('t:' + s.id, s.id, s.name, s.sub, s.text) : `<li class="lock open" data-k="xt:${s.id}"><div class="t"><b>？？？</b><small>${s.sub.split('・')[1]}</small></div><i class="chev"></i></li>`).join('') : '')
-      + (stage1Done() && talesDone() ? `<li class="sec">${t('secFlows')}</li>` + S2.map(gate).join('') : '')
-      + (visited.size ? `<li class="sec">${t('secCulture')}</li>` + REAL.filter(x => !x.tale && visited.has(x.id)).map(x => ent('r:' + x.id, x.id, x.name, x.sub, x.text)).join('') : '')
-      + `<li class="sec">${t('beauty')}</li>`
+    // 靈門用守門獸的小圖代替 emoji；還沒打開的只顯示剪影
+    const bimg = n => BEAST_IMG[n.id] ? `<img class="bi" src="img/beasts/${BEAST_IMG[n.id]}.png" alt="">` : '';
+    const gate = n => n.awake ? ent('g:' + n.id, n.id, `${bimg(n)}${n.name}${t('sep')}${n.hill}`, `${t('beast_' + n.id)}${t('sep')}${n.seal}${t('sep')}${n.virtue}`, n.info) : `<li class="lock open" data-k="xg:${n.id}"><div class="t"><b>${bimg(n)}？？？</b><small>${n.seal}</small></div><i class="chev"></i></li>`;
+    const sec = (label, list, ok) => `<li class="sec">${label}<em>${list.filter(ok).length}/${list.length}</em></li>`;
+    $('#dexList').innerHTML = sec(t('secMountain'), S1, n => n.awake) + S1.map(gate).join('')
+      + (stage1Done() && G.geo ? sec(t('secTales'), TALES, x => visited.has(x.id)) + TALES.map(s => visited.has(s.id) ? ent('t:' + s.id, s.id, s.name, s.sub, s.text) : `<li class="lock open" data-k="xt:${s.id}"><div class="t"><b>？？？</b><small>${s.sub.split('・')[1]}</small></div><i class="chev"></i></li>`).join('') : '')
+      + (stage1Done() && talesDone() ? sec(t('secFlows'), S2, n => n.awake) + S2.map(gate).join('') : '')
+      + (REAL.some(x => !x.tale && visited.has(x.id)) ? `<li class="sec">${t('secCulture')}</li>` + REAL.filter(x => !x.tale && visited.has(x.id)).map(x => ent('r:' + x.id, x.id, x.name, x.sub, x.text)).join('') : '')
+      + sec(t('beauty'), SPOTS, x => x.found)
       + SPOTS.map(sp => sp.found ? ent('s:' + sp.id, sp.id, sp.name, sp.area, sp.text) : `<li class="lock open" data-k="xs:${sp.id}"><div class="t"><b>？？？</b><small>${sp.area.split(/・|, | · /)[0]}</small></div><i class="chev"></i></li>`).join('');
     $('#qi').textContent = t('qiOf', { n: avail(), cost: COST });
     $('#qibar').style.width = Math.min(100, avail() / COST * 100) + '%';
