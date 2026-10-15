@@ -671,7 +671,9 @@ if (showA2hs) {
 // Android Chrome 會給安裝事件，可以直接跳出「安裝」視窗
 addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; const b = launch.querySelector('.install'); b.hidden = false; launch.querySelector('.a2hs p').textContent = t('tipHomeAndroid'); });
 launch.querySelector('.install').addEventListener('click', async e => { e.stopPropagation(); if (!installEvt) return; installEvt.prompt(); await installEvt.userChoice.catch(() => { }); installEvt = null; e.target.hidden = true; });
-if (!params.has('play') && !params.has('geo') && !params.has('demo') && (wantFilm || (showA2hs && !a2hsShown))) {
+// 已從主畫面開啟（獨立模式）：跳過開場提醒和介紹影片，直接到「啟程」主畫面（影片之後還能從選單看）
+if (standalone) launch.classList.remove('show');
+else if (!params.has('play') && !params.has('geo') && !params.has('demo') && (wantFilm || (showA2hs && !a2hsShown))) {
   launch.classList.add('show');
   if (!wantFilm) launch.querySelector('.tip').hidden = true;
   launch.querySelector('.go').addEventListener('click', () => {
