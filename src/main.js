@@ -974,6 +974,8 @@ function updateGame(dt) {
     if (Math.abs(P.x - GATE[0]) < 2.6 && Math.abs(P.z - GATE[2]) < 2.2) act = G.bossDone ? { key: 'gate', text: t('finalHere'), btn: t('finalGo'), fn: ending } : { key: 'boss', text: t('bossHere'), btn: t('bossGo'), fn: bossFight };
   }
   for (const c of CHAPS) if (Math.hypot(c.x - P.x, c.z - P.z) < 8 && Math.abs(P.y - c.y) < 12) act = { key: 'ch' + c.i, text: t('chapLocked', { no: c.no, name: c.name }), btn: t('chapRead'), fn: () => openLore(c.i) };
+  // 現世：走進機緣範圍時，主畫面直接出現進入按鈕（不用先打開雷達）
+  if (G.geo && !act) { const s = inRange(); if (s && s.id !== 'venue') act = { key: 'enc:' + s.id, text: t('encSensed', { name: s.name }), btn: t('enter'), fn: () => encounter(s) }; }
   setAct(G.state === 'play' ? act : null);
   // 感知
   G.sense = Math.max(0, G.sense - dt); G.senseCd = Math.max(0, G.senseCd - dt);
@@ -1188,7 +1190,14 @@ geo.on(() => {
   const s = inRange();
   if (s && s !== lastNear) { sfx.sense(); try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch { } }
   lastNear = s;
+  // 四獸靈門還沒開完時，城市故事還沒浮現；走到了也要說一聲，不然會以為壞掉
+  if (!stage1Done()) {
+    const tl = TALES.find(x => !visited.has(x.id) && meters(geo.pos, x) <= x.r);
+    if (tl && tl !== lastTale && G.state === 'play') { toast(t('taleLater', { name: tl.name })); sfx.sense(); }
+    lastTale = tl;
+  }
 });
+let lastTale = null;
 function drawRadar() {
   const css = rcv.clientWidth, d = Math.min(devicePixelRatio || 1, 2), W = Math.round(css * d);
   if (rcv.width !== W) { rcv.width = rcv.height = W; }

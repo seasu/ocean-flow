@@ -383,6 +383,10 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
 .phead{width:min(520px,100%);flex:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .phead b{display:block;font-size:19px;font-weight:900;letter-spacing:.08em;color:#fff}
 .xbtn{flex:none;width:44px;height:44px;padding:0;display:grid;place-items:center}
+/* 全畫面頁面的關閉鈕：捲動時一直浮在右上角，不用捲回最上面才能關 */
+.phead{padding-right:56px}
+.phead .xbtn{position:fixed;z-index:6;top:calc(12px + var(--st));right:max(calc(16px + var(--sr)),calc((100vw - 520px) / 2));background:rgba(8,18,32,.62);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+#bigmap .phead .xbtn{position:static;background:rgba(255,255,255,.16)}
 .xbtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 #radar .rwrap{position:relative;flex:none;width:min(380px,calc(100vw - 32px),52vh);max-width:100%}
 #rcv{display:block;width:100%;aspect-ratio:1;touch-action:none}
