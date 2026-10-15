@@ -255,6 +255,32 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #lore .cast.beast img{border-radius:0;box-shadow:none;filter:drop-shadow(0 0 26px rgba(127,232,255,.28)) drop-shadow(0 12px 18px rgba(0,0,0,.5))}
 #lore .cast.wide img{height:auto;width:min(100%,520px)}
 #lore .ghost{margin-top:18px;flex:none;min-height:48px;padding:0 22px;border-radius:999px;border:1px solid rgba(255,207,90,.55);background:rgba(255,207,90,.1);color:var(--gold);font:inherit;font-size:16px;font-weight:800;letter-spacing:.06em}
+#quiz{position:fixed;inset:0;z-index:15;display:flex;flex-direction:column;align-items:center;gap:14px;color:#fff;
+  padding:calc(14px + var(--st)) calc(18px + var(--sr)) calc(20px + var(--sb)) calc(18px + var(--sl));background:radial-gradient(120% 80% at 50% 20%,#1b2b44,#05070d 75%);overflow-y:auto;animation:fadeIn .35s}
+#quiz[hidden]{display:none}
+#quiz .phead small{display:block;color:var(--gold);font-size:14px}
+#quiz .dots{display:flex;gap:8px}
+#quiz .dots i{width:28px;height:6px;border-radius:3px;background:rgba(255,255,255,.18)}
+#quiz .dots i.on{background:#bff4ff}#quiz .dots i.ok{background:var(--gold)}
+#quiz .body{width:min(520px,100%);flex:1;display:flex;flex-direction:column;justify-content:safe center;gap:14px}
+#quiz .card{padding:18px;border-radius:20px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+#quiz .card p{margin:0;font-size:17px;line-height:1.85;color:#e4eef8}
+#quiz .card em{display:block;margin-top:12px;font-style:normal;font-size:16px;line-height:1.7;color:#ffe2a0}
+#quiz .card small{color:var(--dim);font-size:14px;letter-spacing:.06em}
+#quiz .card h3{margin:6px 0 0;font-size:22px;line-height:1.5;font-weight:900;text-wrap:pretty}
+#quiz .opts{display:grid;gap:10px}
+#quiz .opts button{min-height:58px;padding:12px 18px;border-radius:16px;text-align:left;font:inherit;font-size:18px;font-weight:700;line-height:1.45;color:#fff;
+  background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.28);transition:background .2s,border-color .2s,transform .1s}
+#quiz .opts button:active{transform:scale(.98)}
+#quiz .opts button.ok{background:rgba(88,200,140,.32);border-color:#7ee2a8}
+#quiz .opts button.no{background:rgba(230,90,110,.22);border-color:#f08aa0;opacity:.75;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#quiz .hint{position:static;text-align:center;text-shadow:none;font-weight:400}#quiz .hint[hidden]{display:none}@media (max-height:480px){#quiz .hint{display:block}}
+#quiz .hint p{margin:0 0 10px;font-size:16px;color:#ffd0d8}
+#quiz .ghost{min-height:48px;padding:0 22px;border-radius:999px;border:1px solid rgba(255,207,90,.55);background:rgba(255,207,90,.1);color:var(--gold);font:inherit;font-size:16px;font-weight:800}
+#quiz .start{align-self:center;margin-top:4px;min-width:min(100%,280px);background:var(--gold);color:#0b1a2c;border:none;box-shadow:0 8px 24px rgba(255,207,90,.25)}
+#quiz .done{text-align:center}#quiz .done svg{width:64px;height:64px;color:var(--gold)}
+#quiz .done h3{font-size:30px;letter-spacing:.2em}#quiz .done p{margin-top:6px}
 #boardView{position:fixed;inset:0;z-index:16;background:rgba(3,6,12,.96);animation:fadeIn .3s}
 #boardView[hidden]{display:none}
 #boardView .x{position:absolute;z-index:2;top:calc(14px + var(--st));right:calc(14px + var(--sr))}
