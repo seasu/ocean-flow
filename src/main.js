@@ -1,7 +1,7 @@
 // 《洋流：起源》mobile web prototype：主迴圈、操作、任務流程
 import { M, clamp, lerp, rng, hex, mixColor, smooth } from './math.js';
 import { Renderer, Builder } from './gl.js';
-import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, portalMesh, bellMesh, beastMesh, N, S, WATER, T, PLACES, CURRENT, curX } from './world.js';
+import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, portalMesh, bellMesh, beastMesh, bossMesh, N, S, WATER, T, PLACES, CURRENT, curX } from './world.js';
 import { drawAvatar, BLUE, ORANGE } from './avatar.js';
 import { initAudio, unlockAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
 import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
@@ -139,6 +139,7 @@ const motes = [];
 }
 // 濁影：被濁流附身的守門獸影子，在靈界地圖上遊蕩；靠近會追上來，碰到就開戰（贏 +靈光、輸 −靈光）
 const WILD_KINDS = ['tiger', 'leopard', 'lion', 'elephant'], WILD_N = 5, WILD_GAIN = 2, WILD_LOSS = 2;
+const bossM = r.mesh(bossMesh());
 const wildMesh = Object.fromEntries(WILD_KINDS.map(k => [k, r.mesh(beastMesh(k))]));
 const wilds = [];
 const wildR = rng(11);
@@ -873,7 +874,7 @@ function unite() {
 function openGate() {
   G.gateOpen = true; G.gateT = 0; sfx.gate();
   pop(t('gateOpen'), 'gold');
-  XI.x = GATE[0] + 2.2; XI.z = GATE[2] - 2; XI.yaw = Math.PI; XI.wave = true;
+  XI.x = GATE[0] + 3.6; XI.z = GATE[2] - 3; XI.yaw = Math.PI; XI.wave = true;
   burst(GATE[0], GATE[1] + 3, GATE[2], [1, 0.9, 0.5], 90, 10);
   setTimeout(() => toast(G.geo ? t('xiGeo') : t('xiIsland')), 1500);
 }
@@ -1414,8 +1415,8 @@ function frame(dt) {
   // 濁淵：靈門打開後蹲在門前，淨化前一直在
   if (G.gateOpen && !G.bossDone) {
     const m = M.ident(), bz = GATE[2] - 1.6;
-    M.translate(m, GATE[0] + 0.5, ground(GATE[0] + 0.5, bz) + Math.sin(G.t * 1.5) * 0.1, bz); M.scale(m, 1.9, 1.9, 1.9);
-    r.draw(wildMesh.elephant, m, [0.3, 0.2, 0.45], 0.15 + 0.12 * Math.sin(G.t * 4));
+    M.translate(m, GATE[0] + 0.5, ground(GATE[0] + 0.5, bz) + Math.sin(G.t * 1.5) * 0.08, bz); M.scale(m, 1.45, 1.45, 1.45);
+    r.draw(bossM, m, [1, 1, 1], 0.06 + 0.06 * Math.sin(G.t * 4));
   }
   // 半透明：水、影子
   r.blend(1);
