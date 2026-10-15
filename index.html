@@ -612,12 +612,30 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 /* 七個故事歸來：七盞故事燈一盞盞亮起，到齊後一起放光 */
 #roar.tales{background:radial-gradient(ellipse at 50% 40%,rgba(20,44,70,.95),rgba(4,8,18,.98) 70%)}
 #roar.tales .pack{grid-template-columns:repeat(2,minmax(0,44vw));gap:14px 10px;margin-top:-8vh}#roar.tales .b6{grid-column:1/3;justify-self:center}
-#roar .lamp{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:18px;background:rgba(14,24,40,.6);border:1px solid rgba(255,207,90,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;min-width:0}
-#roar .lamp i{flex:none;width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px 3px rgba(255,207,90,.8)}
+#roar .lamp{opacity:0;min-width:0}
+#roar .pill{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:18px;background:rgba(14,24,40,.6);border:1px solid rgba(255,207,90,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#roar .lamp i{flex:none;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff6d0,var(--gold) 55%,#c98a10);box-shadow:0 0 12px 3px rgba(255,207,90,.8)}
 #roar .lamp b{font-size:16px;font-weight:800;line-height:1.25;color:#f3e7c8}
-#roar.go .lamp{animation:lampIn .6s cubic-bezier(.3,1.5,.5,1) var(--d) forwards,lampHit 1.4s ease-out var(--hit) 1}
+/* 1 亮起 → 2 字散成光、燈變金球 → 3 金球飛到中央 */
+#roar.go .lamp{animation:lampIn .6s cubic-bezier(.3,1.5,.5,1) var(--d) forwards,lampFly .75s cubic-bezier(.55,0,.75,.35) var(--f) forwards}
+#roar.go .pill{animation:pillFade .5s ease var(--ball) forwards}
+#roar.go .lamp b{animation:wordGo .5s ease var(--ball) forwards}
+#roar.go .lamp i{animation:ballGrow .5s ease var(--ball) forwards}
 @keyframes lampIn{0%{opacity:0;transform:translateY(30px) scale(.7)}100%{opacity:1;transform:none}}
-@keyframes lampHit{0%{opacity:1;box-shadow:none}30%{opacity:1;transform:scale(1.08);box-shadow:0 0 28px rgba(255,207,90,.8);border-color:var(--gold)}100%{opacity:1;transform:none;box-shadow:0 0 14px rgba(255,207,90,.35)}}
+@keyframes pillFade{to{background:transparent;border-color:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}}
+@keyframes wordGo{to{opacity:0;filter:blur(6px);letter-spacing:.4em;color:var(--gold)}}
+@keyframes ballGrow{to{transform:scale(1.9);box-shadow:0 0 22px 8px rgba(255,207,90,.85)}}
+@keyframes lampFly{0%{opacity:1;transform:none}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(.5)}}
+/* 書：線裝書，題簽寫書名；金球匯聚的那一刻出現 */
+#roar .book{position:absolute;left:50%;top:50%;width:min(46vw,200px);aspect-ratio:3/4;transform:translate(-50%,-50%) scale(.2);opacity:0}
+#roar.go .book{animation:bookIn .9s cubic-bezier(.2,1.4,.4,1) var(--hit) forwards,bookGlow 2.4s ease-in-out calc(var(--hit) + .9s) infinite}
+#roar .cv{position:absolute;inset:0;border-radius:4px 10px 10px 4px;background:linear-gradient(135deg,#1d3d5c,#0f2238 60%,#163250);border:2px solid var(--gold);
+  box-shadow:inset -10px 0 0 rgba(255,207,90,.12),6px 6px 0 -2px #e9dcb8,8px 8px 0 -2px rgba(255,207,90,.6)}
+#roar .cv em{position:absolute;top:10%;left:14%;width:26%;height:64%;display:flex;align-items:center;justify-content:center;background:#f3e7c8;border:2px solid var(--gold);border-radius:2px;
+  text-align:center;font-style:normal;font-size:clamp(20px,6.5vw,30px);font-weight:900;line-height:1.15;color:#3a2300}
+#roar .sew{position:absolute;right:8%;top:6%;bottom:6%;width:2px;background:repeating-linear-gradient(to bottom,var(--gold) 0 12%,transparent 12% 25%)}
+@keyframes bookIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-8deg);filter:brightness(3)}60%{opacity:1;transform:translate(-50%,-50%) scale(1.08) rotate(2deg);filter:brightness(1.6)}100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}}
+@keyframes bookGlow{0%,100%{filter:drop-shadow(0 0 16px rgba(255,207,90,.5))}50%{filter:drop-shadow(0 0 36px rgba(255,207,90,.95))}}
 @keyframes land{0%{opacity:0;transform:translateY(-60vh) scale(.6)}70%{opacity:1;transform:translateY(0) scale(1.05,.92)}100%{opacity:1;transform:none}}
 @keyframes howl{0%{opacity:1;transform:none}15%{opacity:1;transform:translateY(6px) scale(1.04,.94)}35%{opacity:1;transform:translateY(-14px) scale(1.18) rotate(-3deg);filter:brightness(1.35)}60%{opacity:1;transform:translateY(-8px) scale(1.14) rotate(3deg)}100%{opacity:1;transform:none}}
 @keyframes glow{0%,100%{filter:drop-shadow(0 0 14px rgba(255,207,90,.55))}50%{filter:drop-shadow(0 0 30px rgba(255,207,90,.95)) brightness(1.12)}}
@@ -628,7 +646,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 #roar .txt p{margin:0 auto;max-width:22em;font-size:17px;line-height:1.6;color:#e6eef6}
 #roar .tap{position:absolute;bottom:calc(5vh + var(--sb));left:0;right:0;text-align:center;font-size:15px;color:var(--dim);opacity:0}
 #roar.go .tap{animation:txtIn .5s ease calc(var(--hit) + 1.5s) forwards}
-@media (orientation:landscape){#roar .pack{grid-template-columns:repeat(4,minmax(0,20vw));margin-top:-18vh}#roar .beast img{max-height:42vh}#roar .txt{bottom:calc(10vh + var(--sb))}#roar h2{font-size:32px;margin-bottom:4px}#roar.flows .pack{grid-template-columns:repeat(3,minmax(0,24vw))}#roar.flows .b0{grid-column:auto;width:auto}#roar.tales .pack{grid-template-columns:repeat(4,minmax(0,22vw));margin-top:-14vh}#roar.tales .b6{grid-column:auto}}
+@media (orientation:landscape){#roar .pack{grid-template-columns:repeat(4,minmax(0,20vw));margin-top:-18vh}#roar .beast img{max-height:42vh}#roar .txt{bottom:calc(10vh + var(--sb))}#roar h2{font-size:32px;margin-bottom:4px}#roar.flows .pack{grid-template-columns:repeat(3,minmax(0,24vw))}#roar.flows .b0{grid-column:auto;width:auto}#roar.tales .pack{grid-template-columns:repeat(4,minmax(0,22vw));margin-top:-14vh}#roar.tales .b6{grid-column:auto}#roar .book{width:min(30vh,140px)}#roar .cv em{font-size:min(5vh,22px)}}
 </style>
 </head>
 <body>
