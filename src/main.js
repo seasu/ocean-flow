@@ -8,6 +8,7 @@ import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
 import { TALES } from './stories.js';
 import { quiz } from './quiz.js';
 import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
+import { roar } from './roar.js';
 import { battle } from './battle.js';
 import { openLore, openRealms, openCast, CH } from './lore.js';
 import { VERSION } from './version.js';
@@ -884,10 +885,9 @@ function awaken(n) {
 
 // 四獸共鳴：四座靈門的光同時升起，第二階城海山三流隨後開放
 function resonance() {
-  pop(t('resonance'), 'gold'); sfx.bell(146.8); setTimeout(() => sfx.bell(196), 220); setTimeout(() => sfx.bell(220), 440); setTimeout(() => sfx.bell(174.6), 660);
   for (const n of S1) { n.flash = 1; burst(n.pos[0], n.pos[1] + 2, n.pos[2], [1, 0.85, 0.45], 50, 9); }
-  try { navigator.vibrate && navigator.vibrate([60, 60, 60, 60, 160]); } catch { }
-  setTimeout(() => toast(G.geo ? t('talesOpen') : t('stage2Open', { realm: REALMS[REQ] })), 2600);
+  // 全畫面：四隻守門獸一起登場怒吼，收起後才告訴你第二階開了
+  roar(t('resSub')).then(() => setTimeout(() => toast(G.geo ? t('talesOpen') : t('stage2Open', { realm: REALMS[REQ] })), 400));
 }
 // 三流歸一：城、海、山三道光一起升起，台北靈門隨後開啟
 function unite() {
@@ -1567,4 +1567,4 @@ if (params.has('play') || params.has('at') || params.has('awake') || params.has(
     setTimeout(() => { pop(t('demoSet', { stage: t('demoStage')[cur - 1] }), 'gold'); setTimeout(() => toast(cur === 3 ? t('stage2Open', { realm: REALMS[REQ] }) : t('talesOpen')), 2200); }, 600);
   }
 }
-window.__game = { ending, GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
+window.__game = { resonance, ending, GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };

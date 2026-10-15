@@ -163,6 +163,26 @@ export const sfx = {
     [293.7, 329.6, 370, 440, 493.9, 587.3, 659.3, 740, 880, 987.8, 1174.7].forEach((f, i) => harp(f, 0.11, 0.15 + i * 0.055));
     [1174.7, 1480, 1760].forEach((f, i) => celesta(f, 0.07, 0.85 + i * 0.12));
   },
+  // 四獸齊吼：低沉鋸齒波帶粗糙的顫動（喉音），加上破音、氣聲與一記低頻重擊，尾音拖進殘響
+  roar() {
+    if (!ctx) return;
+    const t = ctx.currentTime, out = ctx.createGain(), ws = ctx.createWaveShaper(), lp = ctx.createBiquadFilter();
+    const k = 18, curve = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = i / 512 - 1; curve[i] = (1 + k) * x / (1 + k * Math.abs(x)); }
+    ws.curve = curve; lp.type = 'lowpass'; lp.frequency.setValueAtTime(500, t); lp.frequency.linearRampToValueAtTime(1600, t + 0.35); lp.frequency.exponentialRampToValueAtTime(400, t + 1.8);
+    out.gain.setValueAtTime(0.0001, t); out.gain.linearRampToValueAtTime(0.32, t + 0.12); out.gain.setValueAtTime(0.32, t + 0.9); out.gain.exponentialRampToValueAtTime(0.0001, t + 2.1);
+    ws.connect(lp); lp.connect(out); out.connect(fx); out.connect(master);
+    const am = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+    lfo.frequency.value = 26; lg.gain.value = 0.45; am.gain.value = 0.6; lfo.connect(lg); lg.connect(am.gain); am.connect(ws); lfo.start(t); lfo.stop(t + 2.2);
+    for (const [f0, f1] of [[82, 58], [123, 88], [61, 44]]) {
+      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(f0 * 0.8, t); o.frequency.linearRampToValueAtTime(f0, t + 0.25); o.frequency.exponentialRampToValueAtTime(f1, t + 2);
+      o.connect(am); o.start(t); o.stop(t + 2.2);
+    }
+    const n = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), ng = ctx.createGain();
+    n.buffer = noiseBuffer(2.2, false); bp.type = 'bandpass'; bp.frequency.value = 700; bp.Q.value = 0.9; ng.gain.value = 0.5;
+    n.connect(bp); bp.connect(ng); ng.connect(ws); n.start(t); n.stop(t + 2.2);
+    const b = ctx.createOscillator(), bg = ctx.createGain(); b.frequency.setValueAtTime(70, t); b.frequency.exponentialRampToValueAtTime(32, t + 0.8);
+    env(bg, t, 0.01, 0.5, 1.1); b.connect(bg); bg.connect(master); b.start(t); b.stop(t + 1.2);
+  },
   // 不行：低音撥弦兩下
   deny() { harp(146.8, 0.2); harp(138.6, 0.18, 0.14); },
   // 靈門開啟：豎琴刮奏＋弦樂和弦＋鐘
