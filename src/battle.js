@@ -30,6 +30,14 @@ const bar = el.querySelector('.bar i'), hpEl = el.querySelector('.hp');
 const msg = el.querySelector('.msg'), msgH = msg.querySelector('h3'), msgP = msg.querySelector('p'), msgB = msg.querySelector('button');
 
 let S = null, raf = 0, last = 0;
+// 四獸山的守門獸（設計圖：ocean-flow-origin/character-ref/beasts/）：被濁流纏住，淨化越多越露出原本的顏色
+const BEASTS = ['elephant', 'tiger', 'leopard', 'lion'];
+const SPR = {};
+for (const k of BEASTS) { const im = new Image(); im.src = `img/beasts/${k}.png`; SPR[k] = im; }
+const tint = document.createElement('canvas'), tg = tint.getContext('2d');
+// 下方是玩家自己的頭像
+const me = new Image();
+function loadMe() { let v = 'liu'; try { v = localStorage.getItem('of-avatar') || 'liu'; } catch { } me.src = v.startsWith('data:') ? v : `img/avatars/${v}.jpg`; }
 // 隨時可以離開：門不會開，之後再回來挑戰
 const quitB = el.querySelector('.quit');
 quitB.addEventListener('click', e => {
@@ -43,11 +51,12 @@ export function battle(node, lv = 0, realm = '') {
   return new Promise(resolve => {
     tries[node.id] = tries[node.id] || 0;
     el.classList.add('show');
-    el.querySelector('header b').textContent = `${node.icon} ${node.name} ${'★'.repeat(node.star || 1)}`;
+    el.querySelector('header b').textContent = `${node.name} ${'★'.repeat(node.star || 1)}`;
+    loadMe();
     start(node, lv, resolve); quitB.setAttribute('aria-label', t('battleQuit'));
     const make = gameOf(node);
     const note = lv ? '\n' + t('realmPower', { realm, p: lv * 20 }) : '';
-    showMsg(t('battleTitle', { name: node.name }), t('battleTip_' + node.id) + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
+    showMsg(SPR[node.id] ? t('battleBeast', { beast: t('beast_' + node.id) }) : t('battleTitle', { name: node.name }), t('battleTip_' + node.id) + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
     cancelAnimationFrame(raf); last = performance.now(); raf = requestAnimationFrame(tick);
   });
 }
@@ -165,45 +174,52 @@ function draw(L) {
   g.fillStyle = bg; g.fillRect(0, 0, w, h);
   g.save();
   if (S.shake) g.translate((Math.random() - 0.5) * 12 * S.shake, (Math.random() - 0.5) * 12 * S.shake);
-  // 濁流：一團旋轉的方塊，淨化越多越小、越亮；被打中時抖一下、閃白
-  // 受擊：往後一縮、壓扁再彈回，方塊被震開，核心閃白、眼睛瞇起來
-  const hu = S.hurt, kick = hu * hu, wob = Math.sin((1 - hu) * 14) * hu;
-  const jx = S.hitT ? (Math.random() - 0.5) * 8 : 0, n = 22, rad = L.er * (1 - p * 0.45) * (1 - win), cy = L.ey - kick * 12;
-  for (let i = 0; i < n; i++) {
-    const a = i / n * 6.283 + T * (0.6 + (i % 3) * 0.25), r = (rad * (0.35 + ((i * 37) % 10) / 14) + Math.sin(T * 2 + i) * 4) * (1 + kick * 0.45);
-    const x = L.ex + jx + Math.cos(a) * r, y = cy + Math.sin(a) * r * 0.7, sz = 8 + (i % 4) * 4 + Math.sin(T * 3 + i) * 2;
-    g.save(); g.translate(x, y); g.rotate(a + T);
-    const m = (i % 5) / 5;
-    g.fillStyle = S.hitT > 0.15 ? '#ffffff' : mix([58 + m * 30, 50 + m * 20, 86 + m * 30], [127, 232, 255], p * 0.8 + win);
-    g.globalAlpha = 0.85 * (1 - win); g.fillRect(-sz / 2, -sz / 2, sz, sz); g.restore();
+  const spr = SPR[S.node.id];
+  if (spr && spr.complete && spr.naturalWidth) drawBeast(L, spr, p, win, T);
+  else {
+    // 濁流：一團旋轉的方塊，淨化越多越小、越亮；被打中時抖一下、閃白
+    // 受擊：往後一縮、壓扁再彈回，方塊被震開，核心閃白、眼睛瞇起來
+    const hu = S.hurt, kick = hu * hu, wob = Math.sin((1 - hu) * 14) * hu;
+    const jx = S.hitT ? (Math.random() - 0.5) * 8 : 0, n = 22, rad = L.er * (1 - p * 0.45) * (1 - win), cy = L.ey - kick * 12;
+    for (let i = 0; i < n; i++) {
+      const a = i / n * 6.283 + T * (0.6 + (i % 3) * 0.25), r = (rad * (0.35 + ((i * 37) % 10) / 14) + Math.sin(T * 2 + i) * 4) * (1 + kick * 0.45);
+      const x = L.ex + jx + Math.cos(a) * r, y = cy + Math.sin(a) * r * 0.7, sz = 8 + (i % 4) * 4 + Math.sin(T * 3 + i) * 2;
+      g.save(); g.translate(x, y); g.rotate(a + T);
+      const m = (i % 5) / 5;
+      g.fillStyle = S.hitT > 0.15 ? '#ffffff' : mix([58 + m * 30, 50 + m * 20, 86 + m * 30], [127, 232, 255], p * 0.8 + win);
+      g.globalAlpha = 0.85 * (1 - win); g.fillRect(-sz / 2, -sz / 2, sz, sz); g.restore();
+    }
+    g.globalAlpha = 1 - win;
+    const cr = rad * 0.32 + 4, cx = L.ex + jx;
+    for (const q of S.rings) { g.globalAlpha = (1 - q.t / 0.5) * 0.7 * (1 - win); g.strokeStyle = '#bff4ff'; g.lineWidth = 3; g.beginPath(); g.ellipse(cx, cy, cr + q.t * 160, (cr + q.t * 160) * 0.75, 0, 0, 6.283); g.stroke(); }
+    g.globalAlpha = 1 - win;
+    g.save(); g.translate(cx, cy); g.scale(1 + wob * 0.22, 1 - wob * 0.22);
+    g.fillStyle = mix([20, 14, 34], [255, 207, 90], p); g.beginPath(); g.arc(0, 0, cr, 0, 6.283); g.fill();
+    if (S.hitT > 0.1) { g.globalAlpha = (1 - win) * S.hitT * 3; g.fillStyle = '#ffffff'; g.beginPath(); g.arc(0, 0, cr, 0, 6.283); g.fill(); g.globalAlpha = 1 - win; }
+    // 眼睛：平常會眨眼，被打中瞇成 > <，快被淨化時變得溫和
+    const ex = cr * 0.36, ey = -cr * 0.08, es = Math.max(2.5, cr * 0.13);
+    g.strokeStyle = g.fillStyle = mix([255, 120, 160], [255, 255, 255], p);
+    g.lineWidth = Math.max(2, es * 0.55); g.lineCap = 'round';
+    if (hu > 0.25) {
+      for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(sd * ex + es * sd, ey - es); g.lineTo(sd * ex - es * 0.3 * sd, ey); g.lineTo(sd * ex + es * sd, ey + es); g.stroke(); }
+    } else if (S.blink < 0) {
+      for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(sd * ex - es, ey); g.lineTo(sd * ex + es, ey); g.stroke(); }
+    } else {
+      for (const sd of [-1, 1]) { g.beginPath(); g.ellipse(sd * ex, ey, es, es * (1.25 - p * 0.5), 0, 0, 6.283); g.fill(); }
+    }
+    g.restore();
   }
-  g.globalAlpha = 1 - win;
-  const cr = rad * 0.32 + 4, cx = L.ex + jx;
-  for (const q of S.rings) { g.globalAlpha = (1 - q.t / 0.5) * 0.7 * (1 - win); g.strokeStyle = '#bff4ff'; g.lineWidth = 3; g.beginPath(); g.ellipse(cx, cy, cr + q.t * 160, (cr + q.t * 160) * 0.75, 0, 0, 6.283); g.stroke(); }
-  g.globalAlpha = 1 - win;
-  g.save(); g.translate(cx, cy); g.scale(1 + wob * 0.22, 1 - wob * 0.22);
-  g.fillStyle = mix([20, 14, 34], [255, 207, 90], p); g.beginPath(); g.arc(0, 0, cr, 0, 6.283); g.fill();
-  if (S.hitT > 0.1) { g.globalAlpha = (1 - win) * S.hitT * 3; g.fillStyle = '#ffffff'; g.beginPath(); g.arc(0, 0, cr, 0, 6.283); g.fill(); g.globalAlpha = 1 - win; }
-  // 眼睛：平常會眨眼，被打中瞇成 > <，快被淨化時變得溫和
-  const ex = cr * 0.36, ey = -cr * 0.08, es = Math.max(2.5, cr * 0.13);
-  g.strokeStyle = g.fillStyle = mix([255, 120, 160], [255, 255, 255], p);
-  g.lineWidth = Math.max(2, es * 0.55); g.lineCap = 'round';
-  if (hu > 0.25) {
-    for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(sd * ex + es * sd, ey - es); g.lineTo(sd * ex - es * 0.3 * sd, ey); g.lineTo(sd * ex + es * sd, ey + es); g.stroke(); }
-  } else if (S.blink < 0) {
-    for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(sd * ex - es, ey); g.lineTo(sd * ex + es, ey); g.stroke(); }
-  } else {
-    for (const sd of [-1, 1]) { g.beginPath(); g.ellipse(sd * ex, ey, es, es * (1.25 - p * 0.5), 0, 0, 6.283); g.fill(); }
-  }
-  g.restore();
   g.globalAlpha = 1;
   g.save(); S.game.draw(); g.restore();
-  // 守護獸
-  const glow = g.createRadialGradient(L.gx, L.gy, 4, L.gx, L.gy, 34 + win * 80);
+  // 下方：玩家頭像，光彈從這裡出發
+  const gr = 30 + win * 6;
+  const glow = g.createRadialGradient(L.gx, L.gy, 4, L.gx, L.gy, gr + 16 + win * 70);
   glow.addColorStop(0, `rgba(255,207,90,${0.5 + win * 0.4})`); glow.addColorStop(1, 'rgba(255,207,90,0)');
-  g.fillStyle = glow; g.beginPath(); g.arc(L.gx, L.gy, 34 + win * 80, 0, 6.283); g.fill();
-  g.font = '30px system-ui, "Apple Color Emoji", "Segoe UI Emoji"'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText(S.node.icon, L.gx, L.gy - win * 16);
+  g.fillStyle = glow; g.beginPath(); g.arc(L.gx, L.gy, gr + 16 + win * 70, 0, 6.283); g.fill();
+  if (me.complete && me.naturalWidth) {
+    g.save(); g.beginPath(); g.arc(L.gx, L.gy, gr, 0, 6.283); g.clip(); g.drawImage(me, L.gx - gr, L.gy - gr, gr * 2, gr * 2); g.restore();
+  }
+  g.strokeStyle = '#ffcf5a'; g.lineWidth = 2.5; g.beginPath(); g.arc(L.gx, L.gy, gr, 0, 6.283); g.stroke();
   for (const q of S.shots) { g.fillStyle = q.col; g.globalAlpha = 0.9; g.fillRect(q.x - 4, q.y - 4, 8, 8); }
   for (const q of S.fx) { g.globalAlpha = Math.min(1, q.life * 2); g.fillStyle = q.col; g.fillRect(q.x - 3, q.y - 3, 6, 6); }
   g.globalAlpha = 1;
@@ -251,3 +267,33 @@ const mix = (a, b, k) => { k = Math.max(0, Math.min(1, k)); return `rgb(${a.map(
 
 // 測試用
 window.__battle = { get: () => S && S.game, state: () => S };
+
+// 守門獸：濁流的暗紫色罩在身上，淨化越多越淡；被打中往後一縮、壓扁再彈回、閃白；淨化完成後金光一閃、原色現身
+function drawBeast(L, spr, p, win, T) {
+  const hu = S.hurt, kick = hu * hu, wob = Math.sin((1 - hu) * 14) * hu;
+  const sz = Math.min(L.er * 2.9, L.w * 0.62), cx = L.ex + (S.hitT ? (Math.random() - 0.5) * 8 : 0);
+  const cy = L.ey + Math.sin(T * 1.6) * 4 - kick * 12 - win * 10;
+  // 纏在身上的濁塊：淨化越多越少
+  const n = Math.round(18 * (1 - p)) , rad = sz * 0.5;
+  for (let i = 0; i < n; i++) {
+    const a = i / 18 * 6.283 + T * (0.5 + (i % 3) * 0.2), r = rad * (0.75 + ((i * 37) % 10) / 30) + Math.sin(T * 2 + i) * 4;
+    const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r * 0.55, s = 7 + (i % 4) * 3;
+    g.save(); g.translate(x, y); g.rotate(a + T); g.globalAlpha = 0.75 * (1 - win);
+    g.fillStyle = S.hitT > 0.15 ? '#ffffff' : '#3a2a56'; g.fillRect(-s / 2, -s / 2, s, s); g.restore();
+  }
+  g.globalAlpha = 1;
+  for (const q of S.rings) { g.globalAlpha = (1 - q.t / 0.5) * 0.6; g.strokeStyle = '#bff4ff'; g.lineWidth = 3; g.beginPath(); g.ellipse(cx, cy, sz * 0.3 + q.t * 160, (sz * 0.3 + q.t * 160) * 0.6, 0, 0, 6.283); g.stroke(); }
+  g.globalAlpha = 1;
+  // 淨化完成：背後一圈金光
+  if (win) { const gl = g.createRadialGradient(cx, cy, 10, cx, cy, sz * (0.5 + win * 0.4)); gl.addColorStop(0, `rgba(255,214,120,${0.7 * win})`); gl.addColorStop(1, 'rgba(255,214,120,0)'); g.fillStyle = gl; g.beginPath(); g.arc(cx, cy, sz, 0, 6.283); g.fill(); }
+  // 先在小畫布上把濁色、閃白疊上去，只蓋在身體上
+  const px = Math.round(sz * Math.min(2, devicePixelRatio || 1));
+  if (tint.width !== px) { tint.width = tint.height = px; }
+  tg.globalCompositeOperation = 'source-over'; tg.clearRect(0, 0, px, px); tg.drawImage(spr, 0, 0, px, px);
+  tg.globalCompositeOperation = 'source-atop';
+  const murk = (1 - p) * 0.62 * (1 - win);
+  if (murk > 0.01) { tg.fillStyle = `rgba(34,18,58,${murk})`; tg.fillRect(0, 0, px, px); }
+  if (S.hitT > 0.05) { tg.fillStyle = `rgba(255,255,255,${Math.min(0.7, S.hitT * 2.8)})`; tg.fillRect(0, 0, px, px); }
+  if (win) { tg.fillStyle = `rgba(255,220,140,${0.35 * Math.sin(win * 3.14)})`; tg.fillRect(0, 0, px, px); }
+  g.save(); g.translate(cx, cy + sz * 0.5); g.scale(1 + wob * 0.12, 1 - wob * 0.12); g.drawImage(tint, -sz / 2, -sz, sz, sz); g.restore();
+}

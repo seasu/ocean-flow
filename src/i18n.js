@@ -213,6 +213,8 @@ const S = {
   battleTip_city: ['城之回聲：城市的濁流最厚，還會張開護盾。護盾張開時先停手，散掉再狂點。', 'Echo of the City: the city murk is thickest and raises a shield. Stop while it is up, then tap like mad.', '街のこだま：街の濁流は一番厚く、シールドも張る。張っている間は手を止め、消えたら連打。'],
   battleTip_sea: ['海之流痕：洋流的符最繁複，光點還會隨浪飄動。', 'Trace of the Sea: the current sigils are the most complex, and the dots drift with the waves.', '海の流れ痕：海流の符は一番複雑で、光点は波に揺れる。'],
   battleTip_peak: ['山之鐘聲：六格數獨，多了石與月。山記得每一個回聲。', 'Bell of the Mountain: a 6×6 sudoku with stone and moon added. The mountain remembers every echo.', '山の鐘の音：6×6 の数独。石と月が加わる。山はすべてのこだまを覚えている。'],
+  battleBeast: ['{beast}被濁流纏住了', 'The {beast} is bound by the Murk', '{beast}が濁流に絡まれている'],
+  beast_elephant: ['象靈', 'Elephant Spirit', '象霊'], beast_tiger: ['虎靈', 'Tiger Spirit', '虎霊'], beast_leopard: ['豹靈', 'Leopard Spirit', '豹霊'], beast_lion: ['獅靈', 'Lion Spirit', '獅霊'],
   battleTitle: ['濁流擋住了{name}', 'Murk blocks the {name}', '濁流が{name}をふさいでいる'],
   battleTip_tiger: ['虎門・爆發：連點！越快越痛，集滿爆發放出虎爪。', 'Tiger · Power: tap fast! Faster hits hurt more. Fill the power bar to unleash the Tiger Claw.', '虎門・爆発：連打！速いほど強い。爆発ゲージをためて虎の爪を放とう。'],
   battleTip_leopard: ['豹門・敏捷：畫符結印。照數字順序一筆畫完，四道符淨化濁流。', 'Leopard · Agility: draw the sigils. Connect the dots in order in one stroke; four sigils purify the murk.', '豹門・敏捷：符を描く。番号の順に一筆で結び、四つの符で濁流を浄化する。'],
