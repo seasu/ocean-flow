@@ -352,6 +352,7 @@ geo.on(p => {
   const d = meters(anchor, p);
   if (d < Math.max(4, acc * 0.5)) return;
   // 真實定位時速度超過每秒 3.5 公尺（騎車、搭車）不算修為
+  walkFold();
   if (geo.sim || d / ((now - anchor.ts) / 1000) < 3.5) gainXiu(d);
   anchor = { ...p, ts: now };
 });
@@ -363,6 +364,8 @@ try { questFold = localStorage.getItem('of-quest-fold') === '1'; } catch { }
 const setFold = on => { questFold = on; clearTimeout(peekT); questEl.classList.toggle('fold', on); if (on) questEl.classList.add('min'); try { localStorage.setItem('of-quest-fold', on ? '1' : '0'); } catch { } };
 function peekQuest() { if (!questFold) return; questEl.classList.remove('fold'); clearTimeout(peekT); peekT = setTimeout(() => questFold && questEl.classList.add('fold'), 5000); }
 questEl.classList.toggle('fold', questFold);
+// 開始走動（搖桿、鍵盤或真的在走）就把任務卡縮到最小，畫面讓給路；正在「目標換了」短暫展開時不打斷
+function walkFold() { if (!questFold || !questEl.classList.contains('min')) setFold(true); }
 $('#qFold').addEventListener('click', e => { e.stopPropagation(); setFold(!questEl.classList.contains('fold') ? true : false); });
 questEl.addEventListener('click', e => { if (questEl.classList.contains('fold')) { e.stopPropagation(); setFold(false); } });
 const toast = text => { const el = $('#toast'); el.textContent = text; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); };
@@ -811,6 +814,7 @@ function updatePlayer(dt) {
   }
   P.ry = P.y > P.ry ? lerp(P.ry, P.y, 1 - Math.exp(-dt * 22)) : P.y;
   const sp = Math.hypot(P.vx, P.vz);
+  if (sp > 1.5 && G.state === 'play') walkFold();
   P.move = lerp(P.move, Math.min(1, sp / 6), 1 - Math.exp(-dt * 10));
   P.phase += sp * dt * 1.6;
 }
