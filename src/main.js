@@ -228,14 +228,14 @@ meEl.addEventListener('click', e => { if (e.target.closest('.xbtn')) meEl.hidden
 let miniT = 0;
 // 靈界地圖：點地圖 icon（或角落的小地圖）直接滿版，一次只看「我在哪裡、下一站在哪」
 const bigEl = $('#bigmap'), bigCv = $('#bigcv'), bg = bigCv.getContext('2d');
-function openBigMap() { clearTimeout(miniT); $('#mini').classList.remove('show'); $('#mapBtn').classList.remove('on'); bigEl.hidden = false; }
+function openBigMap() { bigZoom = 1; clearTimeout(miniT); $('#mini').classList.remove('show'); $('#mapBtn').classList.remove('on'); bigEl.hidden = false; }
 $('#mapBtn').addEventListener('click', e => { e.stopPropagation(); openBigMap(); });
 $('#mini').addEventListener('click', e => { e.stopPropagation(); openBigMap(); });
 bigEl.addEventListener('click', e => { if (e.target.closest('.xbtn')) bigEl.hidden = true; });
 { // 雙指縮放／滾輪縮放滿版地圖
-  const pts = new Map(); let d0 = 0, z0 = 4;
+  const pts = new Map(); let d0 = 0, z0 = 1;
   const dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
-  const setZ = z => { bigZoom = clamp(z, 1.5, 8); };
+  const setZ = z => { bigZoom = clamp(z, 1, 8); };
   bigCv.addEventListener('pointerdown', e => { pts.set(e.pointerId, e); if (pts.size === 2) { d0 = dist(); z0 = bigZoom; } });
   bigCv.addEventListener('pointermove', e => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, e); if (pts.size === 2 && d0) setZ(z0 * dist() / d0); });
   for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) bigCv.addEventListener(ev, e => { pts.delete(e.pointerId); d0 = 0; });
@@ -434,6 +434,7 @@ function hud() {
 // 小地圖：島嶼底圖只畫一次
 const mini = $('#mini'), mg = mini.getContext('2d'), base = document.createElement('canvas');
 base.width = base.height = N;
+const LAND = { x0: N, z0: N, x1: 0, z1: 0 };   // 陸地範圍，滿版地圖用來剛好框住全島
 {
   const g = base.getContext('2d'), img = g.createImageData(N, N);
   for (let i = 0; i < N * N; i++) {
@@ -443,6 +444,9 @@ base.width = base.height = N;
     img.data.set([...c, 255], i * 4);
   }
   g.putImageData(img, 0, 0);
+  for (let i = 0; i < N * N; i++) if (world.K[i] !== T.SEA) { const x = i % N, z = i / N | 0; LAND.x0 = Math.min(LAND.x0, x); LAND.x1 = Math.max(LAND.x1, x + 1); LAND.z0 = Math.min(LAND.z0, z); LAND.z1 = Math.max(LAND.z1, z + 1); }
+  for (const kk of ['x0', 'z0']) LAND[kk] = Math.max(0, LAND[kk] - 4);
+  for (const kk of ['x1', 'z1']) LAND[kk] = Math.min(N, LAND[kk] + 4);
 }
 function drawMini() {
   drawMap(mini, mg, false);
@@ -452,16 +456,27 @@ function drawMini() {
     if ($('#mapSub').textContent !== sub) $('#mapSub').textContent = sub;
   }
 }
-let bigZoom = 4;   // 滿版地圖的放大倍數（短邊看到全島的 1/bigZoom），可雙指縮放
+let bigZoom = 1;   // 滿版地圖的放大倍數：1＝整座島剛好塞滿螢幕，雙指可再放大（放大時改以「我」為中心）
 function drawMap(cv, mg, big) {
-  // 滿版時鋪滿整個螢幕、以「我」為中心放大（碰到地圖邊就停），小地圖則看整座島
+  // 小地圖看整個世界；滿版地圖先看全島全貌，放大後跟著「我」
   const dpr = Math.min(devicePixelRatio, 2), cw = cv.width = Math.round(cv.clientWidth * dpr), ch = cv.height = big ? Math.round(cv.clientHeight * dpr) : cw;
   if (!cw || !ch) return;
-  const s = Math.min(cw, ch), k = big ? s * bigZoom / N : s / N, wx = Math.min(N, cw / k), wz = Math.min(N, ch / k);
-  const x0 = big ? clamp(P.x - wx / 2, 0, N - wx) : 0, z0 = big ? clamp(P.z - wz / 2, 0, N - wz) : 0;
-  const q = (s / N) * Math.sqrt(S) * (big ? 1.5 : 1);   // q：標記大小，島變大時標記不會縮成一點
-  mg.imageSmoothingEnabled = false; mg.fillStyle = '#0b2a44'; mg.fillRect(0, 0, cw, ch);
-  mg.drawImage(base, x0, z0, wx, wz, 0, 0, wx * k, wz * k);
+  const s = Math.min(cw, ch);
+  let k = s / N, x0 = 0, z0 = 0;
+  if (big) {
+    const top = 96 * dpr, bw = LAND.x1 - LAND.x0, bh = LAND.z1 - LAND.z0;   // 上方留給標題卡
+    k = Math.min(cw / bw, (ch - top) / bh) * bigZoom;
+    const f = clamp(bigZoom - 1, 0, 1), cx = (LAND.x0 + LAND.x1) / 2 + (P.x - (LAND.x0 + LAND.x1) / 2) * f, cz = (LAND.z0 + LAND.z1) / 2 + (P.z - (LAND.z0 + LAND.z1) / 2) * f;
+    const wx = cw / k, wz = (ch - top) / k;
+    x0 = wx < N ? clamp(cx - wx / 2, 0, N - wx) : cx - wx / 2;
+    z0 = (wz < N ? clamp(cz - wz / 2, 0, N - wz) : cz - wz / 2) - top / k;
+  }
+  const q = (s / N) * Math.sqrt(S) * (big ? (cw > ch ? 1 : 1.5) : 1);   // q：標記大小，島變大時標記不會縮成一點
+  mg.imageSmoothingEnabled = false; mg.fillStyle = 'rgb(28,70,120)'; mg.fillRect(0, 0, cw, ch);
+  { // 只畫底圖落在世界範圍內的部分
+    const sx = Math.max(0, x0), sz = Math.max(0, z0), ex = Math.min(N, x0 + cw / k), ez = Math.min(N, z0 + ch / k);
+    if (ex > sx && ez > sz) mg.drawImage(base, sx, sz, ex - sx, ez - sz, (sx - x0) * k, (sz - z0) * k, (ex - sx) * k, (ez - sz) * k);
+  }
   mg.save(); mg.translate(-x0 * k, -z0 * k);
   const dot = (x, z, col, rad) => { mg.fillStyle = col; mg.beginPath(); mg.arc(x * k, z * k, rad * q, 0, 7); mg.fill(); };
   for (const n of NODES) dot(n.pos[0], n.pos[2], n.awake ? '#ffcf5a' : n.stage === 2 && !stage1Done() ? 'rgba(150,165,180,.7)' : `rgba(255,190,110,${0.6 + 0.4 * Math.sin(G.t * 4)})`, n.stage === 2 ? 2.2 : 3.2);
@@ -479,7 +494,9 @@ function drawMap(cv, mg, big) {
     }
   }
   for (const [k2, c] of CHAPS.entries()) {
-    const x = clamp(c.x, 7 * q / k, N - 7 * q / k) * k, z = clamp(c.z, 7 * q / k, N - 7 * q / k) * k, rr = 5 * q;
+    const m = 7 * q / k, vx0 = Math.max(0, x0), vz0 = Math.max(0, z0 + (big ? 96 * dpr / k : 0)), vx1 = Math.min(N, x0 + cw / k), vz1 = Math.min(N, z0 + ch / k);
+    if (big && bigZoom > 1.05 && (c.x < vx0 || c.x > vx1 || c.z < vz0 || c.z > vz1)) continue;   // 放大時畫面外的章節入口不硬塞到邊上
+    const x = clamp(c.x, vx0 + m, vx1 - m) * k, z = clamp(c.z, vz0 + m, vz1 - m) * k, rr = 5 * q;
     mg.save(); mg.beginPath(); mg.arc(x, z, rr, 0, 7); mg.closePath(); mg.fillStyle = '#0b1a2c'; mg.fill(); mg.clip();
     if (chapImg[k2].complete && chapImg[k2].naturalWidth) mg.drawImage(chapImg[k2], x - rr, z - rr, rr * 2, rr * 2);
     mg.restore(); mg.strokeStyle = c.col; mg.lineWidth = 0.9 * q; mg.beginPath(); mg.arc(x, z, rr, 0, 7); mg.stroke();
