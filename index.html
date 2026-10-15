@@ -226,6 +226,28 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #me .achbtn em{font-style:normal;font-size:16px;color:var(--gold);font-variant-numeric:tabular-nums}
 #me .achbtn .chev{width:10px;height:10px;border-right:2px solid var(--dim);border-top:2px solid var(--dim);transform:rotate(45deg)}
 #me .achbtn:active{transform:scale(.98)}
+#stampbook{z-index:13}
+#stampList{list-style:none;margin:0 auto;padding:16px;width:100%;max-width:30em;display:grid;grid-template-columns:repeat(3,1fr);gap:16px 10px;border-radius:20px;
+  background:linear-gradient(180deg,#f3ead6,#e9dcbd);color:#3a2a14;box-shadow:inset 0 0 0 1px rgba(120,80,30,.25),0 10px 30px rgba(0,0,0,.35)}
+#stampList .sh{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;font-size:17px;font-weight:900;padding-bottom:6px;border-bottom:1.5px solid rgba(120,80,30,.3)}
+#stampList .sh:not(:first-child){margin-top:10px}
+#stampList .sh em{font-style:normal;font-size:15px;color:#a5402f;font-variant-numeric:tabular-nums}
+#stampList li[data-id]{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;cursor:pointer;min-width:0}
+#stampList li b{font-size:15px;line-height:1.3}
+#stampList li small{font-size:13px;color:#7a6446;font-variant-numeric:tabular-nums}
+#stampList li:not(.on) b{color:#8a7a62}
+#stampList .nope{animation:nope .4s}
+.seal{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;border:3px solid #c0392b;box-shadow:inset 0 0 0 3px #f3ead6,inset 0 0 0 5px #c0392b;color:#c0392b;transform:rotate(-8deg);background:rgba(192,57,43,.06)}
+.seal i{display:grid;grid-template-rows:repeat(2,auto);grid-auto-flow:column;direction:rtl;gap:0 1px;font-style:normal}
+.seal b{font-family:"Noto Serif TC","Songti TC",serif;font-weight:900;font-size:19px;line-height:1.05;direction:ltr}
+.seal.empty{border:2px dashed rgba(120,90,50,.45);box-shadow:none;color:rgba(120,90,50,.35);background:none;transform:none}
+#stampFx{position:fixed;left:50%;top:calc(18% + var(--st));z-index:30;display:flex;flex-direction:column;align-items:center;gap:10px;transform:translateX(-50%);pointer-events:none;opacity:0}
+#stampFx .seal{width:110px;height:110px;background:rgba(243,234,214,.92);box-shadow:inset 0 0 0 3px #f3ead6,inset 0 0 0 5px #c0392b,0 8px 30px rgba(0,0,0,.45)}
+#stampFx .seal b{font-size:28px}
+#stampFx p{margin:0;padding:6px 14px;border-radius:999px;background:rgba(14,24,40,.75);color:var(--gold);font-size:16px;font-weight:900;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#stampFx.go{animation:stampOut 2.6s ease forwards}#stampFx.go .seal{animation:stampDown .45s cubic-bezier(.5,0,.7,1.4) forwards}
+@keyframes stampDown{0%{transform:scale(2.6) rotate(10deg);opacity:0}80%{transform:scale(.92) rotate(-8deg);opacity:1}100%{transform:scale(1) rotate(-8deg)}}
+@keyframes stampOut{0%,85%{opacity:1}100%{opacity:0}}
 #ach{z-index:13}
 #achList{list-style:none;margin:0 auto;padding:0;width:100%;max-width:30em;display:grid;grid-template-columns:1fr 1fr;gap:12px}
 #achList button{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:#fff;font:inherit;text-align:center;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
@@ -754,7 +776,10 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   <div class="xiu"><div class="xb"><i id="xbar"></i></div><p id="meXiu"></p></div>
   <ul class="grid" id="meGrid"></ul>
   <button class="achbtn" id="achBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M16 5h3v2a3 3 0 0 1-3 3M8 5H5v2a3 3 0 0 0 3 3"/><path d="M12 13v4M8.5 20h7M10 17h4"/></svg><span data-i18n="achBtn">成就</span><em id="achN">0/8</em><i class="chev"></i></button>
+  <button class="achbtn" id="stampBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v5l2 3H7l2-3z"/><path d="M5 14h14v3H5z"/><path d="M7 20h10"/></svg><span data-i18n="stampBtn">台北集章簿</span><em id="stampN">0/15</em><i class="chev"></i></button>
 </div></div>
+<div id="stampbook" class="overlay page" hidden><header class="phead"><div><b data-i18n="stampBtn">台北集章簿</b><small id="stampSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <ul id="stampList"></ul></div>
 <div id="ach" class="overlay page" hidden><header class="phead"><div><b data-i18n="achTitle">成就</b><small id="achSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
   <ul id="achList"></ul></div>
 <div id="dex" class="page"><header class="phead"><div><b data-i18n="dexTitle">台灣之美 圖鑑</b><small id="dexSub"></small></div><button id="dexClose" class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><ul id="dexList"></ul></div>

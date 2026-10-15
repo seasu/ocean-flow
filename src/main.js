@@ -82,7 +82,8 @@ localize(NODES);
 const S1 = NODES.filter(n => n.stage === 1), S2 = NODES.filter(n => n.stage === 2);
 // 守門獸圖（img/beasts/）：四獸山，加上第三階三流的龍、龜、熊
 const BEAST_IMG = { elephant: 'elephant', tiger: 'tiger', leopard: 'leopard', lion: 'lion', city: 'dragon', sea: 'turtle', peak: 'bear' };
-const REQ = 2;   // 第二階需要的境界（化流境）
+const REQ = 2;
+const NEAR_R = 300;   // 主畫面提醒附近景點的距離（公尺）   // 第二階需要的境界（化流境）
 const stage1Done = () => S1.every(n => n.awake);
 // 第二階：台北城市故事（只在現世模式；島上模式直接跳過）
 for (const s of TALES) REAL.push(s);
@@ -271,6 +272,41 @@ $('#avPick input').addEventListener('change', e => {
 });
 $('#meBtn').addEventListener('click', e => { e.stopPropagation(); hudKey = ''; hud(); meEl.hidden = false; });
 meEl.addEventListener('click', e => { if (e.target.closest('.xbtn')) meEl.hidden = true; });
+// ---------- 台北集章簿：每個真實地點一枚印章，只有人在現世走到才蓋得到（模擬定位測試也算） ----------
+const STAMP_TXT = { venue: '台北靈門', huashan: '華山', qidong: '文學基地', jinan: '濟南教會', shandao: '善導寺', station: '台北車站', controlyuan: '監察院', guanghua: '光華',
+  wufenpu: '五分埔', cihcheng: '慈諴宮', xinzhuang: '新莊', wanhua: '萬華', baoan: '保安宮', zaichun: '再春', shipai: '石牌' };
+let stamps = {};
+try { stamps = JSON.parse(localStorage.getItem('of-stamps') || '{}'); } catch { }
+const seal = (id, cls = '') => `<span class="seal ${cls}"><i>${[...(STAMP_TXT[id] || '')].map(c => `<b>${c}</b>`).join('')}</i></span>`;
+const stampFx = document.createElement('div'); stampFx.id = 'stampFx'; document.body.appendChild(stampFx);
+function stamp(s) {
+  if (stamps[s.id]) return;
+  const d = new Date(); stamps[s.id] = `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`;
+  try { localStorage.setItem('of-stamps', JSON.stringify(stamps)); } catch { }
+  // 蓋章：印章從畫面上方壓下來，咚一聲，兩秒後收起（不擋操作）
+  stampFx.innerHTML = `${seal(s.id)}<p>${t('stampGot', { name: s.name })}</p>`;
+  stampFx.className = ''; void stampFx.offsetWidth; stampFx.className = 'go';
+  setTimeout(() => { sfx.bell(98); try { navigator.vibrate && navigator.vibrate(60); } catch { } }, 380);
+  clearTimeout(stamp.t); stamp.t = setTimeout(() => stampFx.className = '', 2600);
+  hudKey = '';
+}
+const stampEl = $('#stampbook');
+function renderStamps() {
+  const groups = [[t('stampCulture'), REAL.filter(x => !x.tale)], [t('stampTales'), REAL.filter(x => x.tale)]];
+  const n = Object.keys(stamps).filter(k => STAMP_TXT[k]).length, m = Object.keys(STAMP_TXT).length;
+  $('#stampSub').textContent = t('stampSub', { n, m });
+  $('#stampList').innerHTML = groups.map(([h, list]) => `<li class="sh">${h}<em>${list.filter(x => stamps[x.id]).length}/${list.length}</em></li>`
+    + list.map(x => `<li class="${stamps[x.id] ? 'on' : ''}" data-id="${x.id}">${seal(x.id, stamps[x.id] ? '' : 'empty')}<b>${x.name}</b><small>${stamps[x.id] || t('stampGo')}</small></li>`).join('')).join('');
+}
+$('#stampBtn').addEventListener('click', () => { renderStamps(); stampEl.hidden = false; });
+stampEl.addEventListener('click', e => {
+  if (e.target.closest('.xbtn')) { stampEl.hidden = true; return; }
+  const li = e.target.closest('li[data-id]'); if (!li) return;
+  const x = REAL.find(r => r.id === li.dataset.id);
+  if (!stamps[x.id]) { li.classList.remove('nope'); void li.offsetWidth; li.classList.add('nope'); sfx.deny(); return; }
+  spotData = { title: x.name, sub: x.sub, text: x.text, em: x.fact || '', d: spotInfo(x.id), key: x.id }; openSpot();
+});
+
 // ---------- 成就：完成過的階段用 icon 排成格子，點一下重播當時的過關動畫 ----------
 // 達成過就記在這台裝置（重新整理也還在）；跳階測試時依目前進度補記
 const ACH = [
@@ -287,6 +323,7 @@ function syncAch() {
   for (const a of ACH) if (!achGot.has(a.id) && G.state !== 'title' && a.live()) { achGot.add(a.id); add = true; }
   if (add) try { localStorage.setItem('of-ach', JSON.stringify([...achGot])); } catch { }
   $('#achN').textContent = `${ACH.filter(a => achGot.has(a.id)).length}/${ACH.length}`;
+  $('#stampN').textContent = `${Object.keys(stamps).filter(k => STAMP_TXT[k]).length}/${Object.keys(STAMP_TXT).length}`;
 }
 const achEl = $('#ach'), BOOK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 18a2 2 0 0 1 2-2h11"/><path d="M9 7v6"/></svg>';
 // 成就依世界觀八章分區：章節圖當分隔；序章放已開放的成就，後面的章節先放灰色 icon（尚未開放）
@@ -1088,6 +1125,11 @@ function updateGame(dt) {
   for (const c of CHAPS) if (Math.hypot(c.x - P.x, c.z - P.z) < 8 && Math.abs(P.y - c.y) < 12) act = { key: 'ch' + c.i, text: t('chapLocked', { no: c.no, name: c.name }), btn: t('chapRead'), fn: () => openLore(c.i) };
   // 現世：走進機緣範圍時，主畫面直接出現進入按鈕（不用先打開雷達）
   if (G.geo && !act) { const s = inRange(); if (s && s.id !== 'venue') act = { key: 'enc:' + s.id, text: t('encSensed', { name: s.name }), btn: t('enter'), fn: () => encounter(s) }; }
+  // 現世：300 公尺內有還沒去過的景點，主畫面主動提醒，附導航（不用打開雷達找）
+  if (G.geo && !act) {
+    const o = REAL.filter(x => shown(x) && x.id !== 'venue' && !visited.has(x.id)).map(x => ({ x, d: meters(geo.pos, x) })).filter(o => o.d <= NEAR_R).sort((a, b) => a.d - b.d)[0];
+    if (o) act = { key: 'near:' + o.x.id, text: t('nearReal', { dir: dirFor(o.x), d: fmt(Math.max(o.d - o.x.r, 10)), name: o.x.name }), btn: t('navBtn'), fn: () => openNav(o.x) };
+  }
   setAct(G.state === 'play' ? act : null);
   // 感知
   G.sense = Math.max(0, G.sense - dt); G.senseCd = Math.max(0, G.senseCd - dt);
@@ -1111,7 +1153,7 @@ function updateGame(dt) {
 const nearEl = $('#near'), nearArrow = nearEl.querySelector('i'), nearText = nearEl.querySelector('p');
 const actEl = $('#act'); let actNow = null;
 function setAct(a) {
-  if ((a && a.key) === (actNow && actNow.key)) { if (a) actNow.fn = a.fn; return; }
+  if ((a && a.key) === (actNow && actNow.key)) { if (a) { actNow.fn = a.fn; if (a.text !== actNow.text) { actNow.text = a.text; actEl.querySelector('p').textContent = a.text; } } return; }
   actNow = a; actEl.classList.toggle('show', !!a); if (!a) return;
   actEl.querySelector('p').textContent = a.text; actEl.querySelector('button').textContent = a.btn;
   sfx.sense(); try { navigator.vibrate && navigator.vibrate(40); } catch { }
@@ -1409,6 +1451,7 @@ function drawRadar() {
 
 function encounter(s) {
   closeRadar(); breakthrough();
+  if (G.geo) stamp(s);
   if (s.id === 'venue') {
     const left = talesStage() ? TALES.filter(s => !visited.has(s.id)).map(s => s.name) : (stage1Done() ? S2 : S1).filter(n => !n.awake).map(n => `${n.name} (${placeOf(n)})`);
     if (G.gateOpen) {
