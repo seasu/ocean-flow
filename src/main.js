@@ -951,12 +951,13 @@ function inRange() {
 }
 function fmt(d) { return d < 1000 ? t('meters', { n: Math.round(d) }) : t('km', { n: (d / 1000).toFixed(1) }); }
 function renderList() {
-  const items = REAL.filter(shown).map(s => ({ s, d: meters(geo.pos, s) })).sort((a, b) => a.d - b.d), tg = radarTarget();
+  const tg = radarTarget(), items = REAL.filter(shown).map(s => ({ s, d: meters(geo.pos, s) })).sort((a, b) => (b.s === tg) - (a.s === tg) || a.d - b.d);   // 目的地排第一
   const html = items.map(({ s, d }) => {
     const done = visited.has(s.id), node = s.node ? NODES.find(n => n.id === s.node) : null;
     const tag = s.tale ? (done ? t('taleFound') : t('taleTag')) : s.id === 'venue' ? (G.gateOpen ? t('canOpen') : t('startEnd')) : node ? (node.awake ? t('opened', { icon: node.icon, name: node.name }) : node === nextGate() ? `${node.seal}${t('sep')}${node.icon} ${node.name}` : node.seal + t('sep') + node.name) : done ? t('bound') : t('chance');
     return `<li data-id="${s.id}" class="${done ? 'done' : ''} ${d <= s.r ? 'near' : ''} ${node ? 'key' : ''} ${s === tg ? 'target' : ''}"><div><b>${s.name}</b><small>${s.sub}</small></div>`
       + `<span><em>${tag}</em>${t('distDir', { d: fmt(d), dir: dirFor(s) })}</span>`
+      + (s.id === 'venue' && d <= s.r ? '' : `<a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}&travelmode=walking"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>${t('navGo')}</a>`)
       + (calib ? `<button data-cal="${s.id}">${t('setHere')}</button>` : '') + `</li>`;
   }).join('');
   if (html !== renderList.html) { renderList.html = html; $('#rlist').innerHTML = html; }   // 沒變就不重畫，點擊才不會被吃掉
@@ -965,6 +966,7 @@ function renderList() {
 $('#rlist').addEventListener('click', e => {
   const cal = e.target.closest('[data-cal]');
   if (cal) { const s = REAL.find(x => x.id === cal.dataset.cal), p = geo.real || geo.pos; s.lat = p.lat; s.lng = p.lng; saveSpot(s); renderList(); toast(t('setDone', { name: s.name })); return; }
+  if (e.target.closest('a.nav')) return;
   const li = e.target.closest('li'); if (!li) return;
   const s = REAL.find(x => x.id === li.dataset.id);
   if (geo.sim) geo.walkTo(s); else toast(t('walkThere', { name: s.name, dir: dirFor(s), d: fmt(meters(geo.pos, s)) }));
@@ -1033,8 +1035,9 @@ function drawRadar() {
   if (geo.acc && geo.acc < 300) { g.fillStyle = 'rgba(88,176,234,.18)'; g.beginPath(); g.arc(c, c, geo.acc * sc, 0, 7); g.fill(); }
   g.fillStyle = '#58b0ea'; g.strokeStyle = '#fff'; g.lineWidth = 2 * d; g.beginPath(); g.arc(c, c, 7 * d, 0, 7); g.fill(); g.stroke();
   g.restore();
-  const rt = $('#rtarget'), html = tg ? `${t('rTarget', { name: tg.name })}<small>${t('distDir', { d: fmt(td), dir: dirFor(tg) })}</small><a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${tg.lat},${tg.lng}&travelmode=walking">${t('maps')}</a>` : '';
-  if (rt.innerHTML !== html) rt.innerHTML = html;
+  // 副標題跟著階段走
+  const trail = G.gateOpen ? t('trailDone') : !stage1Done() ? t('stage1Head') : talesStage() ? t('talesHead') : t('stage2Head');
+  const tr = $('#radar .trail'); if (tr.textContent !== trail) tr.textContent = trail;
   // 狀態列與機緣按鈕
   $('#gstat').textContent = geo.sim ? t('simStat', { err: geo.error ? t('sep') + geo.error : '' }) : t('gpsStat', { n: Math.round(geo.acc || 0) });
   $('#simT').checked = geo.sim;
