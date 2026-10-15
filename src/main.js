@@ -817,6 +817,20 @@ function wildFight(w) {
   });
 }
 
+// 第一章終極 BOSS 濁淵：擋在台北靈門前，四關連戰（最高難度）要一次打完；輸了或離開，靈光全部清空
+const BOSS_COST = 6;
+function bossFight() {
+  if (avail() < BOSS_COST) { sfx.deny(); toast(t('bossNeed', { n: BOSS_COST, have: avail() })); return; }
+  if (params.has('nobattle')) { G.bossDone = true; return; }
+  const node = { id: 'boss', boss: true, star: 3, name: t('beast_boss') };
+  G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show'); sfx.battle(true);
+  battle(node, G.realm, REALMS[G.realm]).then(ok => {
+    sfx.battle(false); G.state = 'play'; $('#hud').classList.add('play', 'on'); G.wildCd = 8;
+    if (ok) { G.bossDone = true; burst(GATE[0], GATE[1] + 3, GATE[2] - 1.6, [1, 0.85, 0.5], 120, 10); sfx.gate(); pop(t('bossWin'), 'gold'); }
+    else { G.bonus -= avail(); P.z = GATE[2] - 5; toast(t('bossLose')); }
+  });
+}
+
 // 開門前先淨化擋在門前的濁流；?nobattle 可跳過（測試用）
 function fight(n, then) {
   if (params.has('nobattle')) return then();
@@ -956,7 +970,7 @@ function updateGame(dt) {
   // 台北靈門
   if (G.gateOpen) {
     G.gateT += dt;
-    if (Math.abs(P.x - GATE[0]) < 2.6 && Math.abs(P.z - GATE[2]) < 2.2) act = { key: 'gate', text: t('finalHere'), btn: t('finalGo'), fn: ending };
+    if (Math.abs(P.x - GATE[0]) < 2.6 && Math.abs(P.z - GATE[2]) < 2.2) act = G.bossDone ? { key: 'gate', text: t('finalHere'), btn: t('finalGo'), fn: ending } : { key: 'boss', text: t('bossHere'), btn: t('bossGo'), fn: bossFight };
   }
   for (const c of CHAPS) if (Math.hypot(c.x - P.x, c.z - P.z) < 8 && Math.abs(P.y - c.y) < 12) act = { key: 'ch' + c.i, text: t('chapLocked', { no: c.no, name: c.name }), btn: t('chapRead'), fn: () => openLore(c.i) };
   setAct(G.state === 'play' ? act : null);
@@ -1397,6 +1411,12 @@ function frame(dt) {
     M.translate(mw, w.x, gy + bob, w.z); M.rotY(mw, w.yaw); M.scale(mw, 0.85, 0.85, 0.85);
     r.draw(wildMesh[w.kind], mw, w.chase ? [0.75, 0.35, 0.6] : [0.42, 0.34, 0.62], w.chase ? 0.25 + 0.15 * Math.sin(G.t * 10) : 0.12);
   }
+  // 濁淵：靈門打開後蹲在門前，淨化前一直在
+  if (G.gateOpen && !G.bossDone) {
+    const m = M.ident(), bz = GATE[2] - 1.6;
+    M.translate(m, GATE[0] + 0.5, ground(GATE[0] + 0.5, bz) + Math.sin(G.t * 1.5) * 0.1, bz); M.scale(m, 1.9, 1.9, 1.9);
+    r.draw(wildMesh.elephant, m, [0.3, 0.2, 0.45], 0.15 + 0.12 * Math.sin(G.t * 4));
+  }
   // 半透明：水、影子
   r.blend(1);
   r.drawWater(water, env);
@@ -1420,6 +1440,7 @@ function frame(dt) {
     const gy = ground(w.x, w.z);
     for (let i = 0; i < 5; i++) { const a = G.t * 1.4 + i * 1.256 + w.hx; r.box(w.x + Math.cos(a) * 1.1, gy + 1 + Math.sin(G.t * 2 + i) * 0.4, w.z + Math.sin(a) * 1.1, 0.26, 0.26, 0.26, w.chase ? [1, 0.3, 0.5] : [0.6, 0.4, 1], 1, 0.7, a); }
   }
+  if (G.gateOpen && !G.bossDone) for (let i = 0; i < 12; i++) { const a = G.t * 0.9 + i * 0.5236, bz = GATE[2] - 1.6; r.box(GATE[0] + 0.5 + Math.cos(a) * 2.4, ground(GATE[0] + 0.5, bz) + 1.5 + Math.sin(G.t * 1.7 + i) * 0.9, bz + Math.sin(a) * 2.4, 0.36, 0.36, 0.36, [0.8, 0.25, 0.9], 1, 0.7, a); }
   for (const n of NODES) {
     const bright = n.stage === 2 && !stage1Done() ? 0.05 : n.awake ? 0.22 : !canOpen(n) ? 0.06 : 0.14 + (G.sense > 0 ? 0.25 : 0) + n.charge * 0.3;
     r.box(n.pos[0], n.pos[1] + 40, n.pos[2], 0.6, 80, 0.6, n.awake ? C.gold : n.col, 1, bright);
@@ -1500,4 +1521,4 @@ if (params.has('play') || params.has('at') || params.has('awake') || params.has(
     setTimeout(() => { pop(t('demoSet', { stage: t('demoStage')[cur - 1] }), 'gold'); setTimeout(() => toast(cur === 3 ? t('stage2Open', { realm: REALMS[REQ] }) : t('talesOpen')), 2200); }, 600);
   }
 }
-window.__game = { wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
+window.__game = { GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };

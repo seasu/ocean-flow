@@ -135,6 +135,10 @@ const CAST = [
     kick: ['守門獸・山之鐘聲', 'Guardian · Bell of the Mountain', '守門獣・山の鐘'], name: ['熊靈', 'Bear Spirit', '熊霊'], sub: ['山', 'Mountain', '山'],
     epi: ['山霧散去時，鐘聲就從牠胸前響起。', 'When the mountain mist lifts, the bell rings from its chest.', '山霧が晴れると、その胸から鐘が鳴る。'],
     text: ['台灣黑熊，胸前有白色的 V 字月牙，守著玉山的鐘。\n山之鐘聲被濁流擋住時，要用數獨找回山的記憶。', 'A Formosan black bear with a white V crescent on its chest, guarding the bell of Yushan.\nWhen the Murk blocks the Bell of the Mountain, solve sudoku to recover the mountain\'s memory.', '胸に白いV字の月の輪がある台湾黒熊。玉山の鐘を守る。\n山の鐘が濁流にふさがれたら、数独で山の記憶を取り戻す。'] },
+  { id: 'boss', img: 'img/beasts/boss.png', board: 'boss', beast: 1,
+    kick: ['第一章・終極 BOSS', 'Chapter One · Final Boss', '第一章・最終ボス'], name: ['濁淵', 'Zhuoyuan', '濁淵'], sub: ['濁流之淵', 'Abyss of the Murk', '濁流の淵'],
+    epi: ['四獸的影子被吞進同一個深淵。', 'Four beasts\' shadows, swallowed into one abyss.', '四獣の影が、ひとつの深淵に飲みこまれた。'],
+    text: ['濁流把四獸的影子揉成一頭巨獸，擋在台北靈門前。\n四關連戰要一次打完，輸了會被吸光所有靈光。', 'The Murk kneaded the four beasts\' shadows into one giant that blocks the Taipei Spirit Gate.\nClear four rounds in one go, or lose all your spirit light.', '濁流が四獣の影をこねた巨獣。台北霊門の前に立ちはだかる。\n四連戦を一度で勝ち抜け。負ければ霊光をすべて失う。'] },
 ];
 const box = document.createElement('div');
 box.id = 'boardView'; box.hidden = true;
