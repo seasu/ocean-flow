@@ -581,13 +581,20 @@ const GEO_LINES = {
 }[lang];
 let talk = null;
 function say(lines, done, who = t('xi')) {
-  talk = { lines, i: 0, done }; $('#dialog b').textContent = who; $('#dialog p').textContent = lines[0]; $('#dialog').classList.add('show');
+  talk = { lines, i: 0, done, who }; showLine(); $('#dialog').classList.add('show');
+}
+// 一句台詞可以是字串，或 { title, text }：重要說明，用金框顯示，按「我知道了」才關
+function showLine() {
+  const l = talk.lines[talk.i], em = typeof l === 'object';
+  $('#dialog').classList.toggle('em', em);
+  $('#dialog b').textContent = em ? l.title : talk.who; $('#dialog p').textContent = em ? l.text : l;
+  $('#dialog small').textContent = em ? t('gotIt') : t('tapNext');
 }
 function nextLine() {
   if (!talk) return;
   talk.i++;
   if (talk.i >= talk.lines.length) { const d = talk.done; talk = null; $('#dialog').classList.remove('show'); d && d(); return; }
-  $('#dialog p').textContent = talk.lines[talk.i];
+  showLine();
 }
 $('#dialog').addEventListener('pointerdown', e => { e.preventDefault(); nextLine(); });
 
@@ -599,7 +606,7 @@ function start(mode) {
   if (innerWidth < 600) setTimeout(() => { $('.hint').style.display = 'none'; }, 10000);
   cam.yaw = 0; cam.tx = P.x; cam.ty = P.y + 1.5; cam.tz = P.z;
   if (G.geo) geo.start();
-  say(G.geo ? GEO_LINES : LINES, () => {
+  say([...(G.geo ? GEO_LINES : LINES), { title: t('xiuTitle'), text: t('xiuIntro') }], () => {
     G.state = 'play'; $('#hud').classList.add('play'); XI.wave = false;
     pop(t('firstSeal'), 'gold');
     // 不直接跳進雷達：讓雷達按鈕發光＋小提示，由玩家自己點開
