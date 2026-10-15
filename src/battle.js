@@ -57,7 +57,7 @@ export function battle(node, lv = 0, realm = '') {
     loadMe();
     start(node, lv, resolve); quitB.setAttribute('aria-label', t('battleQuit'));
     const make = gameOf(node);
-    const note = lv ? '\n' + t('realmPower', { realm, p: lv * 20 }) : '';
+    const note = lv && make.key !== 'sudoku' && make.key !== 'sigil' ? '\n' + t('realmPower', { realm, p: lv * 20 }) : '';
     if (node.boss) showMsg(t('bossTitle', { name: node.name }), t('bossTip') + note + '\n\n' + t('bossPhase', { n: 1, m: BOSS_PHASES.length }) + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
     else if (node.wild) showMsg(t('wildTitle', { name: node.name }), t('wildTip') + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
     else showMsg(SPR[node.id] ? t('battleBeast', { beast: t('beast_' + node.id) }) : t('battleTitle', { name: node.name }), t('battleTip_' + node.id) + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
@@ -87,7 +87,8 @@ const api = {
   get time() { return S.t; },
   get pur() { return S.pur; },
   node: () => S.node,
-  add(n) { S.pur += n * (1 + 0.2 * S.lv); },
+  // raw：數獨、畫符這種「做完才算完」的玩法不吃境界加成，不然會還沒解完就結束
+  add(n, raw) { S.pur += raw ? n : n * (1 + 0.2 * S.lv); },
   info(s) { hpEl.textContent = s; },
   shoot(x, y, col) { S.shots.push({ x, y, x0: x, y0: y, t: 0, d: 0.35 + Math.random() * 0.2, col }); },
   burst(x, y, col, n = 14, sp = 160) {
@@ -313,4 +314,4 @@ function drawBeast(L, spr, p, win, T) {
   g.save(); g.translate(cx, cy + sz * 0.5); g.scale(1 + wob * 0.12, 1 - wob * 0.12); g.drawImage(tint, -sz / 2, -sz, sz, sz); g.restore();
 }
 // 測試用：在主控台把這一關直接淨化滿
-window.__battle = { fill() { if (S && S.run) S.pur = 100; } };
+window.__battle = { fill() { if (S && S.run) S.pur = 100; }, game: () => S && S.game, pur: () => S && S.pur };

@@ -39,7 +39,7 @@ export function sigil(A, { star, ease }) {
   function complete() {
     const p = pts();
     for (const [x, y] of p) A.shoot(x, y, '#ffcf5a');
-    A.add(100 / NUM); S.done = 0.7; A.burst(p[0][0], p[0][1], '#ffcf5a', 30, 220); A.sfx.purify();
+    A.add(100 / NUM, true); S.done = 0.7; A.burst(p[0][0], p[0][1], '#ffcf5a', 30, 220); A.sfx.purify();
     S.k++; S.drawing = false; S.trail = [];
     if (S.k < NUM) { S.rune = order[S.k]; S.next = 0; }
   }

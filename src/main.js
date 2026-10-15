@@ -778,7 +778,8 @@ function buildVein(n) {
     const y = Math.max(ground(x, z), WATER) + 0.02;
     b.box(x - 0.2, y, z - 0.2, 0.4, 0.12, 0.4, hex('#ffd98a'), 1);
   }
-  n.vein = r.mesh(b);
+  // 開門時亮一下、連到台北靈門，幾秒後就收起來，不留在地上
+  n.vein = r.mesh(b); n.veinEnd = G.t + 6;
 }
 
 function updateWilds(dt) {
@@ -1405,6 +1406,7 @@ function frame(dt) {
       M.rotX(mb, Math.sin(G.t * (n.awake ? 3 : 0.8)) * (n.awake ? 0.25 * Math.max(0.2, n.flash) : 0.05) + n.charge * Math.sin(G.t * 9) * 0.15);
       r.draw(bell, mb, n.awake ? [1.15, 1.05, 0.85] : [1, 1, 1], n.awake ? 0.35 : 0);
     }
+    if (n.vein && G.t > n.veinEnd) n.vein = null;
     if (n.vein) r.draw(n.vein, I, [1, 1, 1], 0.6 + 0.4 * Math.sin(G.t * 3));
   }
   if (s > 0.01) { const m = M.ident(); M.translate(m, 0, -(1 - smooth(0, 0.6, s)) * 50, 0); r.draw(floats, m, [1, 1, 1], 0.05); }
@@ -1531,4 +1533,4 @@ if (params.has('play') || params.has('at') || params.has('awake') || params.has(
     setTimeout(() => { pop(t('demoSet', { stage: t('demoStage')[cur - 1] }), 'gold'); setTimeout(() => toast(cur === 3 ? t('stage2Open', { realm: REALMS[REQ] }) : t('talesOpen')), 2200); }, 600);
   }
 }
-window.__game = { GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
+window.__game = { ending, GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
