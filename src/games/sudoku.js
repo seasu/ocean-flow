@@ -50,7 +50,7 @@ export function sudoku(A, { star, ease }) {
     if (fits) {
       grid[i] = k; S.pop.set(i, 1);
       const [x, y] = center(i); A.shoot(x, y, A.TILE[k][0]); A.burst(x, y, A.TILE[k][0], 10, 140);
-      A.add(gain); A.sfx.hit(N * N - grid.filter(v => v < 0).length); A.buzz(12);
+      A.add(gain, true); A.sfx.hit(N * N - grid.filter(v => v < 0).length); A.buzz(12);
       // 自動跳到下一個空格
       const nx = [...Array(N * N).keys()].map(j => (i + 1 + j) % (N * N)).find(j => grid[j] < 0);
       S.sel = nx ?? -1;

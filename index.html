@@ -472,6 +472,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 .screen h1{margin:0;font-size:clamp(56px,18vw,120px);font-weight:900;letter-spacing:.12em;line-height:1;text-shadow:0 4px 24px rgba(111,227,255,.35)}
 .screen .en{font-size:13px;letter-spacing:.4em;color:var(--cyan);font-weight:500}
 .screen .tag{font-size:15px;color:#d8e6f2;font-weight:500;max-width:22em;line-height:1.7}
+#ending .soon{font-size:18px;font-weight:900;color:var(--gold);letter-spacing:.06em;padding:10px 20px;border-radius:999px;background:rgba(255,207,90,.12);border:1px solid rgba(255,207,90,.4)}
 /* 按鈕：和影片「略過」同一套半透明毛玻璃樣式；主按鈕較大、邊框較亮 */
 .ver{position:absolute;left:0;right:0;bottom:calc(14px + var(--sb));font-size:12px;font-weight:500;color:rgba(255,255,255,.35);letter-spacing:.06em;font-variant-numeric:tabular-nums}
 .start{margin-top:10px;font-size:20px;font-weight:900;padding:15px 48px;border-radius:999px;color:#fff;letter-spacing:.12em;
@@ -496,6 +497,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   #toast,#pop{left:calc(50% + min(170px,22vw));max-width:calc(100vw - min(380px,48vw))}
   #radar.show{display:grid;grid-template-columns:auto minmax(0,1fr);grid-auto-rows:min-content;column-gap:20px;align-items:start;justify-items:stretch}
   #radar>*{grid-column:2;width:100%}
+  #radar>:not(header):not(.rwrap){padding-right:52px}
   #radar .rwrap{grid-column:1;grid-row:1/span 6;position:sticky;top:0;width:min(calc(100dvh - 96px - var(--st) - var(--sb)),46vw)}
   #radar header{width:100%}
   #radar .rbar{flex-wrap:wrap}
@@ -517,6 +519,9 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 #battle .msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,calc(100vw - 32px));background:rgba(14,24,40,.8);border:1px solid rgba(255,255,255,.16);border-radius:22px;
   padding:24px 20px;text-align:center;display:none;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 12px 40px rgba(0,0,0,.35)}
 #battle .msg.show{display:block}
+/* 說明框不超出畫面：太長就在框裡捲；橫向放寬，行數少一點 */
+#battle .msg{max-height:calc(100dvh - 24px - var(--st) - var(--sb));overflow-y:auto;overscroll-behavior:contain}
+@media (orientation:landscape) and (max-height:600px){#battle .msg{width:min(560px,calc(100vw - 32px));padding-top:16px;padding-bottom:16px}#battle .msg h3{margin-bottom:8px}#battle .msg p{margin-bottom:14px;line-height:1.6}}
 #battle .msg h3{margin:0 0 12px;color:var(--gold);font-size:21px;letter-spacing:.06em}
 #battle .msg p{margin:0 0 20px;font-size:16px;line-height:1.75;text-align:left;font-weight:500;white-space:pre-line;color:#dbe6f0}
 #battle .msg button{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.45);color:#fff;border-radius:999px;padding:12px 30px;font-weight:900;font-size:17px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
@@ -631,10 +636,11 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   <h2 data-i18n="endTitle">城市本身，也存在流。</h2>
   <div class="logo" data-i18n="title">洋流：起源</div>
   <div class="tag" data-i18n="endTag">走出去，遇見你的機緣。</div>
+  <div class="soon" data-i18n="endSoon">序章完成。第一章・流域，敬請期待。</div>
   <div id="stats"></div>
   <button class="film-btn" data-i18n="watchFilm">▶ 觀看介紹影片</button>
   <div class="langs"></div>
-  <button class="start" id="again" data-i18n="again">再走一次</button>
+  <button class="start" id="again" data-i18n="again">重新體驗序章</button>
 </div>
 <div id="film"><video playsinline preload="none"></video>
   <button class="sound" data-i18n="tapSound">🔊 點一下開聲音</button>

@@ -151,7 +151,8 @@ const S = {
     '現地探索は位置情報を使い、ハッカソン会場（北平東路30号）から出発します<br>位置情報がない場合は自動でシミュレーションに切り替え・音声オン推奨<br>PC：WASD で移動、スペースでジャンプ、E で感知'],
   endTitle: ['城市本身，也存在流。', 'The city itself has its own flow.', '都市そのものにも、流れがある。'],
   endTag: ['走出去，遇見你的機緣。', 'Go outside and meet your encounters.', '外へ出て、あなたの縁に出会おう。'],
-  again: ['再走一次', 'Walk again', 'もう一度歩く'],
+  again: ['重新體驗序章', 'Replay the Prologue', '序章をもう一度'],
+  endSoon: ['序章完成。第一章・流域，敬請期待。', 'Prologue complete. Chapter One: Watershed, coming soon.', '序章クリア。第一章「流域」、お楽しみに。'],
   watchFilm: ['▶ 觀看介紹影片', '▶ Watch the intro film', '▶ 紹介映像を見る'],
   skip: ['略過 ▸', 'Skip ▸', 'スキップ ▸'],
   tapSound: ['🔊 點一下開聲音', '🔊 Tap for sound', '🔊 タップで音声オン'],
@@ -239,10 +240,10 @@ const S = {
   wildLose: ['被濁影打退了，靈光 −{n}', 'The shade drove you back. Spirit Light −{n}', '濁影に押し返された。霊光 −{n}'],
   wildLose0: ['被濁影打退了，還好身上沒有靈光可以搶', 'The shade drove you back, but you had no Spirit Light to lose', '濁影に押し返された。霊光がなくて助かった'],
   taleLater: ['你走到了{name}：這裡藏著一個城市故事，先開完四獸靈門它才會浮現', 'You reached {name}: a city story is hidden here. Open the four beast gates first and it will appear', '{name}に着いた：ここには街の物語が眠っている。四獣の霊門を開けば現れる'],
-  // 第一章終極 BOSS：濁淵
+  // 序章終極 BOSS：濁淵（打完進入第一章）
   beast_boss: ['濁淵', 'Zhuoyuan', '濁淵'],
-  bossTitle: ['終極 BOSS・{name}', 'Final Boss · {name}', '最終ボス・{name}'],
-  bossTip: ['濁淵吞下了四獸的影子，擋在台北靈門前。\n四關連戰：數獨、連點、畫符、三消，難度全開。\n要一次打完；中途輸了或離開，身上的靈光會全部被吸走。', 'Zhuoyuan swallowed the shadows of the four beasts and now blocks the Taipei Spirit Gate.\nFour rounds in a row: sudoku, tap, sigil, match-3, at full difficulty.\nClear them in one go. Lose or leave midway and it drains all your spirit light.', '濁淵は四獣の影を飲みこみ、台北霊門の前に立ちはだかる。\n四連戦：数独、連打、符描き、三消し。難易度は最大。\n一度で勝ち抜くこと。途中で負けたり離れたりすると、霊光をすべて吸い取られる。'],
+  bossTitle: ['序章 BOSS・{name}', 'Prologue Boss · {name}', '序章ボス・{name}'],
+  bossTip: ['四關連戰：數獨、連點、畫符、三消，要一次打完。\n輸了或離開，靈光會全部被吸走。', 'Four rounds in a row: sudoku, tap, sigil, match-3. Clear them in one go.\nLose or leave and all your spirit light is drained.', '四連戦：数独・連打・符描き・三消し。一度で勝ち抜こう。\n負けたり離れたりすると、霊光をすべて吸い取られる。'],
   bossPhase: ['第 {n}/{m} 關', 'Round {n}/{m}', '第 {n}/{m} 戦'],
   bossNext: ['第 {n} 關淨化！濁淵還沒倒下', 'Round {n} purified! Zhuoyuan still stands', '第 {n} 戦 浄化！濁淵はまだ倒れない'],
   bossLoseTip: ['濁淵吸走了你所有的靈光。重新收集之後，再回來挑戰。', 'Zhuoyuan drained all your spirit light. Gather more and come back.', '濁淵に霊光をすべて吸い取られた。集め直して、また挑もう。'],
