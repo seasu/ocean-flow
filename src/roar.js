@@ -8,7 +8,7 @@ el.id = 'roar'; el.hidden = true;
 document.body.appendChild(el);
 
 const BELLS = [146.8, 196, 220, 174.6, 246.9, 293.7, 329.6];
-// opts: { title, sub, beasts: ['elephant', ...] 或 lamps: ['五分埔', ...], kind: 'four'|'tales'|'flows' }
+// opts: { title, sub, beasts: ['elephant', ...] 或 lamps: ['五分埔', ...]＋book（書名）, kind: 'four'|'tales'|'flows' }
 export function roar(sub, opts = {}) {
   const beasts = opts.beasts || (opts.lamps ? null : ['elephant', 'tiger', 'leopard', 'lion']);
   const items = beasts || opts.lamps, n = items.length;
@@ -17,14 +17,27 @@ export function roar(sub, opts = {}) {
   el.innerHTML = `<div class="rays"></div><div class="wave"></div><div class="wave w2"></div><div class="wave w3"></div>
   <div class="pack n${n}">${items.map((k, i) => beasts
     ? `<div class="beast b${i}"><img src="img/beasts/${beastImg[k] || k}.png" alt=""><b>${t('beast_' + k)}</b></div>`
-    : `<div class="lamp b${i}"><i></i><b>${k}</b></div>`).join('')}</div>
+    : `<div class="lamp b${i}"><span class="pill"><i></i><b>${k}</b></span></div>`).join('')}${beasts ? '' : `<div class="book"><div class="cv"><em>${[...(opts.book || '')].join('<br>')}</em><span class="sew"></span></div></div>`}</div>
   <div class="txt"><h2>${opts.title || t('resonance')}</h2><p>${sub}</p></div><small class="tap">${t('tapNext')}</small>`;
   // 每一個登場的間隔；全部到齊後齊鳴
-  const step = beasts ? 330 : 240, hitAt = 250 + n * step + 300;
+  // 故事燈：一盞盞亮起 → 字化成金球 → 飛向中央匯成一本書（書出現的那一刻＝齊鳴）
+  const step = beasts ? 330 : 240, hitAt = beasts ? 250 + n * step + 300 : 250 + n * step + 500 + (n - 1) * 70 + 650;
   el.style.setProperty('--hit', hitAt + 'ms');
   el.querySelectorAll('.pack > div').forEach((d, i) => d.style.setProperty('--d', (250 + i * step) + 'ms'));
+  const ts0 = [];
   return new Promise(res => {
-    el.hidden = false; el.classList.remove('go', 'out'); void el.offsetWidth; el.classList.add('go');
+    el.hidden = false; el.classList.remove('go', 'out'); void el.offsetWidth;
+    if (!beasts) { // 每顆金球要飛到書的位置：量好各自離中心多遠
+      const pk = el.querySelector('.pack').getBoundingClientRect(), cx = pk.left + pk.width / 2, cy = pk.top + pk.height / 2;
+      el.querySelectorAll('.lamp').forEach((d, i) => {
+        const r = d.querySelector('i').getBoundingClientRect();
+        d.style.setProperty('--tx', (cx - r.left - r.width / 2) + 'px'); d.style.setProperty('--ty', (cy - r.top - r.height / 2) + 'px');
+        d.style.setProperty('--f', (250 + n * step + 500 + i * 70) + 'ms');
+      });
+      el.style.setProperty('--ball', (250 + n * step + 100) + 'ms');
+      ts0.push(setTimeout(() => sfx.sense(), 250 + n * step + 500));
+    }
+    el.classList.add('go');
     const ts = items.map((_, i) => setTimeout(() => sfx.bell(BELLS[i % BELLS.length] * (beasts ? 1 : 2)), 250 + i * step));
     ts.push(setTimeout(() => {
       if (beasts) sfx.roar(); else [293.7, 370, 440, 587.3].forEach((f, i) => setTimeout(() => sfx.bell(f), i * 90));
@@ -32,7 +45,7 @@ export function roar(sub, opts = {}) {
     }, hitAt));
     let done = false;
     const close = () => {
-      if (done) return; done = true; ts.forEach(clearTimeout); clearTimeout(auto);
+      if (done) return; done = true; ts.forEach(clearTimeout); ts0.forEach(clearTimeout); clearTimeout(auto);
       el.classList.add('out'); setTimeout(() => { el.hidden = true; el.classList.remove('go', 'out'); res(); }, 450);
     };
     const auto = setTimeout(close, hitAt + 6000);

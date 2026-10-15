@@ -1373,8 +1373,8 @@ function taleFound(s) {
     visited.add(s.id); G.bonus += QUIZ_REWARD;
     const card = () => showCard(s.name, s.sub, s.text, s.fact, s.id);
     if (!talesDone()) { setTimeout(card, 400); return; }
-    // 七個故事都回來了：全畫面七盞故事燈依序亮起，收起後才看最後一則故事卡、告訴你下一階開了
-    setTimeout(() => roar(t('talesAllSub'), { kind: 'tales', title: t('talesAllTitle'), lamps: TALES.map(x => x.name) }).then(() => {
+    // 七個故事都回來了：全畫面七個故事化成金球、匯成一本《台北誌》，收起後才看最後一則故事卡、告訴你下一階開了
+    setTimeout(() => roar(t('talesAllSub'), { kind: 'tales', title: t('talesAllTitle'), book: t('taipeiBook'), lamps: TALES.map(x => x.name) }).then(() => {
       card(); setTimeout(() => toast(t('stage2Open', { realm: REALMS[REQ] })), 800);
     }), 600);
   }));
