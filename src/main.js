@@ -226,11 +226,12 @@ $('#meBtn').addEventListener('click', e => { e.stopPropagation(); hudKey = ''; h
 meEl.addEventListener('click', e => { if (e.target.closest('.xbtn')) meEl.hidden = true; });
 // 小地圖：點地圖 icon 才展開，8 秒後自動收起
 let miniT = 0;
-$('#mapBtn').addEventListener('click', e => {
-  e.stopPropagation(); const on = !$('#mini').classList.contains('show');
-  $('#mini').classList.toggle('show', on); $('#mapBtn').classList.toggle('on', on);
-  if (on) showMini(); else { clearTimeout(miniT); }
-});
+// 靈界地圖：點地圖 icon（或角落的小地圖）直接滿版，一次只看「我在哪裡、下一站在哪」
+const bigEl = $('#bigmap'), bigCv = $('#bigcv'), bg = bigCv.getContext('2d');
+function openBigMap() { clearTimeout(miniT); $('#mini').classList.remove('show'); $('#mapBtn').classList.remove('on'); bigEl.hidden = false; }
+$('#mapBtn').addEventListener('click', e => { e.stopPropagation(); openBigMap(); });
+$('#mini').addEventListener('click', e => { e.stopPropagation(); openBigMap(); });
+bigEl.addEventListener('click', e => { if (e.target.closest('.xbtn')) bigEl.hidden = true; });
 addEventListener('keydown', e => { input.keys[e.code] = true; if (e.code === 'Space') input.jump = true; if (e.code === 'KeyE' || e.code === 'KeyQ') doSense(); if ((e.code === 'Enter' || e.code === 'Space') && talk) nextLine(); });
 addEventListener('keyup', e => { input.keys[e.code] = false; if (e.code === 'Space') input.jump = false; });
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -435,12 +436,25 @@ base.width = base.height = N;
   g.putImageData(img, 0, 0);
 }
 function drawMini() {
-  const s = mini.width = mini.height = Math.round(mini.clientWidth * Math.min(devicePixelRatio, 2)), k = s / N, q = k * Math.sqrt(S);   // q：標記大小，島變大時標記不會縮成一點
-  mg.imageSmoothingEnabled = false; mg.drawImage(base, 0, 0, s, s);
+  drawMap(mini, mg, false);
+  if (!bigEl.hidden) {
+    drawMap(bigCv, bg, true);
+    const g = guideTarget(), sub = t('mapNext', { name: g.name });
+    if ($('#mapSub').textContent !== sub) $('#mapSub').textContent = sub;
+  }
+}
+function drawMap(cv, mg, big) {
+  // 滿版時以「我」為中心放大約 2.4 倍（碰到地圖邊就停），小地圖則看整座島
+  const dpr = Math.min(devicePixelRatio, 2), s = cv.width = cv.height = Math.round(cv.clientWidth * dpr);
+  if (!s) return;
+  const W = big ? Math.round(N / 2.4) : N, x0 = big ? clamp(Math.round(P.x - W / 2), 0, N - W) : 0, z0 = big ? clamp(Math.round(P.z - W / 2), 0, N - W) : 0;
+  const k = s / W, q = (s / N) * Math.sqrt(S) * (big ? 1.5 : 1);   // q：標記大小，島變大時標記不會縮成一點
+  mg.imageSmoothingEnabled = false; mg.drawImage(base, x0, z0, W, W, 0, 0, s, s);
+  mg.save(); mg.translate(-x0 * k, -z0 * k);
   const dot = (x, z, col, rad) => { mg.fillStyle = col; mg.beginPath(); mg.arc(x * k, z * k, rad * q, 0, 7); mg.fill(); };
   for (const n of NODES) dot(n.pos[0], n.pos[2], n.awake ? '#ffcf5a' : n.stage === 2 && !stage1Done() ? 'rgba(150,165,180,.7)' : `rgba(255,190,110,${0.6 + 0.4 * Math.sin(G.t * 4)})`, n.stage === 2 ? 2.2 : 3.2);
   dot(GATE[0], GATE[2], G.gateOpen ? '#ffcf5a' : '#b9483c', 3.2);
-  if (guideOn) { // 「帶我去」的目的地：金色脈動圈＋虛線
+  if (guideOn || big) { // 「帶我去」的目的地：金色脈動圈＋虛線
     const g = guideTarget(), x = g.pos[0] * k, z = g.pos[2] * k;
     mg.setLineDash([3 * q, 3 * q]); mg.strokeStyle = 'rgba(255,207,90,.85)'; mg.lineWidth = q; mg.beginPath(); mg.moveTo(P.x * k, P.z * k); mg.lineTo(x, z); mg.stroke(); mg.setLineDash([]);
     mg.lineWidth = 1.4 * q; mg.beginPath(); mg.arc(x, z, (6 + 2 * Math.sin(G.t * 4)) * q, 0, 7); mg.stroke();
@@ -452,9 +466,19 @@ function drawMini() {
     mg.restore(); mg.strokeStyle = c.col; mg.lineWidth = 0.9 * q; mg.beginPath(); mg.arc(x, z, rr, 0, 7); mg.stroke();
   }
   for (const sp of SPOTS) if (sp.r) { mg.strokeStyle = '#fff'; mg.lineWidth = q * 0.8; mg.beginPath(); mg.arc((sp.pos[0] + 0.5) * k, (sp.pos[1] + 0.5) * k, 2 * q, 0, 7); sp.found ? (mg.fillStyle = '#fff', mg.fill()) : mg.stroke(); }
-  mg.save(); mg.translate(P.x * k, P.z * k); mg.rotate(-P.yaw); mg.scale(q / k, q / k);
+  if (big) { // 滿版時把「我」放大，外面一圈脈動光，旁邊寫「你在這裡」
+    const px = P.x * k, pz = P.z * k, pr = (10 + 3 * Math.sin(G.t * 4)) * q;
+    mg.fillStyle = 'rgba(88,176,234,.25)'; mg.beginPath(); mg.arc(px, pz, pr * 1.6, 0, 7); mg.fill();
+    mg.strokeStyle = '#fff'; mg.lineWidth = 1.2 * q; mg.beginPath(); mg.arc(px, pz, pr, 0, 7); mg.stroke();
+    mg.font = `900 ${16 * dpr}px sans-serif`; mg.textAlign = 'center'; mg.lineWidth = 4 * dpr; mg.strokeStyle = 'rgba(6,14,26,.85)';
+    const ty = pz - pr * 1.6 - 6 * dpr - z0 * k < 20 * dpr ? pz + pr * 1.6 + 20 * dpr : pz - pr * 1.6 - 6 * dpr;
+    mg.strokeText(t('youHere'), px, ty); mg.fillStyle = '#fff'; mg.fillText(t('youHere'), px, ty);
+  }
+  const ps = big ? 1.8 : 1;
+  mg.save(); mg.translate(P.x * k, P.z * k); mg.rotate(-P.yaw); mg.scale(q * ps / k, q * ps / k);
   mg.fillStyle = '#fff'; mg.strokeStyle = '#123'; mg.lineWidth = k; mg.beginPath();
   mg.moveTo(0, 5 * k); mg.lineTo(3.4 * k, -3 * k); mg.lineTo(-3.4 * k, -3 * k); mg.closePath(); mg.fill(); mg.stroke(); mg.restore();
+  mg.restore();
 }
 
 // ---------- 劇情對話 ----------
@@ -923,7 +947,7 @@ rcv.addEventListener('pointerup', ptrUp); rcv.addEventListener('pointercancel', 
 rcv.addEventListener('wheel', e => { e.preventDefault(); setZoom((drawRadar.range || 500) * (e.deltaY > 0 ? 1.15 : 1 / 1.15)); }, { passive: false });
 // iPhone 上畫面一直在更新時，Safari 有時會把點擊當成「懸停」而不送出 click；
 // 在滿版頁裡手指按下又放開、沒拖動，卻等不到 click 時，自己補送一次
-for (const page of [radar, $('#dex'), $('#spot'), $('#settings'), $('#me')]) {
+for (const page of [radar, $('#dex'), $('#spot'), $('#settings'), $('#me'), $('#bigmap')]) {
   let down = null, wait = 0;
   page.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, el: e.target }; }, true);
   page.addEventListener('pointerup', e => {
