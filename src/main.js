@@ -824,9 +824,9 @@ function wildFight(w) {
   if (params.has('nobattle')) { w.gone = 45; G.bonus += WILD_GAIN; return; }
   const node = { id: w.kind, wild: true, star: 1, name: t('wildName', { beast: t('beast_' + w.kind) }) };
   G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show'); sfx.battle(true);
-  battle(node, G.realm, REALMS[G.realm]).then(ok => {
+  battle(node, G.realm, REALMS[G.realm], [t('rwLight', { n: WILD_GAIN })]).then(ok => {
     sfx.battle(false); G.state = 'play'; $('#hud').classList.add('play', 'on'); G.wildCd = 8;
-    if (ok) { w.gone = 45; G.bonus += WILD_GAIN; burst(w.x, ground(w.x, w.z) + 1.5, w.z, [1, 0.85, 0.5], 40, 5); pop(t('wildWin', { n: WILD_GAIN }), 'gold'); }
+    if (ok) { xiDance(); w.gone = 45; G.bonus += WILD_GAIN; burst(w.x, ground(w.x, w.z) + 1.5, w.z, [1, 0.85, 0.5], 40, 5); pop(t('wildWin', { n: WILD_GAIN }), 'gold'); }
     else {
       const loss = Math.min(WILD_LOSS, avail()); G.bonus -= loss;
       // 被打退：往後退幾步，濁影也先離開
@@ -843,18 +843,26 @@ function bossFight() {
   if (params.has('nobattle')) { G.bossDone = true; return; }
   const node = { id: 'boss', boss: true, star: 3, name: t('beast_boss') };
   G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show'); sfx.battle(true);
-  battle(node, G.realm, REALMS[G.realm]).then(ok => {
+  battle(node, G.realm, REALMS[G.realm], [t('rwBoss'), t('rwFinal')]).then(ok => {
     sfx.battle(false); G.state = 'play'; $('#hud').classList.add('play', 'on'); G.wildCd = 8;
-    if (ok) { G.bossDone = true; burst(GATE[0], GATE[1] + 3, GATE[2] - 1.6, [1, 0.85, 0.5], 120, 10); sfx.gate(); pop(t('bossWin'), 'gold'); }
+    if (ok) { xiDance(6); G.bossDone = true; burst(GATE[0], GATE[1] + 3, GATE[2] - 1.6, [1, 0.85, 0.5], 120, 10); sfx.gate(); pop(t('bossWin'), 'gold'); }
     else { G.bonus -= avail(); P.z = GATE[2] - 5; toast(t('bossLose')); }
   });
 }
 
+// 過關後阿汐跑到身邊跳舞慶祝幾秒，跳完回原位
+function xiDance(sec = 4.5) {
+  if (!XI.home) XI.home = [XI.x, XI.z, XI.yaw];
+  const a = cam.yaw + 0.9; XI.x = P.x + Math.sin(a) * 1.8; XI.z = P.z + Math.cos(a) * 1.8; XI.yaw = Math.atan2(P.x - XI.x, P.z - XI.z);
+  XI.danceEnd = G.t + sec;
+}
 // 開門前先淨化擋在門前的濁流；?nobattle 可跳過（測試用）
 function fight(n, then) {
   if (params.has('nobattle')) return then();
   G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show'); sfx.battle(true);
-  battle(n, G.realm, REALMS[G.realm]).then(ok => { sfx.battle(false); G.state = 'play'; $('#hud').classList.add('play', 'on'); if (ok) then(); else toast(t('battleLeft', { name: n.name })); });
+  const rw = [t('rwGate', { seal: n.seal, name: n.name }), t('rwBeast', { beast: t('beast_' + n.id) })];
+  if (n.stage === 1 && S1.filter(m => !m.awake).length === 1) rw.push(t('rwStage2'));
+  battle(n, G.realm, REALMS[G.realm], rw).then(ok => { sfx.battle(false); G.state = 'play'; $('#hud').classList.add('play', 'on'); if (ok) { xiDance(); then(); } else toast(t('battleLeft', { name: n.name })); });
 }
 
 function awaken(n) {
@@ -892,7 +900,7 @@ function unite() {
 function openGate() {
   G.gateOpen = true; G.gateT = 0; sfx.gate();
   pop(t('gateOpen'), 'gold');
-  XI.x = GATE[0] + 3.6; XI.z = GATE[2] - 3; XI.yaw = Math.PI; XI.wave = true;
+  if (XI.home) XI.home = [GATE[0] + 3.6, GATE[2] - 3, Math.PI]; else { XI.x = GATE[0] + 3.6; XI.z = GATE[2] - 3; XI.yaw = Math.PI; } XI.wave = true;
   burst(GATE[0], GATE[1] + 3, GATE[2], [1, 0.9, 0.5], 90, 10);
   setTimeout(() => toast(G.geo ? t('xiGeo') : t('xiIsland')), 1500);
 }
@@ -1437,7 +1445,9 @@ function frame(dt) {
   const pa = { phase: P.phase, move: P.move, air: !P.onGround && !P.swim, swim: P.swim, t: G.t };
   drawAvatar(r, BLUE, P.x, P.ry - (P.swim ? 0.0 : 0), P.z, P.yaw, pa, G.state === 'ending' ? 0.3 : 0);
   const xg = ground(XI.x, XI.z);
-  drawAvatar(r, ORANGE, XI.x, xg, XI.z, XI.yaw, { phase: 0, move: 0, air: false, swim: false, t: G.t + 1.3, wave: XI.wave });
+  const dn = G.t < (XI.danceEnd || 0), hop = dn ? Math.abs(Math.sin(G.t * 6)) * 0.45 : 0;
+  drawAvatar(r, ORANGE, XI.x, xg + hop, XI.z, dn ? XI.yaw + Math.sin(G.t * 3) * 1.2 : XI.yaw, { phase: 0, move: 0, air: false, swim: false, t: G.t + 1.3, wave: XI.wave, dance: dn });
+  if (XI.home && !dn) { XI.x = XI.home[0]; XI.z = XI.home[1]; XI.yaw = XI.home[2]; XI.home = null; }
 
   // 濁影：暗紫色的守門獸，追人的時候發紅光
   for (const w of wilds) {

@@ -124,6 +124,7 @@ function strings(freqs, dur = 2.5, vol = 0.05, delay = 0) {
   }
 }
 
+let victoryBuf = null;
 // D 大調五聲音階
 const PENTA = [587.3, 659.3, 740, 880, 987.8, 1174.7, 1318.5];
 let pickN = 0;
@@ -177,10 +178,20 @@ export const sfx = {
         const s = ctx.createBufferSource(); s.buffer = buf; s.loop = true; s.loopStart = 0.02; s.loopEnd = buf.duration - 0.02; s.connect(fight.gain); s.start(ctx.currentTime + 0.05, 0.02); fight.src = s;
         fight.gain.gain.cancelScheduledValues(ctx.currentTime); fight.gain.gain.setTargetAtTime(0.55, ctx.currentTime + 0.05, 0.3); };
       fight.on = true;
+      if (!victoryBuf) loadTrack('audio/victory.mp3').then(b => { victoryBuf = b; }).catch(() => { });
       if (fight.buf) go(fight.buf); else loadTrack('audio/battle-loop.mp3').then(b => { fight.buf = b; go(b); }).catch(() => { });
     } else if (fight) {
       fight.on = false; fight.gain.gain.setTargetAtTime(0, now, 0.4); const src = fight.src; fight.src = null; if (src) setTimeout(() => { try { src.stop(); } catch { } }, 2500);
     }
+  },
+  // 過關：戰鬥配樂收掉，鋼片琴與豎琴先亮一下，接著管弦樂慶祝號角（Lyria 生成，audio/victory.mp3）
+  victory() {
+    if (!ctx) return;
+    if (fight) fight.gain.gain.setTargetAtTime(0, ctx.currentTime, 0.15);
+    [587.3, 740, 880, 1174.7, 1480, 1760].forEach((f, i) => celesta(f, 0.1, i * 0.06));
+    [293.7, 370, 440, 587.3, 740, 880].forEach((f, i) => harp(f, 0.12, i * 0.04));
+    const play = buf => { const s = ctx.createBufferSource(), g = ctx.createGain(); g.gain.value = 0.85; s.buffer = buf; s.connect(g); g.connect(master); s.start(ctx.currentTime + 0.15); };
+    if (victoryBuf) play(victoryBuf); else loadTrack('audio/victory.mp3').then(b => { victoryBuf = b; play(b); }).catch(() => strings([293.7, 370, 440, 587.3], 3, 0.06));
   },
   // 結局：背景音樂淡出，播放管弦樂結尾曲
   ending() {
