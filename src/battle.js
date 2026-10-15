@@ -57,7 +57,8 @@ export function battle(node, lv = 0, realm = '') {
     start(node, lv, resolve); quitB.setAttribute('aria-label', t('battleQuit'));
     const make = gameOf(node);
     const note = lv ? '\n' + t('realmPower', { realm, p: lv * 20 }) : '';
-    showMsg(SPR[node.id] ? t('battleBeast', { beast: t('beast_' + node.id) }) : t('battleTitle', { name: node.name }), t('battleTip_' + node.id) + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
+    if (node.wild) showMsg(t('wildTitle', { name: node.name }), t('wildTip') + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
+    else showMsg(SPR[node.id] ? t('battleBeast', { beast: t('beast_' + node.id) }) : t('battleTitle', { name: node.name }), t('battleTip_' + node.id) + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
     cancelAnimationFrame(raf); last = performance.now(); raf = requestAnimationFrame(tick);
   });
 }
@@ -162,6 +163,8 @@ function lose() {
   if (!S.run) return;
   S.run = false; sfx.deny();
   const { node, lv, done } = S; tries[node.id]++;
+  // 野外的濁影：輸了就結束（外面會扣靈光），不給重來
+  if (node.wild) { showMsg(t('battleLose'), t('lose_' + gameOf(node).key), t('wildOk'), () => { S = null; el.classList.remove('show'); cancelAnimationFrame(raf); done(false); }); return; }
   showMsg(t('battleLose'), t('lose_' + gameOf(node).key) + '\n' + t('loseWalk'), t('battleRetry'), () => { start(node, lv, done); S.run = true; });
 }
 

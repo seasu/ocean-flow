@@ -137,6 +137,23 @@ const motes = [];
   pick((x, z, k, h) => h >= 8 && k !== T.BUILDING && k !== T.TOWER, more(8));
   pick((x, z, k, h) => world.land[z * N + x] && k !== T.BUILDING && k !== T.TOWER && h >= 3, more(10));
 }
+// 濁影：被濁流附身的守門獸影子，在靈界地圖上遊蕩；靠近會追上來，碰到就開戰（贏 +靈光、輸 −靈光）
+const WILD_KINDS = ['tiger', 'leopard', 'lion', 'elephant'], WILD_N = 5, WILD_GAIN = 2, WILD_LOSS = 2;
+const wildMesh = Object.fromEntries(WILD_KINDS.map(k => [k, r.mesh(beastMesh(k))]));
+const wilds = [];
+const wildR = rng(11);
+function placeWild(w, kind) {
+  for (let i = 0; i < 400; i++) {
+    const x = 3 + Math.floor(wildR() * (N - 6)), z = 3 + Math.floor(wildR() * (N - 6)), k = world.K[z * N + x], h = world.H[z * N + x];
+    if (!world.land[z * N + x] || k === T.BUILDING || k === T.TOWER || h < 1.5) continue;
+    if (Math.hypot(x - PLACES.spawn[0], z - PLACES.spawn[1]) < 14 * S) continue;
+    if (NODES.some(n => Math.hypot(n.pos[0] - x, n.pos[2] - z) < 8)) continue;
+    if (wilds.some(o => o !== w && Math.hypot(o.x - x, o.z - z) < 14 * S)) continue;
+    Object.assign(w, { x: x + 0.5, z: z + 0.5, hx: x + 0.5, hz: z + 0.5, kind: kind || WILD_KINDS[Math.floor(wildR() * WILD_KINDS.length)], yaw: wildR() * 6.28, gone: 0, chase: false });
+    return;
+  }
+}
+for (let i = 0; i < WILD_N; i++) { const w = {}; wilds.push(w); placeWild(w, WILD_KINDS[i % WILD_KINDS.length]); }
 const COST = 3;
 
 // 台灣之美：走近就會收進圖鑑（內容為真實地景的簡介）
@@ -763,6 +780,43 @@ function buildVein(n) {
   n.vein = r.mesh(b);
 }
 
+function updateWilds(dt) {
+  G.wildCd = Math.max(0, (G.wildCd || 0) - dt);
+  const live = G.state === 'play' && G.playT > 20 && !talk;
+  for (const w of wilds) {
+    if (w.gone) { w.gone = Math.max(0, w.gone - dt); if (!w.gone) placeWild(w); continue; }
+    const dx = P.x - w.x, dz = P.z - w.z, d = Math.hypot(dx, dz);
+    const chase = live && !G.wildCd && d < 9 && !P.swim;
+    if (chase && !w.chase && G.t - (G.wildWarnT ?? -99) > 6) { G.wildWarnT = G.t; sfx.deny(); toast(t('wildNear', { beast: t('beast_' + w.kind) })); }
+    w.chase = chase;
+    let tx = w.hx + Math.sin(G.t * 0.4 + w.hx) * 3 - w.x, tz = w.hz + Math.cos(G.t * 0.35 + w.hz) * 3 - w.z, sp = 1.2;
+    if (chase) { tx = dx; tz = dz; sp = 3.2; }
+    const td = Math.hypot(tx, tz);
+    if (td > 0.3) {
+      const nx = w.x + tx / td * sp * dt, nz = w.z + tz / td * sp * dt, gx = Math.floor(nx), gz = Math.floor(nz);
+      if (gx > 1 && gz > 1 && gx < N - 2 && gz < N - 2 && world.land[gz * N + gx] && world.K[gz * N + gx] !== T.BUILDING && world.K[gz * N + gx] !== T.TOWER) { w.x = nx; w.z = nz; }
+      w.yaw = Math.atan2(tx, tz) + Math.PI;
+    }
+    if (chase && d < 1.4) wildFight(w);
+  }
+}
+function wildFight(w) {
+  G.wildCd = 8; w.chase = false;
+  if (params.has('nobattle')) { w.gone = 45; G.bonus += WILD_GAIN; return; }
+  const node = { id: w.kind, wild: true, star: 1, name: t('wildName', { beast: t('beast_' + w.kind) }) };
+  G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show'); sfx.battle(true);
+  battle(node, G.realm, REALMS[G.realm]).then(ok => {
+    sfx.battle(false); G.state = 'play'; $('#hud').classList.add('play', 'on'); G.wildCd = 8;
+    if (ok) { w.gone = 45; G.bonus += WILD_GAIN; burst(w.x, ground(w.x, w.z) + 1.5, w.z, [1, 0.85, 0.5], 40, 5); pop(t('wildWin', { n: WILD_GAIN }), 'gold'); }
+    else {
+      const loss = Math.min(WILD_LOSS, avail()); G.bonus -= loss;
+      // 被打退：往後退幾步，濁影也先離開
+      const a = Math.atan2(P.x - w.x, P.z - w.z); P.x += Math.sin(a) * 3; P.z += Math.cos(a) * 3; w.gone = 20;
+      toast(loss ? t('wildLose', { n: loss }) : t('wildLose0'));
+    }
+  });
+}
+
 // 開門前先淨化擋在門前的濁流；?nobattle 可跳過（測試用）
 function fight(n, then) {
   if (params.has('nobattle')) return then();
@@ -881,6 +935,7 @@ function updateGame(dt) {
       toast(t('plusOne', { n: avail() }));
     }
   }
+  updateWilds(dt);
   // 靈脈節點：走到門前只提示，按了才開始
   let charging = null, act = null;
   for (const n of NODES) {
@@ -1335,6 +1390,13 @@ function frame(dt) {
   const xg = ground(XI.x, XI.z);
   drawAvatar(r, ORANGE, XI.x, xg, XI.z, XI.yaw, { phase: 0, move: 0, air: false, swim: false, t: G.t + 1.3, wave: XI.wave });
 
+  // 濁影：暗紫色的守門獸，追人的時候發紅光
+  for (const w of wilds) {
+    if (w.gone) continue;
+    const gy = ground(w.x, w.z), bob = Math.sin(G.t * 3 + w.hx) * 0.08, mw = M.ident();
+    M.translate(mw, w.x, gy + bob, w.z); M.rotY(mw, w.yaw); M.scale(mw, 0.85, 0.85, 0.85);
+    r.draw(wildMesh[w.kind], mw, w.chase ? [0.75, 0.35, 0.6] : [0.42, 0.34, 0.62], w.chase ? 0.25 + 0.15 * Math.sin(G.t * 10) : 0.12);
+  }
   // 半透明：水、影子
   r.blend(1);
   r.drawWater(water, env);
@@ -1352,6 +1414,11 @@ function frame(dt) {
     const y = m.y + Math.sin(G.t * 2 + m.ph) * 0.18;
     r.box(m.x, y, m.z, 0.34, 0.34, 0.34, [0.7, 1, 1], 1, vis, G.t * 2 + m.ph);
     r.box(m.x, y, m.z, 0.8, 0.8, 0.8, [0.4, 0.85, 1], 1, vis * 0.25, -G.t + m.ph);
+  }
+  for (const w of wilds) {
+    if (w.gone) continue;
+    const gy = ground(w.x, w.z);
+    for (let i = 0; i < 5; i++) { const a = G.t * 1.4 + i * 1.256 + w.hx; r.box(w.x + Math.cos(a) * 1.1, gy + 1 + Math.sin(G.t * 2 + i) * 0.4, w.z + Math.sin(a) * 1.1, 0.26, 0.26, 0.26, w.chase ? [1, 0.3, 0.5] : [0.6, 0.4, 1], 1, 0.7, a); }
   }
   for (const n of NODES) {
     const bright = n.stage === 2 && !stage1Done() ? 0.05 : n.awake ? 0.22 : !canOpen(n) ? 0.06 : 0.14 + (G.sense > 0 ? 0.25 : 0) + n.charge * 0.3;
@@ -1433,4 +1500,4 @@ if (params.has('play') || params.has('at') || params.has('awake') || params.has(
     setTimeout(() => { pop(t('demoSet', { stage: t('demoStage')[cur - 1] }), 'gold'); setTimeout(() => toast(cur === 3 ? t('stage2Open', { realm: REALMS[REQ] }) : t('talesOpen')), 2200); }, 600);
   }
 }
-window.__game = { showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
+window.__game = { wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
