@@ -8,7 +8,7 @@ import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
 import { TALES } from './stories.js';
 import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
 import { battle } from './battle.js';
-import { openLore, openRealms, CH } from './lore.js';
+import { openLore, openRealms, openCast, CH } from './lore.js';
 import { VERSION } from './version.js';
 
 applyStatic();
@@ -219,6 +219,7 @@ for (const b of document.querySelectorAll('#menuBtn, #title .more')) b.addEventL
 soundT.addEventListener('click', () => { setMuted(!muted); syncSound(); });
 settings.addEventListener('click', e => { if (e.target.closest('.xbtn')) settings.hidden = true; });
 $('#loreBtn').addEventListener('click', () => { settings.hidden = true; openLore(); });
+$('#castBtn').addEventListener('click', () => { settings.hidden = true; openCast(); });
 $('#howBtn').addEventListener('click', () => { settings.hidden = true; say([{ title: t('goTitle'), steps: [t('goS1'), t('goS2'), t('goS3')] }]); });
 $('#realmBtn').addEventListener('click', () => { settings.hidden = true; openRealms({ realms: REALMS, need: NEED, now: G.state === 'title' ? -1 : G.realm, geo: G.geo }); });
 // 個人資訊：點左上角頭像，滿版顯示走了多少步、境界與收集進度

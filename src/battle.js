@@ -30,10 +30,11 @@ const bar = el.querySelector('.bar i'), hpEl = el.querySelector('.hp');
 const msg = el.querySelector('.msg'), msgH = msg.querySelector('h3'), msgP = msg.querySelector('p'), msgB = msg.querySelector('button');
 
 let S = null, raf = 0, last = 0;
-// 四獸山的守門獸（設計圖：ocean-flow-origin/character-ref/beasts/）：被濁流纏住，淨化越多越露出原本的顏色
-const BEASTS = ['elephant', 'tiger', 'leopard', 'lion'];
+// 守門獸（設計圖：ocean-flow-origin/character-ref/beasts/）：被濁流纏住，淨化越多越露出原本的顏色
+// 第三階三流：城＝廟口的龍、海＝黑潮的海龜、山＝台灣黑熊
+const BEASTS = { elephant: 'elephant', tiger: 'tiger', leopard: 'leopard', lion: 'lion', city: 'dragon', sea: 'turtle', peak: 'bear' };
 const SPR = {};
-for (const k of BEASTS) { const im = new Image(); im.src = `img/beasts/${k}.png`; SPR[k] = im; }
+for (const [id, k] of Object.entries(BEASTS)) { const im = new Image(); im.src = `img/beasts/${k}.png`; SPR[id] = im; }
 const tint = document.createElement('canvas'), tg = tint.getContext('2d');
 // 下方是玩家自己的頭像
 const me = new Image();
