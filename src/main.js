@@ -913,10 +913,9 @@ function resonance() {
 }
 // 三流歸一：城、海、山三道光一起升起，台北靈門隨後開啟
 function unite() {
-  pop(t('flowsUnite'), 'gold'); S2.forEach((n, i) => setTimeout(() => sfx.bell(n.bell), i * 260));
   for (const n of NODES) { n.flash = 1; burst(n.pos[0], n.pos[1] + 2, n.pos[2], [1, 0.85, 0.45], 40, 9); }
-  try { navigator.vibrate && navigator.vibrate([60, 60, 60, 60, 160]); } catch { }
-  setTimeout(openGate, 2600);
+  // 全畫面：龍、龜、熊一起登場齊吼，收起後台北靈門才打開
+  roar(t('flowsSub'), { kind: 'flows', title: t('flowsUnite'), beasts: S2.map(n => n.id) }).then(() => setTimeout(openGate, 300));
 }
 
 function openGate() {
@@ -1372,11 +1371,12 @@ function taleFound(s) {
     G.state = 'play';
     if (!ok) { toast(t('quizLeft', { name: s.name })); return; }
     visited.add(s.id); G.bonus += QUIZ_REWARD;
-    setTimeout(() => showCard(s.name, s.sub, s.text, s.fact, s.id), 400);
-    if (talesDone()) setTimeout(() => {
-      pop(t('talesAll'), 'gold'); sfx.bell(196); setTimeout(() => sfx.bell(220), 240); setTimeout(() => sfx.bell(293.7), 480);
-      setTimeout(() => toast(t('stage2Open', { realm: REALMS[REQ] })), 2600);
-    }, 1600);
+    const card = () => showCard(s.name, s.sub, s.text, s.fact, s.id);
+    if (!talesDone()) { setTimeout(card, 400); return; }
+    // 七個故事都回來了：全畫面七盞故事燈依序亮起，收起後才看最後一則故事卡、告訴你下一階開了
+    setTimeout(() => roar(t('talesAllSub'), { kind: 'tales', title: t('talesAllTitle'), lamps: TALES.map(x => x.name) }).then(() => {
+      card(); setTimeout(() => toast(t('stage2Open', { realm: REALMS[REQ] })), 800);
+    }), 600);
   }));
 }
 
