@@ -587,7 +587,9 @@ function say(lines, done, who = t('xi')) {
 function showLine() {
   const l = talk.lines[talk.i], em = typeof l === 'object';
   $('#dialog').classList.toggle('em', em);
-  $('#dialog b').textContent = em ? l.title : talk.who; $('#dialog p').textContent = em ? l.text : l;
+  $('#dialog b').textContent = em ? l.title : talk.who;
+  if (em && l.steps) $('#dialog p').innerHTML = '<ol>' + l.steps.map((x, i) => `<li><i>${i + 1}</i><span>${x}</span></li>`).join('') + '</ol>';
+  else $('#dialog p').textContent = em ? l.text : l;
   $('#dialog small').textContent = em ? t('gotIt') : t('tapNext');
 }
 function nextLine() {
@@ -611,7 +613,7 @@ function start(mode) {
   if (innerWidth < 600) setTimeout(() => { $('.hint').style.display = 'none'; }, 10000);
   cam.yaw = 0; cam.tx = P.x; cam.ty = P.y + 1.5; cam.tz = P.z;
   if (G.geo) geo.start();
-  say([...(G.geo ? GEO_LINES : LINES), { title: t('xiuTitle'), text: t('xiuIntro') }], () => {
+  say([...(G.geo ? GEO_LINES : LINES), { title: t('goTitle'), steps: [t('goS1'), t('goS2'), t('goS3')] }], () => {
     G.state = 'play'; $('#hud').classList.add('play'); XI.wave = false;
     pop(t('firstSeal'), 'gold');
     // 不直接跳進雷達：讓雷達按鈕發光＋小提示，由玩家自己點開
