@@ -2,7 +2,7 @@
   "source": "Wikimedia Commons（照片取自中文維基百科條目）",
   "sourceUrl": "https://commons.wikimedia.org/",
   "license": "各照片依其標示的自由授權使用（作者與授權見 images[].author / license）",
-  "fetchedAt": "2026-10-14T09:11:07.608Z",
+  "fetchedAt": "2026-10-15T02:29:39.492Z",
   "spots": {
     "leopard": {
       "src": "commons",
@@ -81,10 +81,10 @@
         },
         {
           "file": "data/photos/c-sea-3.jpg",
-          "subject": "Northeast and Yilan Coast National Scenic Area, Tourism Administration 1",
-          "author": "Tourism Administration, MOTC",
-          "license": "Attribution",
-          "page": "https://commons.wikimedia.org/wiki/File:Northeast_and_Yilan_Coast_National_Scenic_Area,_Tourism_Administration_1.jpg"
+          "subject": "龜山戴帽-攝影者吳裕隆",
+          "author": "Neycnsa",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:%E9%BE%9C%E5%B1%B1%E6%88%B4%E5%B8%BD-%E6%94%9D%E5%BD%B1%E8%80%85%E5%90%B3%E8%A3%95%E9%9A%86.jpg"
         }
       ]
     },
@@ -109,10 +109,10 @@
         },
         {
           "file": "data/photos/c-peak-3.jpg",
-          "subject": "Yushan Main Peak Chien Tzu Hao 02",
-          "author": "A22605728",
-          "license": "CC BY-SA 4.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Yushan_Main_Peak_Chien_Tzu_Hao_02.jpg"
+          "subject": "Yushan Main Peak seen from Dongpu Mountain in the afternoon on 28 January 2017",
+          "author": "Chi-Hung Lin",
+          "license": "CC BY-SA 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Yushan_Main_Peak_seen_from_Dongpu_Mountain_in_the_afternoon_on_28_January_2017.jpg"
         }
       ]
     },
@@ -249,10 +249,10 @@
         },
         {
           "file": "data/photos/c-turtle-3.jpg",
-          "subject": "Northeast and Yilan Coast National Scenic Area, Tourism Administration 1",
-          "author": "Tourism Administration, MOTC",
-          "license": "Attribution",
-          "page": "https://commons.wikimedia.org/wiki/File:Northeast_and_Yilan_Coast_National_Scenic_Area,_Tourism_Administration_1.jpg"
+          "subject": "龜山戴帽-攝影者吳裕隆",
+          "author": "Neycnsa",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:%E9%BE%9C%E5%B1%B1%E6%88%B4%E5%B8%BD-%E6%94%9D%E5%BD%B1%E8%80%85%E5%90%B3%E8%A3%95%E9%9A%86.jpg"
         }
       ]
     },
@@ -361,10 +361,10 @@
         },
         {
           "file": "data/photos/c-yushan-3.jpg",
-          "subject": "Yushan Main Peak Chien Tzu Hao 02",
-          "author": "A22605728",
-          "license": "CC BY-SA 4.0",
-          "page": "https://commons.wikimedia.org/wiki/File:Yushan_Main_Peak_Chien_Tzu_Hao_02.jpg"
+          "subject": "Yushan Main Peak seen from Dongpu Mountain in the afternoon on 28 January 2017",
+          "author": "Chi-Hung Lin",
+          "license": "CC BY-SA 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Yushan_Main_Peak_seen_from_Dongpu_Mountain_in_the_afternoon_on_28_January_2017.jpg"
         }
       ]
     },
@@ -414,6 +414,146 @@
           "author": "CEphoto, Uwe Aranas",
           "license": "CC BY-SA 3.0",
           "page": "https://commons.wikimedia.org/wiki/File:Hengchun-Township_Taiwan_Eluanbi-Lighthouse-04.jpg"
+        }
+      ]
+    },
+    "wufenpu": {
+      "src": "commons",
+      "name": "五分埔",
+      "url": "https://zh.wikipedia.org/wiki/%E4%BA%94%E5%88%86%E5%9F%94",
+      "images": [
+        {
+          "file": "data/photos/c-wufenpu-1.jpg",
+          "subject": "Wufenpu (0762)",
+          "author": "No machine-readable author provided. Jiang assumed (based on copyright claims).",
+          "license": "Public domain",
+          "page": "https://commons.wikimedia.org/wiki/File:Wufenpu_(0762).JPG"
+        },
+        {
+          "file": "data/photos/c-wufenpu-2.jpg",
+          "subject": "Wufenpu (0760)",
+          "author": "No machine-readable author provided. Jiang assumed (based on copyright claims).",
+          "license": "Public domain",
+          "page": "https://commons.wikimedia.org/wiki/File:Wufenpu_(0760).JPG"
+        }
+      ]
+    },
+    "cihcheng": {
+      "src": "commons",
+      "name": "士林慈諴宮",
+      "url": "https://zh.wikipedia.org/wiki/%E5%A3%AB%E6%9E%97%E6%85%88%E8%AB%B4%E5%AE%AE",
+      "images": [
+        {
+          "file": "data/photos/c-cihcheng-1.jpg",
+          "subject": "Shilin Cixian Temple 20100213",
+          "author": "龍本",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Shilin_Cixian_Temple_20100213.jpg"
+        }
+      ]
+    },
+    "xinzhuang": {
+      "src": "commons",
+      "name": "新莊慈祐宮",
+      "url": "https://zh.wikipedia.org/wiki/%E6%96%B0%E8%8E%8A%E6%85%88%E7%A5%90%E5%AE%AE",
+      "images": [
+        {
+          "file": "data/photos/c-xinzhuang-1.jpg",
+          "subject": "新莊慈祐宮正面照",
+          "author": "Outlookxp",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:%E6%96%B0%E8%8E%8A%E6%85%88%E7%A5%90%E5%AE%AE%E6%AD%A3%E9%9D%A2%E7%85%A7.jpg"
+        }
+      ]
+    },
+    "wanhua": {
+      "src": "commons",
+      "name": "加蚋子",
+      "url": "https://zh.wikipedia.org/wiki/%E5%8A%A0%E8%9A%8B%E5%AD%90",
+      "images": [
+        {
+          "file": "data/photos/c-wanhua-1.jpg",
+          "subject": "Longshan Temple, Taipei 01",
+          "author": "Bernard Gagnon",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Longshan_Temple,_Taipei_01.jpg"
+        },
+        {
+          "file": "data/photos/c-wanhua-2.jpg",
+          "subject": "Taipei Taiwan Mengjia-Longshan-Temple-00",
+          "author": "CEphoto, Uwe Aranas",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Taiwan_Mengjia-Longshan-Temple-00.jpg"
+        },
+        {
+          "file": "data/photos/c-wanhua-3.jpg",
+          "subject": "Taipei Taiwan Mengjia-Longshan-Temple-05",
+          "author": "CEphoto, Uwe Aranas",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipei_Taiwan_Mengjia-Longshan-Temple-05.jpg"
+        }
+      ]
+    },
+    "baoan": {
+      "src": "commons",
+      "name": "大龍峒保安宮",
+      "url": "https://zh.wikipedia.org/wiki/%E5%A4%A7%E9%BE%8D%E5%B3%92%E4%BF%9D%E5%AE%89%E5%AE%AE",
+      "images": [
+        {
+          "file": "data/photos/c-baoan-1.jpg",
+          "subject": "台北保安宮1",
+          "author": "Sdfery",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:%E5%8F%B0%E5%8C%97%E4%BF%9D%E5%AE%89%E5%AE%AE1.jpg"
+        },
+        {
+          "file": "data/photos/c-baoan-2.jpg",
+          "subject": "Dalongdong Baoan Temple, Taiwan",
+          "author": "Rutger van der Maar",
+          "license": "CC BY 2.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Dalongdong_Baoan_Temple,_Taiwan.jpg"
+        },
+        {
+          "file": "data/photos/c-baoan-3.jpg",
+          "subject": "Taipeh Dalongdong Baoan Temple Hof",
+          "author": "Zairon",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Taipeh_Dalongdong_Baoan_Temple_Hof.jpg"
+        }
+      ]
+    },
+    "zaichun": {
+      "src": "commons",
+      "name": "中山橋 (臺北市)",
+      "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%B1%B1%E6%A9%8B_(%E8%87%BA%E5%8C%97%E5%B8%82)",
+      "images": [
+        {
+          "file": "data/photos/c-zaichun-1.jpg",
+          "subject": "Zhongshan New Bridge 20110425",
+          "author": "玄史生",
+          "license": "CC BY-SA 3.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Zhongshan_New_Bridge_20110425.jpg"
+        },
+        {
+          "file": "data/photos/c-zaichun-2.jpg",
+          "subject": "Taihoku Meiji Bridge",
+          "author": "葛西虎次郎",
+          "license": "Public domain",
+          "page": "https://commons.wikimedia.org/wiki/File:Taihoku_Meiji_Bridge.jpg"
+        }
+      ]
+    },
+    "shipai": {
+      "src": "commons",
+      "name": "石牌 (臺北市)",
+      "url": "https://zh.wikipedia.org/wiki/%E7%9F%B3%E7%89%8C_(%E8%87%BA%E5%8C%97%E5%B8%82)",
+      "images": [
+        {
+          "file": "data/photos/c-shipai-1.jpg",
+          "subject": "Shipai Stele, Beitou",
+          "author": "Peellden",
+          "license": "CC BY-SA 4.0",
+          "page": "https://commons.wikimedia.org/wiki/File:Shipai_Stele,_Beitou.jpg"
         }
       ]
     }

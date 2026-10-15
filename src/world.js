@@ -387,6 +387,18 @@ export function gateMesh() {
   return b;
 }
 
+// 後續章節的入口：海上一座方塊門框，鎖著（col 是章節的顏色）
+export function portalMesh(col) {
+  const b = new Builder(), stone = hex('#5d6672'), dark = hex('#3c434d');
+  b.box(-3.5, -1.5, -1.5, 7, 1.5, 3, dark);
+  b.box(-3, 0, -1, 6, 0.4, 2, stone);
+  b.box(-2.6, 0.4, -0.4, 0.8, 6.4, 0.8, stone); b.box(1.8, 0.4, -0.4, 0.8, 6.4, 0.8, stone);
+  b.box(-3.2, 6.8, -0.6, 6.4, 0.8, 1.2, stone);
+  b.box(-0.6, 7.6, -0.4, 1.2, 0.8, 0.8, col, 0.8);
+  for (let y = 1; y < 6.6; y += 1.1) { b.box(-2.7, y, -0.5, 0.2, 0.5, 1, col, 0.7); b.box(2.5, y, -0.5, 0.2, 0.5, 1, col, 0.7); }
+  return b;
+}
+
 // 靈脈節點底座；山頂多一座鐘架
 export function nodeMesh(kind) {
   const b = new Builder(), stone = hex('#b7b0a2'), dark = hex('#6d6a63');
