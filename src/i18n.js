@@ -300,6 +300,7 @@ const S = {
   cardEm: ['四獸靈門 {n}/4・{virtue}', 'Four Beast Gates {n}/4 · {virtue}', '四獣霊門 {n}/4・{virtue}'],
   nextSeal: ['下一印：{icon} {name}（{where}）', 'Next seal: {icon} {name} ({where})', '次の印：{icon} {name}（{where}）'],
   resonance: ['四獸共鳴', 'Four Beasts Resonance', '四獣共鳴'],
+  resSub: ['象、虎、豹、獅一起醒來，台北的山都亮了', 'Elephant, Tiger, Leopard and Lion awaken together; Taipei\'s hills light up', '象・虎・豹・獅がそろって目覚め、台北の山が輝く'],
   gateOpen: ['台北靈門已開啟', 'The Taipei Spirit Gate is open', '台北霊門が開いた'],
   xiGeo: ['阿汐：「城市本身，也存在流。回到起點打開台北靈門吧。」', 'A-Xi: "The city has its own flow. Go back to the start and open the Taipei Spirit Gate."', 'アシー：「都市にも流れがある。スタート地点に戻って台北霊門を開こう。」'],
   xiIsland: ['阿汐：「城市本身，也存在流。我在台北靈門等你。」', 'A-Xi: "The city has its own flow. I\'ll wait for you at the Taipei Spirit Gate."', 'アシー：「都市にも流れがある。台北霊門で待ってるよ。」'],
