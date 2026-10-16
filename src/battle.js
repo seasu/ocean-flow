@@ -7,13 +7,20 @@ import { sudoku } from './games/sudoku.js';
 import { taphero } from './games/taphero.js';
 import { sigil } from './games/sigil.js';
 import { match3 } from './games/match3.js';
+import { memory } from './games/memory.js';
+import { mines } from './games/mines.js';
+import { slide } from './games/slide.js';
 
-// 第二階：城之回聲連點（城市的節奏）、海之流痕畫符（描出洋流）、山之鐘聲數獨（山的記憶）
-const GAMES = { elephant: sudoku, tiger: taphero, leopard: sigil, lion: match3, city: taphero, sea: sigil, peak: sudoku };
-// 測試用：?game=sudoku|taphero|sigil|match3 讓每一門都用同一種玩法
-const FORCE = { sudoku, taphero, sigil, match3 }[new URLSearchParams(location.search).get('game')];
+// 第二階・台北城市故事的七隻街貓，各一種玩法，呼應故事：五分埔分布料（記憶配對）、慈諴宮夜市攤位（三消）、新莊河港搬貨（連點）、
+// 萬華巷弄（踩地雷）、保安宮修復紋樣（畫符）、明治橋 435 塊（滑塊拼圖）、石牌界碑（數獨）
+// 第三階：城之回聲連點（城市的節奏）、海之流痕畫符（描出洋流）、山之鐘聲數獨（山的記憶）
+const GAMES = { elephant: sudoku, tiger: taphero, leopard: sigil, lion: match3, city: taphero, sea: sigil, peak: sudoku,
+  wufenpu: memory, cihcheng: match3, xinzhuang: taphero, wanhua: mines, baoan: sigil, zaichun: slide, shipai: sudoku };
+// 測試用：?game=sudoku|taphero|sigil|match3|memory|mines|slide 讓每一門都用同一種玩法
+const FORCE = { sudoku, taphero, sigil, match3, memory, mines, slide }[new URLSearchParams(location.search).get('game')];
 // 終極 BOSS 濁淵：四關連戰，依序是象（數獨）、虎（連點）、豹（畫符）、獅（三消）
 export const BOSS_PHASES = ['elephant', 'tiger', 'leopard', 'lion'];
+const RAW = new Set(['sudoku', 'sigil', 'memory', 'mines', 'slide']);
 const gameOf = (node, ph = 0) => FORCE || GAMES[node.boss ? BOSS_PHASES[ph] : node.id] || match3;
 
 // 方塊元素：海、山、花、陽、石（顏色之外再用形狀區分），數獨與三消共用
@@ -37,7 +44,8 @@ const msg = el.querySelector('.msg'), msgH = msg.querySelector('h3'), msgP = msg
 let S = null, raf = 0, last = 0;
 // 守門獸（設計圖：ocean-flow-origin/character-ref/beasts/）：被濁流纏住，淨化越多越露出原本的顏色
 // 第三階三流：城＝廟口的龍、海＝黑潮的海龜、山＝台灣黑熊
-const BEASTS = { elephant: 'elephant', tiger: 'tiger', leopard: 'leopard', lion: 'lion', city: 'dragon', sea: 'turtle', peak: 'bear', boss: 'boss' };
+const BEASTS = { elephant: 'elephant', tiger: 'tiger', leopard: 'leopard', lion: 'lion', city: 'dragon', sea: 'turtle', peak: 'bear', boss: 'boss',
+  ...Object.fromEntries(['wufenpu', 'cihcheng', 'xinzhuang', 'wanhua', 'baoan', 'zaichun', 'shipai'].map(k => [k, 'cat-' + k])) };
 const SPR = {};
 for (const [id, k] of Object.entries(BEASTS)) { const im = new Image(); im.src = `img/beasts/${k}.png`; SPR[id] = im; }
 const tint = document.createElement('canvas'), tg = tint.getContext('2d');
@@ -65,8 +73,9 @@ export function battle(node, lv = 0, realm = '', reward = []) {
     loadMe();
     start(node, lv, resolve); quitB.setAttribute('aria-label', t('battleQuit'));
     const make = gameOf(node);
-    const note = (lv && make.key !== 'sudoku' && make.key !== 'sigil' ? '\n' + t('realmPower', { realm, p: lv * 20 }) : '')
-      + (MODS.hungry && make.key !== 'sudoku' && make.key !== 'sigil' ? '\n' + t('hungryNote') : '');
+    const pure = RAW.has(make.key);   // 做完才算完的玩法不吃境界加成與飢餓
+    const note = (lv && !pure ? '\n' + t('realmPower', { realm, p: lv * 20 }) : '')
+      + (MODS.hungry && !pure ? '\n' + t('hungryNote') : '');
     if (node.boss) showMsg(t('bossTitle', { name: node.name }), t('bossTip') + note + '\n\n' + t('bossPhase', { n: 1, m: BOSS_PHASES.length }) + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
     else if (node.wild) showMsg(t('wildTitle', { name: node.name }), t('wildTip') + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
     else showMsg(SPR[node.id] ? t('battleBeast', { beast: t('beast_' + node.id) }) : t('battleTitle', { name: node.name }), t('battleTip_' + node.id) + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
