@@ -400,24 +400,73 @@ function syncItems() { $('#itemsN').textContent = `${ITEMS.filter(itemOwned).len
 const placeName = it => (REAL.find(r => r.id === it.spot) || TALES.find(r => r.id === it.spot))?.name || '';
 // 收藏頁：跟成就一樣，小 icon 排成格子，依階段分區，還沒拿到的是灰色
 const itemsEl = $('#items'), itemPg = $('#itemPage');
-const STAGE_GLYPH = ['<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/>', '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 18a2 2 0 0 1 2-2h11"/>'];
+const STAGE_GLYPH = ['<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>', '<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/>', '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 18a2 2 0 0 1 2-2h11"/>'];
+const STAGE_COL = ['#c9a8ff', '#ffcf5a', '#7fe8ff'];
 function renderItems() {
   const n = ITEMS.filter(itemOwned).length;
   $('#itemsSub').textContent = G.geo ? t('itemsSub', { n, m: ITEMS.length }) : t('spiritNoRec');
-  const head = st => { const list = ITEMS.filter(x => x.stage === st); return `<li class="chd" style="--c:${st === 1 ? '#ffcf5a' : '#7fe8ff'}"><i class="gl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${STAGE_GLYPH[st - 1]}</svg></i><span><b>${t('itemStage' + st)}</b></span><em>${list.filter(itemOwned).length}/${list.length}</em></li>`; };
-  const tile = it => { const on = itemOwned(it); return `<li><button class="${on ? 'on' : 'lock'}" data-id="${it.id}"><span class="ic item">${itemSVG(it)}</span><b>${on ? it.name[LI] : '？？？'}</b><small>${on ? t('type_' + it.type) + '・' + t('itemOpen') : t('itemHint', { place: placeName(it) })}</small></button></li>`; };
-  $('#itemList').innerHTML = [1, 2].map(st => head(st) + ITEMS.filter(x => x.stage === st).map(tile).join('')).join('');
+  const head = st => { const list = ITEMS.filter(x => x.stage === st); return `<li class="chd" style="--c:${STAGE_COL[st]}"><i class="gl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${STAGE_GLYPH[st]}</svg></i><span><b>${t('itemStage' + st)}</b></span><em>${list.filter(itemOwned).length}/${list.length}</em></li>`; };
+  const tile = it => { const on = itemOwned(it), used = it.type === 'token' && tokenUsed(); return `<li${it.type === 'token' ? ' class="wide"' : ''}><button class="${on ? 'on' : 'lock'}${used ? ' used' : ''}" data-id="${it.id}"><span class="ic item">${itemSVG(it)}${used ? `<i class="usedmk">${t('tokenUsedMk')}</i>` : ''}</span><b>${on ? it.name[LI] : '？？？'}</b><small>${!on ? (it.type === 'token' ? t('tokenHint') : t('itemHint', { place: placeName(it) })) : used ? t('tokenUsedAt', { time: tokenUsed() }) : it.type === 'token' ? t('tokenOpen') : t('type_' + it.type) + '・' + t('itemOpen')}</small></button></li>`; };
+  $('#itemList').innerHTML = [1, 2, 0].map(st => head(st) + ITEMS.filter(x => x.stage === st).map(tile).join('')).join('');
 }
 function openItem(it) {
   itemPg.querySelector('.phead b').textContent = it.name[LI];
-  itemPg.querySelector('.phead small').textContent = `${t('type_' + it.type)}・${placeName(it)}`;
+  itemPg.querySelector('.phead small').textContent = `${t('type_' + it.type)}・${it.type === 'token' ? t('tokenShop') : placeName(it)}`;
   itemPg.querySelector('.hero').innerHTML = itemSVG(it);
   itemPg.querySelector('.fx b').textContent = it.fx[LI];
   itemPg.querySelector('.fx small').textContent = t('auto_' + it.type);
   itemPg.querySelector('.story').textContent = it.story[LI];
-  itemPg.querySelector('.where b').textContent = placeName(it);
+  itemPg.querySelector('.where b').textContent = it.type === 'token' ? t('tokenWhere') : placeName(it);
+  // 商圈信物：底下放「出示給店家兌換」；用過就蓋「已使用」
+  const tk = it.type === 'token', used = tk && tokenUsed();
+  itemPg.querySelector('.fx small').textContent = tk ? t(used ? 'tokenUsedAt' : 'tokenShopNote', { time: used }) : t('auto_' + it.type);
+  itemPg.querySelector('.hero').classList.toggle('used', !!used);
+  itemPg.querySelector('.hero').insertAdjacentHTML('beforeend', used ? `<i class="usedmk">${t('tokenUsedMk')}</i>` : '');
+  const go = itemPg.querySelector('.redeemgo'); go.hidden = !tk || !!used;
   itemPg.hidden = false; itemPg.scrollTop = 0;
 }
+// ---------- 商圈信物：打贏濁淵掉落（只在現世修行），出示給合作店家兌換一次 ----------
+const TOKEN = ITEMS.find(x => x.type === 'token');
+const tokenUsed = () => { try { return localStorage.getItem('of-token-used') || ''; } catch { return ''; } };
+function dropToken() {
+  if (!G.geo || itemsGot.has(TOKEN.id)) return;
+  itemsGot.add(TOKEN.id); try { localStorage.setItem('of-items', JSON.stringify([...itemsGot])); } catch { }
+  hudKey = '';
+  setTimeout(() => toast(t('tokenDrop', { item: TOKEN.name[LI] })), 1800);
+}
+const redeemEl = $('#redeem'), redeemUse = redeemEl.querySelector('.use');
+let redeemT = 0, confirmT = 0;
+const two = n => String(n).padStart(2, '0');
+function redeemTick() {
+  const d = new Date();
+  redeemEl.querySelector('.clock b').textContent = `${two(d.getHours())}:${two(d.getMinutes())}:${two(d.getSeconds())}`;
+  redeemEl.querySelector('.clock small').textContent = `${d.getFullYear()}/${two(d.getMonth() + 1)}/${two(d.getDate())}`;
+}
+function openRedeem() {
+  redeemEl.querySelector('.phead b').textContent = TOKEN.name[LI];
+  redeemEl.querySelector('.hero').innerHTML = itemSVG(TOKEN);
+  redeemUse.classList.remove('confirm'); redeemUse.textContent = t('redeemBtn'); redeemEl.classList.remove('done');
+  redeemTick(); clearInterval(redeemT); redeemT = setInterval(redeemTick, 250);
+  redeemEl.hidden = false;
+}
+function closeRedeem() { clearInterval(redeemT); redeemEl.hidden = true; }
+itemPg.querySelector('.redeemgo').addEventListener('click', () => { sfx.pick(); openRedeem(); });
+redeemEl.addEventListener('click', e => { if (e.target.closest('.xbtn')) closeRedeem(); });
+// 兌換要按兩次（第二次由店家確認），避免誤觸；用過這支手機就不能再用
+redeemUse.addEventListener('click', () => {
+  if (tokenUsed()) return;
+  if (!redeemUse.classList.contains('confirm')) {
+    redeemUse.classList.add('confirm'); redeemUse.textContent = t('redeemConfirm'); sfx.sense();
+    clearTimeout(confirmT); confirmT = setTimeout(() => { redeemUse.classList.remove('confirm'); redeemUse.textContent = t('redeemBtn'); }, 5000);
+    return;
+  }
+  clearTimeout(confirmT);
+  const d = new Date(), stampT = `${d.getFullYear()}/${two(d.getMonth() + 1)}/${two(d.getDate())} ${two(d.getHours())}:${two(d.getMinutes())}`;
+  try { localStorage.setItem('of-token-used', stampT); } catch { }
+  redeemEl.classList.add('done'); redeemEl.querySelector('.donemk small').textContent = stampT;
+  sfx.bell(98); try { navigator.vibrate && navigator.vibrate([40, 40, 90]); } catch { }
+  openItem(TOKEN); renderItems();
+});
 $('#itemsBtn').addEventListener('click', () => { renderItems(); itemsEl.hidden = false; });
 itemsEl.addEventListener('click', e => {
   if (e.target.closest('.xbtn')) { itemsEl.hidden = true; return; }
@@ -1059,12 +1108,12 @@ function wildFight(w) {
 const BOSS_COST = 6;
 function bossFight() {
   if (avail() < BOSS_COST) { sfx.deny(); toast(t('bossNeed', { n: BOSS_COST, have: avail() })); return; }
-  if (params.has('nobattle')) { G.bossDone = true; return; }
+  if (params.has('nobattle')) { G.bossDone = true; dropToken(); return; }
   const node = { id: 'boss', boss: true, star: 3, name: t('beast_boss') };
   G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show'); sfx.battle(true);
-  battle(node, G.realm, REALMS[G.realm], [t('rwBoss'), t('rwFinal')]).then(ok => {
+  battle(node, G.realm, REALMS[G.realm], [t('rwBoss'), t('rwFinal'), t(G.geo ? 'rwToken' : 'rwTokenSpirit')]).then(ok => {
     sfx.battle(false); G.state = 'play'; $('#hud').classList.add('play', 'on'); G.wildCd = 8;
-    if (ok) { xiDance(6); G.bossDone = true; burst(GATE[0], GATE[1] + 3, GATE[2] - 1.6, [1, 0.85, 0.5], 120, 10); sfx.gate(); pop(t('bossWin'), 'gold'); }
+    if (ok) { xiDance(6); G.bossDone = true; burst(GATE[0], GATE[1] + 3, GATE[2] - 1.6, [1, 0.85, 0.5], 120, 10); sfx.gate(); pop(t('bossWin'), 'gold'); dropToken(); }
     else { G.bonus -= avail(); P.z = GATE[2] - 5; toast(t('bossLose')); }
   });
 }
@@ -1874,4 +1923,4 @@ if (params.has('play') || params.has('at') || params.has('awake') || params.has(
     setTimeout(() => { pop(t('demoSet', { stage: t('demoStage')[cur - 1] }), 'gold'); setTimeout(() => toast(cur === 3 ? t('stage2Open', { realm: REALMS[REQ] }) : t('talesOpen')), 2200); }, 600);
   }
 }
-window.__game = { resonance, ending, GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter };
+window.__game = { resonance, ending, GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter, bossFight };

@@ -79,8 +79,14 @@ export const ITEMS = [
     fx: ['補飽足 +35', 'Restores 35 fullness', '満腹度 +35'],
     story: ['石牌的小吃攤從傍晚亮到深夜，一袋鹽酥雞邊走邊吃剛剛好。', "Shipai's food stalls glow from dusk to late night. A bag of fried chicken is perfect for eating on the go.", '石牌の屋台は夕方から深夜まで灯る。塩酥鶏を一袋、歩きながらがちょうどいい。'],
     v: [[0.6, 0, 0.6, 3, 2.8, 3, '#e8e2d0'], [0.55, 1.6, 0.55, 3.1, 0.4, 3.1, '#d6453a'], [1, 2.8, 1, 1, 0.8, 1, '#c87a2e'], [2.1, 2.8, 1.4, 1, 0.9, 1, '#b8692a'], [1.4, 2.8, 2.2, 1, 0.7, 1, '#d08a3a'], [2.9, 2.9, 2.6, 0.2, 2.2, 0.2, '#e8d8a8']] },
+  // 商圈信物：打贏序章 BOSS 濁淵才掉落（只在現世修行）；拿去合作店家兌換一次實體優惠
+  { id: 'token', spot: null, stage: 0, type: 'token',
+    name: ['士林夜市信物', 'Shilin Night Market Token', '士林夜市の証'],
+    fx: ['出示給合作店家，可兌換一次實體優惠', 'Show it at a partner shop to redeem one real-world offer', '協力店で見せると、一度だけ実店舗の特典と交換できる'],
+    story: ['濁淵散去後，夜市的燈籠一盞盞亮起來。這枚信物記著你真的走過這段路，商圈的店家認得它。', 'When the Murk Abyss fades, the night-market lanterns light up one by one. This token proves you truly walked the route, and the shops know it.', '濁淵が消えると、夜市の提灯が一つずつ灯る。この証はあなたが本当に道を歩いた印。商店街の店はそれを知っている。'],
+    v: [[1.8, 4.9, 0.3, 0.4, 1.3, 0.2, '#c0392b'], [1.5, 4.3, 0.15, 1, 0.7, 0.5, '#c99a3a'], [0, 0, 0, 4, 4.4, 0.8, '#e3b452'], [0.55, 0.55, 0.75, 2.9, 3.3, 0.2, '#c0392b'], [1.45, 1.2, 0.9, 1.1, 0.35, 0.2, '#ffcf5a'], [1.25, 1.55, 0.9, 1.5, 1.5, 0.2, '#ffcf5a'], [1.45, 3.05, 0.9, 1.1, 0.35, 0.2, '#ffcf5a'], [1.7, -1.5, 0.25, 0.6, 1.5, 0.3, '#c0392b']] },
 ];
-export const ITEM_OF = Object.fromEntries(ITEMS.map(x => [x.spot, x]));
+export const ITEM_OF = Object.fromEntries(ITEMS.filter(x => x.spot).map(x => [x.spot, x]));
 
 // ---------- 方塊圖示：等角投影，上面亮、正面原色、側面暗，加深色描邊 ----------
 const C30 = Math.cos(Math.PI / 6), S30 = 0.5;

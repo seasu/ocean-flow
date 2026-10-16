@@ -241,6 +241,27 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #itemPage .story{margin:0;font-size:18px;line-height:1.8;color:#e6eef6}
 #itemPage .where{display:flex;flex-direction:column;gap:2px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12)}
 #itemPage .where span{font-size:14px;color:var(--dim)}#itemPage .where b{font-size:17px}
+#itemList li.wide{grid-column:1/-1}
+#itemList .ic.item{position:relative}
+#itemList .usedmk,#itemPage .usedmk{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-14deg);padding:2px 8px;border:2.5px solid #e2574c;border-radius:8px;color:#ff6f62;font-style:normal;font-weight:900;font-size:16px;letter-spacing:.1em;background:rgba(20,10,10,.55);white-space:nowrap}
+#itemPage .hero{position:relative}#itemPage .usedmk{font-size:28px;padding:4px 14px;border-width:3.5px}
+#itemPage .hero.used svg{filter:grayscale(.7) brightness(.7)}
+#itemList button.used .ic svg{filter:grayscale(.7) brightness(.7)}
+#itemPage .redeemgo{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;border-radius:999px;font:inherit;font-size:19px;font-weight:900;color:#2a1c00;background:linear-gradient(135deg,#ffe08a,var(--gold));border:none;box-shadow:0 8px 24px rgba(255,207,90,.35);cursor:pointer}
+#itemPage .redeemgo[hidden]{display:none}#itemPage .redeemgo svg{width:24px;height:24px}
+#redeem{z-index:15}
+#redeem .body{width:min(460px,100%);margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+#redeem .live{position:relative;width:min(72vw,280px);aspect-ratio:1;border-radius:50%;overflow:hidden;display:grid;place-items:center;margin-top:6px;border:3px solid var(--gold);box-shadow:0 0 40px rgba(255,207,90,.4)}
+#redeem .live::before{content:"";position:absolute;inset:-30%;background:repeating-conic-gradient(from 0deg,#c0392b 0 15deg,#e3b452 15deg 30deg);animation:rdSpin 6s linear infinite;opacity:.85}
+#redeem .live::after{content:"";position:absolute;inset:14%;border-radius:50%;background:radial-gradient(circle,#1a2c48,#0b1626);animation:rdPulse 1.6s ease-in-out infinite}
+#redeem .hero{position:relative;z-index:1;width:56%;height:56%;animation:rdBob 1.4s ease-in-out infinite}#redeem .hero svg{width:100%;height:100%}
+@keyframes rdSpin{to{transform:rotate(360deg)}}@keyframes rdPulse{50%{transform:scale(.94)}}@keyframes rdBob{50%{transform:translateY(-8px) rotate(4deg)}}
+#redeem .clock{margin:0;display:flex;flex-direction:column}#redeem .clock b{font-size:44px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.04em}#redeem .clock small{font-size:17px;color:var(--dim)}
+#redeem .tip{margin:0;font-size:16px;line-height:1.6;color:#dbe6f0}
+#redeem .use{width:100%;padding:18px;border-radius:999px;font:inherit;font-size:20px;font-weight:900;color:#fff;background:linear-gradient(135deg,#2b6fb0,#1b4c80);border:1.5px solid rgba(127,232,255,.6);cursor:pointer}
+#redeem .use.confirm{background:linear-gradient(135deg,#e2574c,#b5352a);border-color:#ffb3a8;font-size:18px}
+#redeem .donemk{display:none;flex-direction:column;gap:4px;padding:12px 28px;border:4px solid #e2574c;border-radius:14px;color:#ff6f62;transform:rotate(-6deg)}#redeem .donemk b{font-size:30px;letter-spacing:.12em}#redeem .donemk small{font-size:15px}
+#redeem.done .use{display:none}#redeem.done .donemk{display:flex}#redeem.done .live::before{animation-duration:2s}
 #spot .readrw .it{flex:none;width:48px;height:48px;margin-left:auto}#spot .readrw .it:empty{display:none}#spot .readrw .it svg{width:100%;height:100%}
 #spot .readrw.lock .it,#spot .readrw:not(.ready):not(.got) .it{filter:grayscale(.6);opacity:.75}
 #spot .itemfx{position:fixed;left:50%;top:50%;z-index:6;display:flex;flex-direction:column;align-items:center;gap:8px;width:min(80vw,310px);padding:22px 20px;border-radius:24px;text-align:center;color:#fff;background:rgba(14,30,52,.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1.5px solid rgba(255,207,90,.6);box-shadow:0 0 40px rgba(255,207,90,.3),0 12px 40px rgba(0,0,0,.45);opacity:0;pointer-events:none;transform:translate(-50%,-50%) scale(.85)}
@@ -833,7 +854,9 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 <div id="items" class="overlay page" hidden><header class="phead"><div><b data-i18n="itemsBtn">物品收藏</b><small id="itemsSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
   <ul id="itemList"></ul></div>
 <div id="itemPage" class="overlay page" hidden><header class="phead"><div><b></b><small></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
-  <div class="body"><div class="hero"></div><div class="fx"><span data-i18n="itemFx">效果</span><b></b><small></small></div><p class="story"></p><div class="where"><span data-i18n="itemWhere">在哪裡拿到</span><b></b></div></div></div>
+  <div class="body"><div class="hero"></div><div class="fx"><span data-i18n="itemFx">效果</span><b></b><small></small></div><p class="story"></p><div class="where"><span data-i18n="itemWhere">在哪裡拿到</span><b></b></div><button class="redeemgo" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16v11H4z"/><path d="M3 5h18v4H3zM12 5v15M12 5c-1.5-3-5-3-5 0M12 5c1.5-3 5-3 5 0"/></svg><span data-i18n="redeemGo">出示給店家兌換</span></button></div></div>
+<div id="redeem" class="overlay page" hidden><header class="phead"><div><b></b><small data-i18n="tokenShop">合作店家示意</small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <div class="body"><div class="live"><div class="hero"></div></div><p class="clock"><b></b><small></small></p><p class="tip" data-i18n="redeemTip">圖案會動、時間會走，店家一看就知道不是截圖</p><button class="use" type="button"></button><div class="donemk"><b data-i18n="redeemDone">兌換完成</b><small></small></div></div></div>
 <div id="dex" class="page"><header class="phead"><div><b data-i18n="dexTitle">台灣之美 圖鑑</b><small id="dexSub"></small></div><button id="dexClose" class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><ul id="dexList"></ul></div>
 <div id="radar" class="page">
   <header class="phead"><div><b data-i18n="radarTitle">現世・靈脈雷達</b><small class="trail" data-i18n="trail">文化徑 × 山林徑・走一條路，認識台北這座城</small><small id="gstat"></small></div><button id="rClose" class="xbtn" aria-label="close" data-i18n-label="backSpirit"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
