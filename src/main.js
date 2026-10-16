@@ -291,7 +291,7 @@ const STAMP_TXT = { venue: '台北靈門', huashan: '華山', qidong: '文學基
   wufenpu: '五分埔', cihcheng: '慈諴宮', xinzhuang: '新莊', wanhua: '萬華', baoan: '保安宮', zaichun: '再春', shipai: '石牌' };
 let stamps = {};
 try { stamps = JSON.parse(localStorage.getItem('of-stamps') || '{}'); } catch { }
-const seal = (id, cls = '') => `<span class="seal ${cls}"><i>${[...(STAMP_TXT[id] || '')].map(c => `<b>${c}</b>`).join('')}</i></span>`;
+const seal = (id, cls = '') => `<span class="seal ph ${cls}" style="--ph:url(img/stamps/${id}.jpg)"><i>${[...(STAMP_TXT[id] || '')].map(c => `<b>${c}</b>`).join('')}</i></span>`;
 const stampFx = document.createElement('div'); stampFx.id = 'stampFx'; document.body.appendChild(stampFx);
 function stamp(s) {
   if (stamps[s.id]) return;
