@@ -606,9 +606,11 @@ function updateGuide() {
   let deg = 0, text;
   if (g.real) {
     // 城市故事只在現世：箭頭指真實方向（有指南針或走出方向時），字寫距離
+    // 有指南針就照手機朝向；沒有就照靈界地圖的方位（北＝地圖上方），箭頭和地上的金光都指得出去
     const h = heading ?? course, [x, y] = offset(geo.pos, g.real), d = meters(geo.pos, g.real);
     if (h != null) deg = ((Math.atan2(x, y) * 180 / Math.PI - h + 540) % 360) - 180;
-    guideEl.classList.toggle('nodir', h == null);
+    else deg = islandRel([P.x + x, 0, P.z - y])[2];
+    guideEl.classList.remove('nodir');
     text = d <= (g.real.r || 60) ? t('guideArrived') : (h == null ? dirName(geo.pos, g.real) + ' ' : '') + fmt(d);
   } else {
     const [, n, a] = islandRel(g.pos); deg = a; guideEl.classList.remove('nodir');
@@ -639,10 +641,16 @@ function taleMarks() {
 }
 function guideTrail() {
   if (!guideOn || G.state !== 'play') return;
-  const g = guideTarget(); if (!g.pos) return;
-  const dx = g.pos[0] - P.x, dz = g.pos[2] - P.z, d = Math.hypot(dx, dz);
+  const g = guideTarget(); let dx, dz, d;
+  if (g.pos) { dx = g.pos[0] - P.x; dz = g.pos[2] - P.z; d = Math.hypot(dx, dz); }
+  else if (g.real) {
+    // 現世的目的地：金光照真實方位往外流（北＝靈界地圖的上方），到了就停
+    const [x, y] = offset(geo.pos, g.real), m = Math.hypot(x, y);
+    if (m <= (g.real.r || 60)) return;
+    dx = x; dz = -y; d = 1e3;
+  } else return;
   if (d < 3) return;
-  const ux = dx / d, uz = dz / d, ph = (G.t * 2.4) % 1.2, L = Math.min(d - 1, perk('phones') ? 24 : 12);   // 流光耳機：金光更長
+  const k0 = Math.hypot(dx, dz), ux = dx / k0, uz = dz / k0, ph = (G.t * 2.4) % 1.2, L = Math.min(d - 1, perk('phones') ? 24 : 12);   // 流光耳機：金光更長
   for (let k = 1 + ph; k < L; k += 1.2) {
     const a = Math.min(1, (k - 1) / 1.2) * Math.min(1, (L - k) / 3);
     r.box(P.x + ux * k, P.y + 0.12, P.z + uz * k, 0.5, 0.08, 0.5, [1, 0.85, 0.4], 1, a, Math.atan2(ux, uz));
