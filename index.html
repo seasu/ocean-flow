@@ -39,7 +39,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#3f86b8 url(img/poster
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
 #c{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;display:block;touch-action:none}
 /* 加到主畫面的全螢幕模式：iOS 回報的視窗高度比螢幕短，下方會空一塊；改用螢幕高度填滿 */
-.pwa-fill,.pwa-fill body{height:var(--fullh)}.pwa-fill :is(#c,#hud,.overlay,#lore,#quiz,#boardView,#spot,#dex,#radar,.screen,#battle,#launch,#film,#roar),.pwa-fill #launch::before,.pwa-fill #launch::after{bottom:auto;height:var(--fullh)}
+.pwa-fill,.pwa-fill body{height:var(--fullh)}.pwa-fill :is(#c,#hud,#ascend,.overlay,#lore,#quiz,#boardView,#spot,#dex,#radar,.screen,#battle,#launch,#film,#roar),.pwa-fill #launch::before,.pwa-fill #launch::after{bottom:auto;height:var(--fullh)}
 button{font-family:inherit;color:inherit;border:0;cursor:pointer}
 
 /* HUD */
@@ -705,6 +705,20 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 #battle .msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,calc(100vw - 32px));background:rgba(14,24,40,.8);border:1px solid rgba(255,255,255,.16);border-radius:22px;
   padding:24px 20px;text-align:center;display:none;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 12px 40px rgba(0,0,0,.35)}
 #battle .msg.show{display:block}
+/* 突破動畫 */
+#ascend{position:fixed;inset:0;z-index:40;background:#060b16;transition:opacity .45s}#ascend.out{opacity:0}
+#ascend canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#ascend .flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,#fff,rgba(255,236,190,.6) 40%,transparent 75%);opacity:0;pointer-events:none}
+#ascend.hit .flash{animation:ascFlash 1s ease-out}
+@keyframes ascFlash{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
+#ascend .txt{position:absolute;left:0;right:0;bottom:calc(17% + var(--sb));text-align:center;opacity:0;transform:translateY(16px);pointer-events:none}
+#ascend.hit .txt{opacity:1;transform:none;transition:opacity .7s .5s,transform .7s .5s}
+#ascend .txt small{display:block;font-size:16px;letter-spacing:.3em;color:#ffe9b0;font-weight:700}
+#ascend .txt h2{margin:6px 0 8px;font-size:clamp(64px,20vw,110px);font-weight:900;letter-spacing:.14em;line-height:1;color:#fff;
+  background:linear-gradient(90deg,#ffa53a,#8fd14f,#ff8fbf,#a98bff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 4px 22px rgba(255,220,150,.45))}
+#ascend .txt p{margin:0;font-size:22px;font-weight:900;color:#fff;letter-spacing:.1em;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+#ascend .tap{position:absolute;left:0;right:0;bottom:calc(6% + var(--sb));text-align:center;font-size:16px;color:rgba(220,230,245,.7);opacity:0}
+#ascend.hit .tap{opacity:1;transition:opacity .5s 1.6s}
 /* 說明框出現時，後面的戰鬥畫面模糊壓暗，只看說明 */
 #battle:has(.msg.show)::before{content:"";position:absolute;inset:0;z-index:50;background:rgba(6,12,22,.5);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 #battle .msg{z-index:51}
