@@ -51,6 +51,8 @@ quitB.addEventListener('click', e => {
   const done = S.done; S = null; msg.classList.remove('show'); el.classList.remove('show'); cancelAnimationFrame(raf); sfx.deny(); done && done(false);
 });
 const tries = {};
+// 物品加成與飽足：由 main 每場開打前設定（perk(id)：有沒有這樣裝備；hungry：肚子餓淨化力變弱）
+export const MODS = { perk: () => false, hungry: false };
 // 這一場的獎勵由呼叫的地方給（開門、靈光…）
 let REWARD = [];
 
@@ -63,7 +65,8 @@ export function battle(node, lv = 0, realm = '', reward = []) {
     loadMe();
     start(node, lv, resolve); quitB.setAttribute('aria-label', t('battleQuit'));
     const make = gameOf(node);
-    const note = lv && make.key !== 'sudoku' && make.key !== 'sigil' ? '\n' + t('realmPower', { realm, p: lv * 20 }) : '';
+    const note = (lv && make.key !== 'sudoku' && make.key !== 'sigil' ? '\n' + t('realmPower', { realm, p: lv * 20 }) : '')
+      + (MODS.hungry && make.key !== 'sudoku' && make.key !== 'sigil' ? '\n' + t('hungryNote') : '');
     if (node.boss) showMsg(t('bossTitle', { name: node.name }), t('bossTip') + note + '\n\n' + t('bossPhase', { n: 1, m: BOSS_PHASES.length }) + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
     else if (node.wild) showMsg(t('wildTitle', { name: node.name }), t('wildTip') + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
     else showMsg(SPR[node.id] ? t('battleBeast', { beast: t('beast_' + node.id) }) : t('battleTitle', { name: node.name }), t('battleTip_' + node.id) + note + '\n' + t('how_' + make.key), t('battleGo'), () => { S.run = true; });
@@ -94,7 +97,8 @@ const api = {
   get pur() { return S.pur; },
   node: () => S.node,
   // raw：數獨、畫符這種「做完才算完」的玩法不吃境界加成，不然會還沒解完就結束
-  add(n, raw) { S.pur += raw ? n : n * (1 + 0.2 * S.lv); },
+  add(n, raw) { S.pur += raw ? n : n * (1 + 0.2 * S.lv) * (MODS.hungry ? 0.8 : 1); },
+  perk: id => MODS.perk(id),
   info(s) { hpEl.textContent = s; },
   shoot(x, y, col) { S.shots.push({ x, y, x0: x, y0: y, t: 0, d: 0.35 + Math.random() * 0.2, col }); },
   burst(x, y, col, n = 14, sp = 160) {
@@ -211,6 +215,8 @@ function confetti(L) {
 function lose() {
   if (!S.run) return;
   S.run = false; sfx.deny();
+  // 保生大帝藥籤：每場一次，快輸的時候補一口氣
+  if (MODS.perk('herb') && !S.herb && S.game.revive) { S.herb = 1; S.game.revive(); showMsg(t('herbTitle'), t('herbTip'), t('battleGo'), () => { S.run = true; }); return; }
   const { node, lv, done } = S; tries[node.id]++;
   // 野外的濁影：輸了就結束（外面會扣靈光），不給重來
   if (node.boss) { showMsg(t('battleLose'), t('lose_' + gameOf(node, S.ph).key) + '\n' + t('bossLoseTip'), t('wildOk'), () => { S = null; el.classList.remove('show'); cancelAnimationFrame(raf); done(false); }); return; }

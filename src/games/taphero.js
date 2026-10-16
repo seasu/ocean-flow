@@ -5,7 +5,7 @@ const LEVEL = { 1: { hp: 1, time: 10, shield: 0 }, 2: { hp: 1.5, time: 12, shiel
 export function taphero(A, { star, ease }) {
   const LV = LEVEL[star] || LEVEL[1];
   const S = { time: LV.time + ease * 4, blockT: 0, power: 0, combo: 0, comboT: 0, ripples: [], nums: [], claw: 0, pet: 1, taps: 0 };
-  const DMG = 1.4 / LV.hp, CRIT = 0.15, POWER = 0.05, CLAW = 14 / LV.hp, PET = 1 / LV.hp;
+  const DMG = 1.4 / LV.hp, CRIT = 0.15, POWER = A.perk('bracer') ? 0.075 : 0.05, CLAW = 14 / LV.hp, PET = 1 / LV.hp;
   // 護盾：每 5 秒裡最後 1.5 秒張開
   const shielded = () => LV.shield && (A.time % 5) > 3.5;
   const info = () => A.info(A.t('secondsLeft', { n: Math.max(0, Math.ceil(S.time)) }));
@@ -32,6 +32,7 @@ export function taphero(A, { star, ease }) {
   }
 
   return {
+    revive() { S.time += 6; info(); },
     S, hit, claw, btn,
     down(x, y) {
       const a = A.lay.area; if (y < a.y - 20) return;

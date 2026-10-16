@@ -22,7 +22,7 @@ export function sudoku(A, { star, ease }) {
   for (const i of idx) { if (shown.size >= give) break; shown.add(i); }
   const grid = ans.map((v, i) => shown.has(i) ? v : -1);
   const blanks = N * N - shown.size, gain = 100 / blanks;
-  const S = { sel: grid.indexOf(-1), miss: 0, maxMiss: 3, flash: new Map(), pop: new Map() };
+  const S = { sel: grid.indexOf(-1), miss: 0, maxMiss: 3 + (A.perk('barrel') ? 1 : 0), flash: new Map(), pop: new Map() };
   const info = () => A.info(A.t('mistakes', { n: S.maxMiss - S.miss }));
   info();
 
@@ -61,6 +61,7 @@ export function sudoku(A, { star, ease }) {
   }
 
   return {
+    revive() { S.miss = S.maxMiss - 1; info(); },
     N, grid, ans, place, sel: () => S.sel, setSel: i => { S.sel = i; }, lay, center,
     down(x, y) {
       const p = palAt(x, y); if (p >= 0) return place(p);
