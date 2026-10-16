@@ -12,6 +12,8 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="manifest" href="manifest.webmanifest">
 <title>洋流：起源</title>
+<!-- 首頁背景先用一張台灣截圖墊著，程式和 3D 台灣載好前不會只有字 -->
+<link rel="preload" as="image" href="img/poster.jpg" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;900&family=Noto+Sans+JP:wght@500;900&display=swap">
 <style>
@@ -20,7 +22,7 @@
   --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--sans);
+html,body{margin:0;height:100%;overflow:hidden;background:#3f86b8 url(img/poster.jpg) center/cover no-repeat;color:var(--ink);font-family:var(--sans);
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
 #c{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;display:block;touch-action:none}
 button{font-family:inherit;color:inherit;border:0;cursor:pointer}
