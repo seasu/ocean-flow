@@ -9,18 +9,17 @@ import { sigil } from './games/sigil.js';
 import { match3 } from './games/match3.js';
 import { memory } from './games/memory.js';
 import { mines } from './games/mines.js';
-import { slide } from './games/slide.js';
 
 // 第二階・台北城市故事的七隻街貓，各一種玩法，呼應故事：五分埔分布料（記憶配對）、慈諴宮夜市攤位（三消）、新莊河港搬貨（連點）、
-// 萬華巷弄（踩地雷）、保安宮修復紋樣（畫符）、明治橋 435 塊（滑塊拼圖）、石牌界碑（數獨）
+// 萬華巷弄（踩地雷）、保安宮修復紋樣（畫符）、再春泳池磁磚（翻牌配對）、石牌界碑（數獨）
 // 第三階：城之回聲連點（城市的節奏）、海之流痕畫符（描出洋流）、山之鐘聲數獨（山的記憶）
 const GAMES = { elephant: sudoku, tiger: taphero, leopard: sigil, lion: match3, city: taphero, sea: sigil, peak: sudoku,
-  wufenpu: memory, cihcheng: match3, xinzhuang: taphero, wanhua: mines, baoan: sigil, zaichun: slide, shipai: sudoku };
-// 測試用：?game=sudoku|taphero|sigil|match3|memory|mines|slide 讓每一門都用同一種玩法
-const FORCE = { sudoku, taphero, sigil, match3, memory, mines, slide }[new URLSearchParams(location.search).get('game')];
+  wufenpu: memory, cihcheng: match3, xinzhuang: taphero, wanhua: mines, baoan: sigil, zaichun: memory, shipai: sudoku };
+// 測試用：?game=sudoku|taphero|sigil|match3|memory|mines 讓每一門都用同一種玩法
+const FORCE = { sudoku, taphero, sigil, match3, memory, mines }[new URLSearchParams(location.search).get('game')];
 // 終極 BOSS 濁淵：四關連戰，依序是象（數獨）、虎（連點）、豹（畫符）、獅（三消）
 export const BOSS_PHASES = ['elephant', 'tiger', 'leopard', 'lion'];
-const RAW = new Set(['sudoku', 'sigil', 'memory', 'mines', 'slide']);
+const RAW = new Set(['sudoku', 'sigil', 'memory', 'mines']);
 const gameOf = (node, ph = 0) => FORCE || GAMES[node.boss ? BOSS_PHASES[ph] : node.id] || match3;
 
 // 方塊元素：海、山、花、陽、石（顏色之外再用形狀區分），數獨與三消共用

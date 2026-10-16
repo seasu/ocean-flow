@@ -148,7 +148,7 @@ const CAST = [
   { id: 'cat-zaichun', img: 'img/beasts/cat-zaichun.png', beast: 1,
     kick: ['守門貓・再春游泳池與明治橋', 'Guardian Cat · Zaichun Pool', '守り猫・再春プールと明治橋'], name: ['明治', 'Meiji', 'メイジ'], sub: ['賓士貓', 'Tuxedo', 'ハチワレ'],
     epi: ['435 塊橋身，牠一塊一塊數過。', 'It has counted all 435 pieces of the bridge, one by one.', '435 個の橋の欠片を、一つずつ数えてきた。'],
-    text: ['戴著復古泳鏡、套著救生圈的賓士貓，常在再春游泳池舊址守著明治橋的構件。\n濁流把照片打散時，要用滑塊拼圖拼回原樣。', 'A tuxedo cat in retro goggles and a life ring, keeping watch over the Meiji Bridge pieces at the old Zaichun Pool.\nWhen the Murk scatters the photo, slide the pieces back into place.', 'レトロなゴーグルと浮き輪のハチワレ。再春プール跡で明治橋の部材を見守る。\n濁流が写真を散らしたら、スライドパズルで元に戻す。'] },
+    text: ['戴著復古泳鏡、套著救生圈的賓士貓，常在再春游泳池舊址守著明治橋的構件。\n濁流把泳池磁磚全翻成背面時，要兩兩翻出一樣的才消得掉。', 'A tuxedo cat in retro goggles and a life ring, keeping watch over the Meiji Bridge pieces at the old Zaichun Pool.\nWhen the Murk flips every pool tile face down, turn up matching pairs to clear them.', 'レトロなゴーグルと浮き輪のハチワレ。再春プール跡で明治橋の部材を見守る。\n濁流がタイルを全部裏返したら、同じ二枚をそろえて消す。'] },
   { id: 'cat-shipai', img: 'img/beasts/cat-shipai.png', beast: 1,
     kick: ['守門貓・石牌商城', 'Guardian Cat · Shipai', '守り猫・石牌'], name: ['阿碑', 'Abei', 'アベイ'], sub: ['暹羅貓', 'Siamese', 'シャム猫'],
     epi: ['界碑分開土地，也讓人記得彼此。', 'The boundary stone divided the land, and made people remember each other.', '境界碑は土地を分け、互いを思い出させた。'],

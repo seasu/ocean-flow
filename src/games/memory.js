@@ -2,12 +2,15 @@
 // 開場先讓你看一眼所有牌；星等：1 星 3×4 看 2.5 秒、2 星 3×4 看 1.5 秒、3 星 4×4（多兩對）看 1.5 秒，每 12 秒濁流會把兩張沒翻開的牌偷偷換位置
 const LEVEL = { 1: { r: 4, c: 3, peek: 2.5, time: 45, swap: 0 }, 2: { r: 4, c: 3, peek: 1.5, time: 40, swap: 0 }, 3: { r: 4, c: 4, peek: 1.5, time: 55, swap: 12 } };
 
+// 再春・賓士貓：一開始就全部蓋著（不先看），4×4 翻兩張一樣就消掉，時間給多一點
+const NODE = { zaichun: { r: 4, c: 4, peek: 0, time: 75, swap: 0 } };
+
 export function memory(A, { star, ease }) {
-  const LV = LEVEL[star] || LEVEL[1], N = LV.r * LV.c, PAIRS = N / 2;
+  const LV = NODE[A.node?.()?.id] || LEVEL[star] || LEVEL[1], N = LV.r * LV.c, PAIRS = N / 2;
   // 六種元素；4×4 多出的兩對用同元素的「金框」版本區分
   const kinds = [...Array(PAIRS).keys()].map(i => ({ k: i % 6, gold: i >= 6 }));
   const deck = kinds.flatMap(x => [x, x]).sort(() => Math.random() - 0.5).map(x => ({ ...x, open: 0, done: false }));
-  const S = { time: LV.time + ease * 10, peek: LV.peek + ease * 0.5, pick: [], wait: 0, got: 0, swapT: LV.swap, shake: new Map() };
+  const S = { time: LV.time + ease * 10, peek: LV.peek ? LV.peek + ease * 0.5 : 0, pick: [], wait: 0, got: 0, swapT: LV.swap, shake: new Map() };
   const info = () => A.info(A.t('secondsLeft', { n: Math.max(0, Math.ceil(S.time)) }));
   info();
   const box = () => { const a = A.lay.area, s = Math.min(a.w, a.h - 30); return { x: a.x + (a.w - s) / 2, y: a.y + (a.h - s) / 2, s }; };
