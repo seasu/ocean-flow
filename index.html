@@ -228,14 +228,14 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #meBtn.hungry{border-color:#ff9a5a;animation:hungryPulse 1.8s ease-in-out infinite}
 @keyframes hungryPulse{50%{box-shadow:0 0 0 5px rgba(255,140,80,.35)}}
 #items,#itemPage{z-index:13}
-#charLab{z-index:13}#charLab>*{flex:none}
-#charLab .stage{position:relative;width:min(520px,100%);margin:0 auto;height:46dvh;border-radius:24px;overflow:hidden;border:1px solid rgba(127,232,255,.3);background:#0d1a2e}
+#charLab{z-index:13;overflow:hidden;gap:12px}#charLab>*{flex:none}
+#charLab .stage{position:relative;width:min(520px,100%);margin:0 auto;height:40dvh;border-radius:24px;overflow:hidden;border:1px solid rgba(127,232,255,.3);background:#0d1a2e}
 #charLab canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
 #charLab .stage p{position:absolute;left:0;right:0;bottom:10px;margin:0;text-align:center;font-size:15px;color:rgba(220,235,250,.75);pointer-events:none;text-shadow:0 1px 4px #000}
 #charLab .acts{width:min(520px,100%);margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-#charLab .acts button{padding:13px 8px;border-radius:999px;font:inherit;font-size:17px;font-weight:800;color:#dbe6f0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);cursor:pointer}
+#charLab .acts button{padding:11px 8px;border-radius:999px;font:inherit;font-size:17px;font-weight:800;color:#dbe6f0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);cursor:pointer}
 #charLab .acts button.on{color:#2a1c00;background:linear-gradient(135deg,#ffe08a,var(--gold));border-color:var(--gold)}
-#charLab .ward{width:min(520px,100%);margin:0 auto;display:flex;flex-direction:column;gap:16px;padding-bottom:12px}
+#charLab .ward{flex:1 1 0;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;width:min(520px,100%);margin:0 auto;display:flex;flex-direction:column;gap:16px;padding:4px 0 12px;border-top:1px solid rgba(255,255,255,.1)}
 #charLab .ward h4{margin:0 0 8px;font-size:16px;font-weight:800;color:rgba(220,235,250,.8);letter-spacing:.06em}
 #charLab .chips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 #charLab .chips button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px 12px;border-radius:18px;font:inherit;color:#dbe6f0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer}
