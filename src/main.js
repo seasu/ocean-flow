@@ -2,8 +2,7 @@
 import { M, clamp, lerp, rng, hex, mixColor, smooth } from './math.js';
 import { Renderer, Builder } from './gl.js';
 import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, portalMesh, bellMesh, beastMesh, bossMesh, N, S, WATER, T, PLACES, CURRENT, curX } from './world.js';
-import { drawAvatar, ORANGE } from './avatar.js';
-import { drawAvatar2, LIU2, LIU2_OUTFIT } from './avatar2.js';
+import { drawAvatar2, LIU2, LIU2_OUTFIT, XI2 } from './avatar2.js';
 import { initAudio, unlockAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
 import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
 import { TALES } from './stories.js';
@@ -1814,7 +1813,7 @@ function frame(dt) {
   drawAvatar2(r, lk.body === 'outfit' ? LIU2_OUTFIT : LIU2, P.x, P.ry, P.z, P.yaw, pa, G.state === 'ending' ? 0.3 : 0, lk);
   const xg = ground(XI.x, XI.z);
   const dn = G.t < (XI.danceEnd || 0), hop = dn ? Math.abs(Math.sin(G.t * 6)) * 0.45 : 0;
-  drawAvatar(r, ORANGE, XI.x, xg + hop, XI.z, dn ? XI.yaw + Math.sin(G.t * 3) * 1.2 : XI.yaw, { phase: 0, move: 0, air: false, swim: false, t: G.t + 1.3, wave: XI.wave, dance: dn });
+  drawAvatar2(r, XI2, XI.x, xg + hop, XI.z, dn ? XI.yaw + Math.sin(G.t * 3) * 1.2 : XI.yaw, { phase: 0, move: 0, air: false, swim: false, t: G.t + 1.3, wave: XI.wave, dance: dn });
   if (XI.home && !dn) { XI.x = XI.home[0]; XI.z = XI.home[1]; XI.yaw = XI.home[2]; XI.home = null; }
 
   // 濁影：暗紫色的守門獸，追人的時候發紅光

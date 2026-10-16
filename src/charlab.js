@@ -2,12 +2,13 @@
 // 用自己的 WebGL 畫布，只有打開時才跑；選好的外觀存起來，遊戲裡的阿流跟著換
 import { Renderer } from './gl.js';
 import { M, hex, lerp } from './math.js';
-import { drawAvatar2, LIU2, LIU2_OUTFIT } from './avatar2.js';
+import { drawAvatar2, LIU2, LIU2_OUTFIT, XI2 } from './avatar2.js';
 import { ITEMS, itemSVG } from './items.js';
 import { t, lang } from './i18n.js';
 
 const el = document.querySelector('#charLab'), cv = el.querySelector('canvas');
 let r = null, raf = 0, last = 0, api = null;
+const TEST_XI = new URLSearchParams(location.search).has('labxi');
 const LI = lang === 'en' ? 1 : lang === 'ja' ? 2 : 0;
 const S = { t: 0, phase: 0, move: 0, act: 'walk', yaw: 0.55, drag: null, scroll: 0, jumpT: 0 };
 const SPEED = { idle: 0, walk: 0.55, run: 1, jump: 0, wave: 0, swim: 0 };
@@ -46,7 +47,8 @@ function frame(now) {
   }
   const a = { phase: S.phase, move: swim ? 0.3 : S.move, air, swim, t: S.t, wave: S.act === 'wave' };
   const lk = curLook();
-  drawAvatar2(r, lk.body === 'outfit' ? LIU2_OUTFIT : LIU2, 0, y, 0, 0, a, 0, lk);
+  if (TEST_XI) drawAvatar2(r, XI2, 0, y, 0, 0, a);   // 測試用：?labxi 改看阿汐
+  else drawAvatar2(r, lk.body === 'outfit' ? LIU2_OUTFIT : LIU2, 0, y, 0, 0, a, 0, lk);
   if (swim) { r.blend(1); r.box(0, 0.05, 0, 9, 1.8, 9, hex('#3a8fd0'), 0.15, 0.42); r.blend(0); }
   raf = requestAnimationFrame(frame);
 }
