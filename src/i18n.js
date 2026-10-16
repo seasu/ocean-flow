@@ -127,6 +127,7 @@ const S = {
   realmNeedGeo: ['走 {n} 公尺', 'Walk {n} m', '{n} m 歩く'],
   realmNeedIsland: ['走 {n} 步', 'Walk {n} steps', '{n} 歩 歩く'],
   realmStart: ['起點', 'Starting point', '出発点'],
+  realmStartHint: ['開始現世修行就達成', 'Reached once you start the Real-World Journey', '現世の修行を始めると達成'],
   qi: ['靈光 {n}', 'Spirit Light {n}', '霊光 {n}'],
   radar: ['現世', 'Real World', '現世'],
   beauty: ['台灣之美', 'Beauty of Taiwan', '台湾の美'],
