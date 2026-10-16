@@ -1731,7 +1731,7 @@ const TALE_STAR = { wufenpu: 1, cihcheng: 2, xinzhuang: 1, wanhua: 2, baoan: 2, 
 function taleFound(s) {
   sfx.pick(); setTimeout(() => sfx.pick(), 150);
   burst(P.x, P.y + 1.5, P.z, [1, 0.75, 0.6], 40, 5);
-  const photo = spotInfo(s.id)?.images?.[0]?.file;   // 滑塊拼圖用景點照片
+  const photo = spotInfo(s.id)?.images?.[0]?.file;
   const node = { id: s.id, name: s.name, star: TALE_STAR[s.id] || 1, tale: true, photo };
   showCard(s.name, s.sub, s.text, s.lines.join('\n'), s.id, true, { label: t('startQuiz'), fn: () => {
     G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show'); sfx.battle(true);
