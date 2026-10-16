@@ -286,7 +286,7 @@ $('#avPick input').addEventListener('change', e => {
 });
 $('#meBtn').addEventListener('click', e => { e.stopPropagation(); hudKey = ''; hud(); meEl.hidden = false; });
 meEl.addEventListener('click', e => { if (e.target.closest('.xbtn')) meEl.hidden = true; });
-// ---------- 台北集章簿：每個真實地點一枚印章，只有人在現世走到才蓋得到（模擬定位測試也算） ----------
+// ---------- 台北集章簿：每個真實地點一枚，人在現世走到附近就自動收集（模擬定位測試也算） ----------
 const STAMP_TXT = { venue: '台北靈門', huashan: '華山', qidong: '文學基地', jinan: '濟南教會', shandao: '善導寺', station: '台北車站', controlyuan: '監察院', guanghua: '光華',
   wufenpu: '五分埔', cihcheng: '慈諴宮', xinzhuang: '新莊', wanhua: '萬華', baoan: '保安宮', zaichun: '再春', shipai: '石牌' };
 let stamps = {};
@@ -297,7 +297,7 @@ function stamp(s) {
   if (stamps[s.id]) return;
   const d = new Date(); stamps[s.id] = `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`;
   try { localStorage.setItem('of-stamps', JSON.stringify(stamps)); } catch { }
-  // 蓋章：印章從畫面上方壓下來，咚一聲，兩秒後收起（不擋操作）
+  // 收集：印記從畫面上方落下來，咚一聲，兩秒後收起（不擋操作）
   stampFx.innerHTML = `${seal(s.id)}<p>${t('stampGot', { name: s.name })}</p>`;
   stampFx.className = ''; void stampFx.offsetWidth; stampFx.className = 'go';
   setTimeout(() => { sfx.bell(98); try { navigator.vibrate && navigator.vibrate(60); } catch { } }, 380);
@@ -310,7 +310,7 @@ function renderStamps() {
   const n = Object.keys(stamps).filter(k => STAMP_TXT[k]).length, m = Object.keys(STAMP_TXT).length;
   $('#stampSub').textContent = G.geo ? t('stampSub', { n, m }) : t('spiritNoRec');
   $('#stampList').innerHTML = groups.map(([h, list]) => `<li class="sh">${h}<em>${list.filter(x => stamps[x.id]).length}/${list.length}</em></li>`
-    + list.map(x => `<li class="${stamps[x.id] ? 'on' : ''}" data-id="${x.id}">${seal(x.id, stamps[x.id] ? '' : 'empty')}<b>${x.name}</b><small>${stamps[x.id] || t('stampGo')}</small></li>`).join('')).join('');
+    + list.map(x => `<li class="${stamps[x.id] ? 'on' : ''}" data-id="${x.id}">${seal(x.id, stamps[x.id] ? '' : 'empty')}<b>${x.name}</b><p>${(x.sub || '').split(/・| · /).slice(1).join('・')}</p>${stamps[x.id] ? `<small>${stamps[x.id]}</small>` : ''}</li>`).join('')).join('');
 }
 $('#stampBtn').addEventListener('click', () => { renderStamps(); stampEl.hidden = false; });
 stampEl.addEventListener('click', e => {

@@ -309,14 +309,16 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #me .achbtn .chev{width:10px;height:10px;border-right:2px solid var(--dim);border-top:2px solid var(--dim);transform:rotate(45deg)}
 #me .achbtn:active{transform:scale(.98)}
 #stampbook{z-index:13}
-#stampList{list-style:none;margin:0 auto;padding:16px;width:100%;max-width:30em;display:grid;grid-template-columns:repeat(3,1fr);gap:16px 10px;border-radius:20px;
+#stampList{list-style:none;margin:0 auto;padding:16px;width:100%;max-width:30em;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 14px;border-radius:20px;
   background:linear-gradient(180deg,#f3ead6,#e9dcbd);color:#3a2a14;box-shadow:inset 0 0 0 1px rgba(120,80,30,.25),0 10px 30px rgba(0,0,0,.35)}
 #stampList .sh{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;font-size:17px;font-weight:900;padding-bottom:6px;border-bottom:1.5px solid rgba(120,80,30,.3)}
 #stampList .sh:not(:first-child){margin-top:10px}
 #stampList .sh em{font-style:normal;font-size:15px;color:#a5402f;font-variant-numeric:tabular-nums}
-#stampList li[data-id]{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;cursor:pointer;min-width:0}
-#stampList li b{font-size:15px;line-height:1.3}
-#stampList li small{font-size:13px;color:#7a6446;font-variant-numeric:tabular-nums}
+#stampList li[data-id]{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;cursor:pointer;min-width:0}
+#stampList li b{font-size:18px;line-height:1.3}
+#stampList li p{margin:0;font-size:15px;line-height:1.45;color:#6b5636;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}#stampList li p:empty{display:none}
+#stampList li[data-id] .seal{width:104px;height:104px;margin-bottom:4px}#stampList li[data-id] .seal b{font-size:25px}
+#stampList li small{font-size:15px;color:#7a6446;font-variant-numeric:tabular-nums}
 #stampList li:not(.on) b{color:#8a7a62}
 #stampList .nope{animation:nope .4s}
 .seal{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;border:3px solid #c0392b;box-shadow:inset 0 0 0 3px #f3ead6,inset 0 0 0 5px #c0392b;color:#c0392b;transform:rotate(-8deg);background:rgba(192,57,43,.06)}
@@ -911,7 +913,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   <button class="more ico" aria-label="settings" data-i18n-label="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   <h1>洋流</h1>
   <div class="tag fold" data-i18n="tagline">走出去，遇見你的機緣。</div>
-  <div class="modes"><button class="start" type="button"><b data-i18n="startGeo">現世修行</b><small data-i18n="startGeoSub">開啟定位，走到真實景點・蓋章、記成就</small></button>
+  <div class="modes"><button class="start" type="button"><b data-i18n="startGeo">現世修行</b><small data-i18n="startGeoSub">開啟定位，走到真實景點附近就收集・記成就</small></button>
   <button class="spirit" type="button"><b data-i18n="startSpirit">靈界走走</b><small data-i18n="startSpiritSub">在家也能玩，靈界裡走到就觸發・只能體驗</small></button></div>
   <small class="ver" data-v="__VERSION__"></small>
 </div>
