@@ -1,6 +1,7 @@
 // 洋流世界觀：八個章節，像一本書一頁一頁翻開（設定 → 洋流世界觀）
 // 圖來自 docs/lore/eight-stages.png，切成 img/lore/ch0–7.jpg；中文文案來自專案的 world-chapters.md
 import { lang, t } from './i18n.js';
+import { realmSvg, REALM_COL } from './realmicon.js';
 
 export const CH = [
   { no: ['序章', 'Prologue', '序章'], name: ['起源', 'Origin', '起源'], sub: ['覺醒台灣', 'Awakening in Taiwan', '台湾の目覚め'],
@@ -83,11 +84,11 @@ const RQ = [
   { q: ['我的存在如何影響世界？', 'How does my being change the world?', 'わたしの存在は世界をどう変える？'],
     text: ['你本身開始成為一個「流源」。\n你的選擇、想法與存在，都會改變周圍的世界。', 'You yourself begin to become a source of Flow.\nYour choices, your thoughts and your very presence change the world around you.', 'あなた自身が「流れの源」になりはじめる。\n選択も、思いも、存在そのものも、まわりの世界を変えていく。'] },
 ];
-// 境界的徽記：一圈一圈往外長的光環，境界越高圈越多、越亮
+// 境界的徽記：一圈一圈往外長的光環，境界越高圈越多、越亮；中間是這個境界的圖示
 const emblem = (k, now) => `<svg class="emblem${now ? ' now' : ''}" viewBox="0 0 200 200">${[...Array(5)].map((_, r) => {
   const on = r <= k, rad = 26 + r * 16;
   return `<circle cx="100" cy="100" r="${rad}" fill="none" stroke="${on ? (r === k ? '#ffcf5a' : '#7fe8ff') : 'rgba(255,255,255,.12)'}" stroke-width="${r === k ? 3.5 : 2}" ${on ? '' : 'stroke-dasharray="3 7"'} opacity="${on ? 1 - (k - r) * 0.12 : 1}"/>`;
-}).join('')}<circle cx="100" cy="100" r="${10 + k * 2}" fill="#ffcf5a"/></svg>`;
+}).join('')}<g color="${REALM_COL[k]}">${realmSvg(k, 1.7, 'x="74" y="74" width="52" height="52" ')}</g></svg>`;
 export function openRealms({ realms, need, now, geo }) {
   openBook(cover(t('realmKicker'), t('realmTitle'), t('realmIntro'), t('realmSwipe'))
     + realms.map((name, i) => `<section class="ch realm">${emblem(i, i === now)}

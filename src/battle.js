@@ -154,7 +154,8 @@ function tick(now) {
   for (const s of S.shots) {
     s.t += dt; const k = Math.min(1, s.t / s.d), e = k * k;
     s.x = s.x0 + (L.ex - s.x0) * e + Math.sin(k * 3.14) * (s.x0 < L.ex ? -30 : 30); s.y = s.y0 + (L.ey - s.y0) * e;
-    if (k >= 1) { s.hit = true; S.hitT = 0.25; S.hurt = 1; S.rings.push({ t: 0 }); api.burst(L.ex + (Math.random() - 0.5) * L.er, L.ey + (Math.random() - 0.5) * L.er * 0.6, s.col, 4, 120); }
+    if (k >= 1) { s.hit = true; if (S.hitT <= 0) S.hitT = 0.25; S.hurt = 1;  // 連點時不重複閃白，免得整隻一直是白的
+      if (S.rings.length < 2) S.rings.push({ t: 0 }); api.burst(L.ex + (Math.random() - 0.5) * L.er, L.ey + (Math.random() - 0.5) * L.er * 0.6, s.col, 4, 120); }
   }
   S.shots = S.shots.filter(s => !s.hit);
   S.hitT = Math.max(0, S.hitT - dt); S.shake = Math.max(0, S.shake - dt);
@@ -229,7 +230,7 @@ function draw(L) {
   const { w, h } = L, p = S.node.boss ? Math.min(1, (S.ph + S.pur / 100) / BOSS_PHASES.length) : Math.min(1, S.pur / 100), win = S.win ? Math.min(1, S.win / 1.2) : 0, T = S.t;
   g.clearRect(0, 0, w, h);
   const bg = g.createRadialGradient(L.ex, L.ey, 10, w / 2, h * 0.45, Math.max(w, h) * 0.8);
-  bg.addColorStop(0, `rgba(${lerp(40, 60, p)},${lerp(30, 120, p)},${lerp(70, 150, p)},.94)`);
+  bg.addColorStop(0, `rgba(${lerp(40, 38, p)},${lerp(30, 82, p)},${lerp(70, 118, p)},.94)`);
   bg.addColorStop(1, 'rgba(5,10,22,.97)');
   g.fillStyle = bg; g.fillRect(0, 0, w, h);
   g.save();
@@ -342,7 +343,7 @@ function drawBeast(L, spr, p, win, T) {
     g.fillStyle = S.hitT > 0.15 ? '#ffffff' : '#3a2a56'; g.fillRect(-s / 2, -s / 2, s, s); g.restore();
   }
   g.globalAlpha = 1;
-  for (const q of S.rings) { g.globalAlpha = (1 - q.t / 0.5) * 0.6; g.strokeStyle = '#bff4ff'; g.lineWidth = 3; g.beginPath(); g.ellipse(cx, cy, sz * 0.3 + q.t * 160, (sz * 0.3 + q.t * 160) * 0.6, 0, 0, 6.283); g.stroke(); }
+  for (const q of S.rings) { g.globalAlpha = (1 - q.t / 0.5) * 0.35; g.strokeStyle = '#bff4ff'; g.lineWidth = 3; g.beginPath(); g.ellipse(cx, cy, sz * 0.3 + q.t * 160, (sz * 0.3 + q.t * 160) * 0.6, 0, 0, 6.283); g.stroke(); }
   g.globalAlpha = 1;
   // 淨化完成：背後一圈金光
   if (win) { const gl = g.createRadialGradient(cx, cy, 10, cx, cy, sz * (0.5 + win * 0.4)); gl.addColorStop(0, `rgba(255,214,120,${0.7 * win})`); gl.addColorStop(1, 'rgba(255,214,120,0)'); g.fillStyle = gl; g.beginPath(); g.arc(cx, cy, sz, 0, 6.283); g.fill(); }
@@ -353,7 +354,7 @@ function drawBeast(L, spr, p, win, T) {
   tg.globalCompositeOperation = 'source-atop';
   const murk = (1 - p) * 0.62 * (1 - win);
   if (murk > 0.01) { tg.fillStyle = `rgba(34,18,58,${murk})`; tg.fillRect(0, 0, px, px); }
-  if (S.hitT > 0.05) { tg.fillStyle = `rgba(255,255,255,${Math.min(0.7, S.hitT * 2.8)})`; tg.fillRect(0, 0, px, px); }
+  if (S.hitT > 0.05) { tg.fillStyle = `rgba(255,255,255,${Math.min(0.5, S.hitT * 2)})`; tg.fillRect(0, 0, px, px); }
   if (win) { tg.fillStyle = `rgba(255,220,140,${0.35 * Math.sin(win * 3.14)})`; tg.fillRect(0, 0, px, px); }
   g.save(); g.translate(cx, cy + sz * 0.5); g.scale(1 + wob * 0.12, 1 - wob * 0.12); g.drawImage(tint, -sz / 2, -sz, sz, sz); g.restore();
 }
