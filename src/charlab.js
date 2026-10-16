@@ -57,24 +57,21 @@ function setAct(k) {
 }
 // 只算已經拿到的物品
 const curLook = () => { if (!api) return {}; const l = api.look(); return Object.fromEntries(Object.entries(l).filter(([, v]) => v && api.owned(v))); };
-const BASE_IC = '<svg viewBox="0 0 24 24"><path d="M8 4l-4 3 2 4 2-1v10h8V10l2 1 2-4-4-3c-1 1.5-2.4 2-4 2s-3-.5-4-2z"/></svg>';
-const NONE_IC = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><path d="M6.7 17.3L17.3 6.7"/></svg>';
 function renderWard() {
   const lk = curLook(), w = el.querySelector('.ward');
   w.innerHTML = Object.entries(api.slots).map(([slot, ids]) => {
     const cur = lk[slot] || '';
-    const none = `<button type="button" class="${cur ? '' : 'on'}" data-slot="${slot}" data-id=""><span class="ic">${slot === 'body' ? BASE_IC : NONE_IC}</span><b>${t(slot === 'body' ? 'lookBase' : 'lookNone')}</b></button>`;
     const chips = ids.map(id => {
       const it = ITEMS.find(x => x.id === id), own = api.owned(id);
       return `<button type="button" class="${own ? (cur === id ? 'on' : '') : 'lock'}" data-slot="${slot}" data-id="${id}"><span class="ic item">${itemSVG(it)}</span><b>${own ? it.name[LI] : t('lookLocked')}</b></button>`;
     }).join('');
-    return `<section><h4>${t('slot_' + slot)}</h4><div class="chips">${none}${chips}</div></section>`;
+    return `<section><h4>${t('slot_' + slot)}</h4><div class="chips">${chips}</div></section>`;
   }).join('') + `<p class="wnote">${t('wardHint')}</p>`;
 }
 
 export function openCharLab(a) {
   if (!r) { try { r = new Renderer(cv); } catch { return; } }
-  api = a; el.hidden = false; setAct('walk'); renderWard(); el.scrollTop = 0;
+  api = a; el.hidden = false; setAct('walk'); renderWard(); el.querySelector('.ward').scrollTop = 0;
   last = performance.now(); cancelAnimationFrame(raf); raf = requestAnimationFrame(frame);
 }
 function close() { el.hidden = true; cancelAnimationFrame(raf); }
@@ -84,8 +81,10 @@ el.addEventListener('click', e => {
   const b = e.target.closest('.acts button'); if (b) return setAct(b.dataset.act);
   const c = e.target.closest('.ward button'); if (!c || !api) return;
   if (c.classList.contains('lock')) { c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); api.deny(); return; }
-  api.setLook(c.dataset.slot, c.dataset.id); api.pick(); renderWard();
-  if (c.dataset.id && S.act !== 'wave') setAct('wave');
+  // 點一下穿上，再點同一件脫下，點別件直接換
+  const off = curLook()[c.dataset.slot] === c.dataset.id;
+  api.setLook(c.dataset.slot, off ? '' : c.dataset.id); api.pick(); renderWard();
+  if (!off && S.act !== 'wave') setAct('wave');
 });
 // 左右拖曳轉角色
 cv.addEventListener('pointerdown', e => { S.drag = { x: e.clientX, yaw: S.yaw }; cv.setPointerCapture(e.pointerId); });
