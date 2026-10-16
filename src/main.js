@@ -2,7 +2,7 @@
 import { M, clamp, lerp, rng, hex, mixColor, smooth } from './math.js';
 import { Renderer, Builder } from './gl.js';
 import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, portalMesh, bellMesh, beastMesh, bossMesh, N, S, WATER, T, PLACES, CURRENT, curX } from './world.js';
-import { drawAvatar2, LIU2, LIU2_OUTFIT, XI2 } from './avatar2.js';
+import { drawAvatar2, liuPal, XI2 } from './avatar2.js';
 import { initAudio, unlockAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
 import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
 import { TALES } from './stories.js';
@@ -408,7 +408,7 @@ const LOOK_SLOTS = { body: ['outfit'], head: ['goggles', 'phones'], wrist: ['bra
 let look = {};
 try { look = JSON.parse(localStorage.getItem('of-look') || '{}'); } catch { }
 const setLook = (slot, id) => { look[slot] = id || ''; try { localStorage.setItem('of-look', JSON.stringify(look)); } catch { } };
-const lookNow = () => Object.fromEntries(Object.entries(look).filter(([, v]) => v && perk(v)));
+const lookNow = () => ({ ...Object.fromEntries(Object.entries(look).filter(([, v]) => v && perk(v))), realm: G.realm || 0 });   // realm：境界衣服與背後圖示
 // 走路慢慢消耗飽足；餓了先吃身上帶的鹹光餅
 function hunger(m) {
   const was = hungry();
@@ -501,7 +501,7 @@ redeemUse.addEventListener('click', () => {
   openItem(TOKEN); renderItems();
 });
 $('#itemsBtn').addEventListener('click', () => { renderItems(); itemsEl.hidden = false; });
-$('#labBtn').addEventListener('click', () => { sfx.pick(); openCharLab({ slots: LOOK_SLOTS, owned: perk, look: () => look, setLook, deny: () => sfx.deny(), pick: () => sfx.pick() }); });
+$('#labBtn').addEventListener('click', () => { sfx.pick(); openCharLab({ realm: () => G.realm || 0, slots: LOOK_SLOTS, owned: perk, look: () => look, setLook, deny: () => sfx.deny(), pick: () => sfx.pick() }); });
 itemsEl.addEventListener('click', e => {
   if (e.target.closest('.xbtn')) { itemsEl.hidden = true; return; }
   const b = e.target.closest('button[data-id]'); if (!b) return;
@@ -815,22 +815,6 @@ const LAND = { x0: N, z0: N, x1: 0, z1: 0 };   // 陸地範圍，滿版地圖用
   for (let i = 0; i < N * N; i++) if (world.K[i] !== T.SEA) { const x = i % N, z = i / N | 0; LAND.x0 = Math.min(LAND.x0, x); LAND.x1 = Math.max(LAND.x1, x + 1); LAND.z0 = Math.min(LAND.z0, z); LAND.z1 = Math.max(LAND.z1, z + 1); }
   for (const kk of ['x0', 'z0']) LAND[kk] = Math.max(0, LAND[kk] - 4);
   for (const kk of ['x1', 'z1']) LAND[kk] = Math.min(N, LAND[kk] + 4);
-}
-// 境界光環：境界越高，阿流身邊的光越多層，每層是那個境界的顏色
-// 聚流：腰間繞圈的綠光；化流：腳下往上飄的橘色火苗；御流：斜斜轉的紫色光環；歸流：頭後金色光輪
-const AURA = ['#7fe8ff', '#7ee05a', '#ff9326', '#9a78ff', '#ffc22e'].map(c => [1, 3, 5].map(k => parseInt(c.slice(k, k + 2), 16) / 255));
-// glow=false：實心發光的小方塊（白天也看得出顏色）；glow=true：加亮那一輪，只畫歸流腳下的光圈
-function realmAura(glow) {
-  const k = G.realm || 0; if (k < 1 || G.state === 'title') return;
-  const T = G.t, x = P.x, y = P.ry, z = P.z;
-  if (glow) { if (k >= 4) r.box(x, y + 0.04, z, 2.2, 0.02, 2.2, AURA[4], 1, 0.18 + 0.06 * Math.sin(T * 2), T * 0.3); return; }
-  for (let i = 0; i < 6; i++) { const a = T * 1.6 + i * 1.047; r.box(x + Math.cos(a) * 0.95, y + 1.2 + Math.sin(T * 2 + i) * 0.15, z + Math.sin(a) * 0.95, 0.2, 0.2, 0.2, AURA[1], 0.55, 1, a); }
-  if (k >= 2) for (let i = 0; i < 9; i++) { const ph = (T * 0.55 + i / 9) % 1, a = i * 2.4 + T * 0.4, q = Math.sin(ph * Math.PI); r.box(x + Math.cos(a) * 0.6, y + ph * 2.6, z + Math.sin(a) * 0.6, 0.18 * q, 0.3 * q, 0.18 * q, AURA[2], 0.55, 1, a); }
-  if (k >= 3) for (let i = 0; i < 14; i++) { const a = -T * 2.2 + i * 0.449, cx = Math.cos(a) * 1.25, cz = Math.sin(a) * 1.25; r.box(x + cx, y + 1.3 + cz * 0.35, z + cz, 0.15, 0.15, 0.15, AURA[3], 0.55, 1, a); }
-  if (k >= 4) {
-    const fx = Math.sin(P.yaw), fz = Math.cos(P.yaw);
-    for (let i = 0; i < 16; i++) { const a = i * 0.3927 + T * 0.6, u = Math.cos(a) * 0.62; r.box(x - fx * 0.45 + fz * u, y + 2.55 + Math.sin(a) * 0.62, z - fz * 0.45 - fx * u, 0.14, 0.14, 0.14, AURA[4], 0.55, 1, a); }
-  }
 }
 function drawMini() {
   drawMap(mini, mg, false);
@@ -1847,8 +1831,7 @@ function frame(dt) {
   for (const c of CHAPS) { const m = M.ident(); M.translate(m, c.x, c.y + Math.sin(G.t * 0.8 + c.i) * 0.3, c.z); M.rotY(m, Math.atan2(64 * S - c.x, 64 * S - c.z)); r.draw(c.mesh, m, [1, 1, 1], 0.12 + 0.08 * Math.sin(G.t * 1.6 + c.i)); }
   const pa = { phase: P.phase, move: P.move, air: !P.onGround && !P.swim, swim: P.swim, t: G.t };
   const lk = lookNow();
-  drawAvatar2(r, lk.body === 'outfit' ? LIU2_OUTFIT : LIU2, P.x, P.ry, P.z, P.yaw, pa, G.state === 'ending' ? 0.3 : 0, lk);
-  realmAura(false);
+  drawAvatar2(r, liuPal(lk), P.x, P.ry, P.z, P.yaw, pa, G.state === 'ending' ? 0.3 : 0, lk);
   const xg = ground(XI.x, XI.z);
   const dn = G.t < (XI.danceEnd || 0), hop = dn ? Math.abs(Math.sin(G.t * 6)) * 0.45 : 0;
   drawAvatar2(r, XI2, XI.x, xg + hop, XI.z, dn ? XI.yaw + Math.sin(G.t * 3) * 1.2 : XI.yaw, { phase: 0, move: 0, air: false, swim: false, t: G.t + 1.3, wave: XI.wave, dance: dn });
@@ -1905,7 +1888,6 @@ function frame(dt) {
   }
   if (world.lamp) r.box(world.lamp[0], world.lamp[1], world.lamp[2], 30, 0.35, 0.7, [1, 0.95, 0.7], 1, 0.12 + s * 0.25, G.t * 0.9);
   for (const p of G.particles) r.box(p.x, p.y, p.z, 0.18, 0.18, 0.18, p.col, 1, Math.min(1, p.life), p.life * 4);
-  realmAura(true);
   guideTrail(); taleMarks();
   if (G.riding && P.swim) for (let i = 0; i < 3; i++) r.box(P.x + Math.sin(G.t * 7 + i * 2) * 0.6, WATER + 0.05, P.z + 0.6 + i * 0.7, 0.25, 0.05, 0.6, [0.8, 0.95, 1], 1, 0.5 - i * 0.12);
   r.blend(0);

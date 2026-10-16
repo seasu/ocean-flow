@@ -3,7 +3,7 @@
 // 用自己的 WebGL 畫布，只在播放時跑；點一下或約 7 秒後收起
 import { Renderer } from './gl.js';
 import { M, hex, clamp } from './math.js';
-import { drawAvatar2, LIU2, LIU2_OUTFIT } from './avatar2.js';
+import { drawAvatar2, liuPal } from './avatar2.js';
 import { sfx } from './audio.js';
 import { t } from './i18n.js';
 import { realmVox, REALM_COL } from './realmicon.js';
@@ -34,7 +34,7 @@ export function ascend(i, look = {}) {
   el.querySelector('.txt p').textContent = t('ascendRealm', { realm });
   const ic = el.querySelector('.badge i'); ic.innerHTML = realmVox(i); ic.style.setProperty('--c', REALM_COL[i] || REALM_COL[0]);
   el.querySelector('.tap').textContent = t('tapNext');
-  const pal = look.body === 'outfit' ? LIU2_OUTFIT : LIU2;
+  look = { ...look, realm: i }; const pal = liuPal(look);   // 突破後直接換上新境界的衣服
   // 往上飄的小靈光
   const motes = Array.from({ length: 40 }, (_, i) => ({ a: Math.random() * 6.28, r: 0.8 + Math.random() * 2.2, s: 0.4 + Math.random() * 0.8, o: Math.random() * 4, c: FOUR[i % 4] }));
   return new Promise(res => {

@@ -22,6 +22,26 @@ export const XI2 = { ...LIU2, ...pal({
   shoe: '#e8601c', cuff: '#f08a24', phone: '#ef6c1a', pwave: '#ff8a1f', pwaveLt: '#ffcf4a',
 }) };
 export const LIU2_OUTFIT = { ...LIU2, ...pal({ jacket: '#1f8f86', jacketSh: '#17706a', wave: '#ffcf5a', waveLt: '#ffe9a8', strap: '#ffd27a' }) };
+// 境界衣服：每突破一個境界換一套，浪花、帽兜、飄帶換成那個境界的顏色，背後印境界圖示（emb）
+// 感流＝原本的白外套藍浪；聚流綠、化流橘、御流紫；歸流換成深藍外套配金浪
+export const LIU2_REALM = [
+  { ...LIU2, ...pal({ emb: '#7fe8ff', embBg: '#1e2b52' }) },
+  { ...LIU2, ...pal({ wave: '#5fae3a', waveLt: '#b8f08a', waveDk: '#2f6a22', navy: '#1f4a2a', navyDk: '#12301a', strap: '#9fe07a', eye: '#3f8f3a', shoe: '#1f4a2a', cuff: '#1f4a2a', phone: '#1f4a2a', emb: '#b8f08a', embBg: '#1f4a2a' }) },
+  { ...LIU2, ...pal({ jacket: '#fbf3e6', jacketSh: '#efe0c8', wave: '#f07a1c', waveLt: '#ffc46a', waveDk: '#b84a0f', navy: '#5a2a14', navyDk: '#3a1a0c', strap: '#ffb04a', eye: '#c4641a', shoe: '#5a2a14', cuff: '#5a2a14', phone: '#5a2a14', emb: '#ffb04a', embBg: '#5a2a14' }) },
+  { ...LIU2, ...pal({ jacket: '#eeeafc', jacketSh: '#d8d0f4', wave: '#8a6ae8', waveLt: '#c9b8ff', waveDk: '#5a3fb8', navy: '#2c2160', navyDk: '#1c1540', strap: '#b9a0ff', eye: '#6a4fd0', shoe: '#2c2160', cuff: '#2c2160', phone: '#2c2160', emb: '#c9b8ff', embBg: '#2c2160' }) },
+  { ...LIU2, ...pal({ jacket: '#26346a', jacketSh: '#1c2754', inner: '#0f1428', wave: '#e3a83a', waveLt: '#ffd97a', waveDk: '#a8761a', navy: '#f3f5f8', navyDk: '#c9d2dd', strap: '#ffcf5a', eye: '#c4901a', shoe: '#26346a', cuff: '#e3a83a', phone: '#e3a83a', pants: '#141c38', emb: '#ffd97a', embBg: '#8a6a1e' }) },
+];
+// 阿流用哪一套：五分埔新衣優先，不然就是目前境界的衣服
+export const liuPal = look => look.body === 'outfit' ? { ...LIU2_OUTFIT, emb: LIU2_REALM[look.realm || 0].emb, embBg: LIU2_REALM[look.realm || 0].embBg } : LIU2_REALM[look.realm || 0] || LIU2;
+// 背後的境界圖示：5×5 方塊像素畫（漣漪、漩渦、浪上火苗、捲浪、圓海）
+const EMB = [
+  ['.###.', '#...#', '#.#.#', '#...#', '.###.'],
+  ['#####', '....#', '###.#', '#...#', '#####'],
+  ['..#..', '.###.', '.###.', '#.#.#', '.#.#.'],
+  ['..###', '.#..#', '#..##', '#....', '#####'],
+  ['.###.', '#...#', '#####', '#...#', '.###.'],
+];
+const EMB_PARTS = EMB.map(rows => [[0, 1.3, -0.237, 0.56, 0.56, 0.012, 'embBg'], ...rows.flatMap((row, j) => [...row].map((ch, i) => ch === '#' ? [(2 - i) * 0.09, 1.3 + (2 - j) * 0.09, -0.245, 0.085, 0.085, 0.01, 'emb', 0.45] : null).filter(Boolean))]);
 
 // [cx, cy, cz, w, h, d, 顏色鍵, 自發光]；sym() 會補上左右對稱的另一半
 const sym = list => list.flatMap(p => p[0] ? [p, [-p[0], ...p.slice(1)]] : [p]);
@@ -149,6 +169,7 @@ export function drawAvatar2(r, c, x, y, z, yaw, a, glow = 0, look = {}) {
   const body = M.copy(root); M.translate(body, 0, breathe + bob, 0);
   if (a.move > 0.6 && !a.air) M.rotX(body, 0.08 * a.move);   // 跑起來身體往前傾
   parts(r, body, TORSO, c, glow);
+  if (look.realm != null && c.emb) parts(r, body, EMB_PARTS[look.realm] || EMB_PARTS[0], c, glow);   // 背後的境界圖示（背對時 x 要左右翻，所以用 2 - i）
   if (look.back) {
     const m = M.copy(body); M.translate(m, 0, 1.22, -0.31);
     if (look.back === 'paddle') { M.rotZ(m, 0.55); parts(r, m, PADDLE, c, glow); } else parts(r, m, BARREL, c, glow);
