@@ -286,18 +286,18 @@ $('#avPick input').addEventListener('change', e => {
 });
 $('#meBtn').addEventListener('click', e => { e.stopPropagation(); hudKey = ''; hud(); meEl.hidden = false; });
 meEl.addEventListener('click', e => { if (e.target.closest('.xbtn')) meEl.hidden = true; });
-// ---------- 台北集章簿：每個真實地點一枚印章，只有人在現世走到才蓋得到（模擬定位測試也算） ----------
+// ---------- 台北集章簿：每個真實地點一枚，人在現世走到附近就自動收集（模擬定位測試也算） ----------
 const STAMP_TXT = { venue: '台北靈門', huashan: '華山', qidong: '文學基地', jinan: '濟南教會', shandao: '善導寺', station: '台北車站', controlyuan: '監察院', guanghua: '光華',
   wufenpu: '五分埔', cihcheng: '慈諴宮', xinzhuang: '新莊', wanhua: '萬華', baoan: '保安宮', zaichun: '再春', shipai: '石牌' };
 let stamps = {};
 try { stamps = JSON.parse(localStorage.getItem('of-stamps') || '{}'); } catch { }
-const seal = (id, cls = '') => `<span class="seal ${cls}"><i>${[...(STAMP_TXT[id] || '')].map(c => `<b>${c}</b>`).join('')}</i></span>`;
+const seal = (id, cls = '') => `<span class="seal ph ${cls}" style="--ph:url(img/stamps/${id}.jpg)"><i>${[...(STAMP_TXT[id] || '')].map(c => `<b>${c}</b>`).join('')}</i></span>`;
 const stampFx = document.createElement('div'); stampFx.id = 'stampFx'; document.body.appendChild(stampFx);
 function stamp(s) {
   if (stamps[s.id]) return;
   const d = new Date(); stamps[s.id] = `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`;
   try { localStorage.setItem('of-stamps', JSON.stringify(stamps)); } catch { }
-  // 蓋章：印章從畫面上方壓下來，咚一聲，兩秒後收起（不擋操作）
+  // 收集：印記從畫面上方落下來，咚一聲，兩秒後收起（不擋操作）
   stampFx.innerHTML = `${seal(s.id)}<p>${t('stampGot', { name: s.name })}</p>`;
   stampFx.className = ''; void stampFx.offsetWidth; stampFx.className = 'go';
   setTimeout(() => { sfx.bell(98); try { navigator.vibrate && navigator.vibrate(60); } catch { } }, 380);
@@ -309,8 +309,11 @@ function renderStamps() {
   const groups = [[t('stampCulture'), REAL.filter(x => !x.tale)], [t('stampTales'), REAL.filter(x => x.tale)]];
   const n = Object.keys(stamps).filter(k => STAMP_TXT[k]).length, m = Object.keys(STAMP_TXT).length;
   $('#stampSub').textContent = G.geo ? t('stampSub', { n, m }) : t('spiritNoRec');
-  $('#stampList').innerHTML = groups.map(([h, list]) => `<li class="sh">${h}<em>${list.filter(x => stamps[x.id]).length}/${list.length}</em></li>`
-    + list.map(x => `<li class="${stamps[x.id] ? 'on' : ''}" data-id="${x.id}">${seal(x.id, stamps[x.id] ? '' : 'empty')}<b>${x.name}</b><small>${stamps[x.id] || t('stampGo')}</small></li>`).join('')).join('');
+  // 跟成就頁同一套樣式：分區標題＋兩欄卡片，圓圈裡放景點照片，還沒收集的是灰的
+  const GLY = ['<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/>', '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 18a2 2 0 0 1 2-2h11"/>'];
+  const COL = ['#ffcf5a', '#7fe8ff'];
+  $('#stampList').innerHTML = groups.map(([h, list], gi) => `<li class="chd" style="--c:${COL[gi]}"><i class="gl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${GLY[gi]}</svg></i><span><b>${h}</b></span><em>${list.filter(x => stamps[x.id]).length}/${list.length}</em></li>`
+    + list.map(x => `<li data-id="${x.id}"><button class="${stamps[x.id] ? 'on' : 'lock'}" type="button"><span class="ic photo" style="--ph:url(img/stamps/${x.id}.jpg)"></span><b>${x.name}</b><small>${stamps[x.id] || (x.sub || '').split(/・| · /).slice(1).join('・')}</small></button></li>`).join('')).join('');
 }
 $('#stampBtn').addEventListener('click', () => { renderStamps(); stampEl.hidden = false; });
 stampEl.addEventListener('click', e => {

@@ -265,8 +265,8 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #itemList{list-style:none;margin:0 auto;padding:0;width:100%;max-width:30em;display:grid;grid-template-columns:1fr 1fr;gap:12px}
 #itemList .ic.item{border-radius:22px;background:radial-gradient(circle,rgba(127,232,255,.18),rgba(127,232,255,.03) 70%);border-color:rgba(127,232,255,.6)}
 #itemList .ic.item svg{width:70px;height:70px}
-#itemList .chd .gl{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--c);color:var(--c)}
-#itemList .chd .gl svg{width:26px;height:26px}
+:is(#itemList,#stampList) .chd .gl{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--c);color:var(--c)}
+:is(#itemList,#stampList) .chd .gl svg{width:26px;height:26px}
 #itemPage .body{width:min(520px,100%);margin:0 auto;display:flex;flex-direction:column;gap:18px}
 #itemPage .hero{width:min(64vw,260px);aspect-ratio:1;margin:8px auto 0;padding:28px;border-radius:36px;background:radial-gradient(circle,rgba(127,232,255,.22),rgba(127,232,255,.02) 70%);border:2px solid rgba(127,232,255,.45);box-sizing:border-box}
 #itemPage .hero svg{width:100%;height:100%;filter:drop-shadow(0 8px 14px rgba(0,0,0,.45))}
@@ -309,20 +309,20 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #me .achbtn .chev{width:10px;height:10px;border-right:2px solid var(--dim);border-top:2px solid var(--dim);transform:rotate(45deg)}
 #me .achbtn:active{transform:scale(.98)}
 #stampbook{z-index:13}
-#stampList{list-style:none;margin:0 auto;padding:16px;width:100%;max-width:30em;display:grid;grid-template-columns:repeat(3,1fr);gap:16px 10px;border-radius:20px;
-  background:linear-gradient(180deg,#f3ead6,#e9dcbd);color:#3a2a14;box-shadow:inset 0 0 0 1px rgba(120,80,30,.25),0 10px 30px rgba(0,0,0,.35)}
-#stampList .sh{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;font-size:17px;font-weight:900;padding-bottom:6px;border-bottom:1.5px solid rgba(120,80,30,.3)}
-#stampList .sh:not(:first-child){margin-top:10px}
-#stampList .sh em{font-style:normal;font-size:15px;color:#a5402f;font-variant-numeric:tabular-nums}
-#stampList li[data-id]{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;cursor:pointer;min-width:0}
-#stampList li b{font-size:15px;line-height:1.3}
-#stampList li small{font-size:13px;color:#7a6446;font-variant-numeric:tabular-nums}
-#stampList li:not(.on) b{color:#8a7a62}
-#stampList .nope{animation:nope .4s}
 .seal{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;border:3px solid #c0392b;box-shadow:inset 0 0 0 3px #f3ead6,inset 0 0 0 5px #c0392b;color:#c0392b;transform:rotate(-8deg);background:rgba(192,57,43,.06)}
 .seal i{display:grid;grid-template-rows:repeat(2,auto);grid-auto-flow:column;direction:rtl;gap:0 1px;font-style:normal}
 .seal b{font-family:"Noto Serif TC","Songti TC",serif;font-weight:900;font-size:19px;line-height:1.05;direction:ltr}
 .seal.empty{border:2px dashed rgba(120,90,50,.45);box-shadow:none;color:rgba(120,90,50,.35);background:none;transform:none}
+/* 景點照片當圓章底：收集到的是彩色，還沒收集的蓋一層紙色遮罩 */
+:is(#achList,#itemList,#stampList) .ic.photo{background:#1a2738 var(--ph) center/cover no-repeat}
+#stampList .lock .ic.photo{background:#1a2738 var(--ph) center/cover no-repeat;filter:grayscale(1) brightness(.45)}
+#stampList small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.seal.ph{position:relative;overflow:hidden;background:#d9cdb0 var(--ph) center/cover no-repeat}
+.seal.ph::before{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(120,20,10,.18),rgba(120,20,10,.42));box-shadow:inset 0 0 0 4px #f3ead6,inset 0 0 0 6px #c0392b}
+.seal.ph i{position:relative;color:#fff;text-shadow:0 1px 3px rgba(60,10,5,.85),0 0 8px rgba(120,20,10,.6)}
+.seal.ph.empty{border:2px dashed rgba(120,90,50,.55);filter:grayscale(1)}
+.seal.ph.empty::before{background:rgba(236,226,202,.82);box-shadow:none}
+.seal.ph.empty i{color:rgba(110,85,50,.55);text-shadow:none}
 #stampFx{position:fixed;left:50%;top:calc(18% + var(--st));z-index:30;display:flex;flex-direction:column;align-items:center;gap:10px;transform:translateX(-50%);pointer-events:none;opacity:0}
 #stampFx .seal{width:110px;height:110px;background:rgba(243,234,214,.92);box-shadow:inset 0 0 0 3px #f3ead6,inset 0 0 0 5px #c0392b,0 8px 30px rgba(0,0,0,.45)}
 #stampFx .seal b{font-size:28px}
@@ -331,35 +331,35 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 @keyframes stampDown{0%{transform:scale(2.6) rotate(10deg);opacity:0}80%{transform:scale(.92) rotate(-8deg);opacity:1}100%{transform:scale(1) rotate(-8deg)}}
 @keyframes stampOut{0%,85%{opacity:1}100%{opacity:0}}
 #ach{z-index:13}
-:is(#achList,#itemList){list-style:none;margin:0 auto;padding:0;width:100%;max-width:30em;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-:is(#achList,#itemList) button{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:#fff;font:inherit;text-align:center;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-:is(#achList,#itemList) button.on{border-color:rgba(255,207,90,.55);background:rgba(255,207,90,.08)}
-:is(#achList,#itemList) button:active{transform:scale(.96)}
-:is(#achList,#itemList) b{font-size:17px;line-height:1.3}
-:is(#achList,#itemList) small{font-size:14px;color:var(--dim);line-height:1.4}
-:is(#achList,#itemList) .on small{color:var(--gold)}
-:is(#achList,#itemList) .ic{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,rgba(255,207,90,.28),rgba(255,207,90,.04) 70%);border:2px solid var(--gold);overflow:hidden}
-:is(#achList,#itemList) .ic img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 6px rgba(255,207,90,.6))}
-:is(#achList,#itemList) .ic.n4{grid-template-columns:1fr 1fr;padding:10px;gap:0}:is(#achList,#itemList) .ic.n4 img{width:34px;height:34px}
-:is(#achList,#itemList) .ic.n3{grid-template-columns:1fr 1fr;padding:10px}:is(#achList,#itemList) .ic.n3 img{width:36px;height:36px}:is(#achList,#itemList) .ic.n3 img:first-child{grid-column:1/3;justify-self:center}
-:is(#achList,#itemList) .ic.n1{padding:8px}
-:is(#achList,#itemList) .ic.book svg{width:46px;height:46px;color:var(--gold)}
-:is(#achList,#itemList) .chd{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:14px;padding-bottom:10px;border-bottom:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
-:is(#achList,#itemList) .chd:first-child{margin-top:0}
-:is(#achList,#itemList) .chd img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--c)}
-:is(#achList,#itemList) .chd span{flex:1;display:flex;flex-direction:column;line-height:1.25}
-:is(#achList,#itemList) .chd small{font-size:14px;color:var(--dim)}
-:is(#achList,#itemList) .chd b{font-size:20px;color:var(--c)}
-:is(#achList,#itemList) .chd em{font-style:normal;font-size:15px;color:var(--c);font-variant-numeric:tabular-nums}
-:is(#achList,#itemList) .chd.shut img{filter:grayscale(1) brightness(.6)}
-:is(#achList,#itemList) .chd.shut b{color:#9fb0c0}:is(#achList,#itemList) .chd.shut em{color:var(--dim)}
+:is(#achList,#itemList,#stampList){list-style:none;margin:0 auto;padding:0;width:100%;max-width:30em;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+:is(#achList,#itemList,#stampList) button{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:#fff;font:inherit;text-align:center;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+:is(#achList,#itemList,#stampList) button.on{border-color:rgba(255,207,90,.55);background:rgba(255,207,90,.08)}
+:is(#achList,#itemList,#stampList) button:active{transform:scale(.96)}
+:is(#achList,#itemList,#stampList) b{font-size:17px;line-height:1.3}
+:is(#achList,#itemList,#stampList) small{font-size:14px;color:var(--dim);line-height:1.4}
+:is(#achList,#itemList,#stampList) .on small{color:var(--gold)}
+:is(#achList,#itemList,#stampList) .ic{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,rgba(255,207,90,.28),rgba(255,207,90,.04) 70%);border:2px solid var(--gold);overflow:hidden}
+:is(#achList,#itemList,#stampList) .ic img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 6px rgba(255,207,90,.6))}
+:is(#achList,#itemList,#stampList) .ic.n4{grid-template-columns:1fr 1fr;padding:10px;gap:0}:is(#achList,#itemList,#stampList) .ic.n4 img{width:34px;height:34px}
+:is(#achList,#itemList,#stampList) .ic.n3{grid-template-columns:1fr 1fr;padding:10px}:is(#achList,#itemList,#stampList) .ic.n3 img{width:36px;height:36px}:is(#achList,#itemList,#stampList) .ic.n3 img:first-child{grid-column:1/3;justify-self:center}
+:is(#achList,#itemList,#stampList) .ic.n1{padding:8px}
+:is(#achList,#itemList,#stampList) .ic.book svg{width:46px;height:46px;color:var(--gold)}
+:is(#achList,#itemList,#stampList) .chd{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:14px;padding-bottom:10px;border-bottom:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+:is(#achList,#itemList,#stampList) .chd:first-child{margin-top:0}
+:is(#achList,#itemList,#stampList) .chd img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--c)}
+:is(#achList,#itemList,#stampList) .chd span{flex:1;display:flex;flex-direction:column;line-height:1.25}
+:is(#achList,#itemList,#stampList) .chd small{font-size:14px;color:var(--dim)}
+:is(#achList,#itemList,#stampList) .chd b{font-size:20px;color:var(--c)}
+:is(#achList,#itemList,#stampList) .chd em{font-style:normal;font-size:15px;color:var(--c);font-variant-numeric:tabular-nums}
+:is(#achList,#itemList,#stampList) .chd.shut img{filter:grayscale(1) brightness(.6)}
+:is(#achList,#itemList,#stampList) .chd.shut b{color:#9fb0c0}:is(#achList,#itemList,#stampList) .chd.shut em{color:var(--dim)}
 #achList .ghosts{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;justify-items:center}
 #achList .ghosts span{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.04);border:1.5px dashed rgba(255,255,255,.22);color:rgba(190,205,220,.45)}
 #achList .ghosts svg{width:28px;height:28px}
-:is(#achList,#itemList) .lock .ic{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.05)}
-:is(#achList,#itemList) .lock .ic img,:is(#achList,#itemList) .lock .ic svg{filter:grayscale(1) brightness(.45);opacity:.6;color:#9aa}
-:is(#achList,#itemList) .lock b{color:#9fb0c0}
-:is(#achList,#itemList) .nope{animation:nope .4s}@keyframes nope{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+:is(#achList,#itemList,#stampList) .lock .ic{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.05)}
+:is(#achList,#itemList,#stampList) .lock .ic img,:is(#achList,#itemList,#stampList) .lock .ic svg{filter:grayscale(1) brightness(.45);opacity:.6;color:#9aa}
+:is(#achList,#itemList,#stampList) .lock b{color:#9fb0c0}
+:is(#achList,#itemList,#stampList) .nope{animation:nope .4s}@keyframes nope{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 /* 成就重播淨化完成卡：不顯示戰鬥畫面 */
 #battle.replay{z-index:21;background:radial-gradient(ellipse at 50% 45%,rgba(40,30,10,.95),rgba(4,8,18,.98) 70%)}
 #battle.replay>:not(.vic){display:none}
@@ -911,7 +911,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   <button class="more ico" aria-label="settings" data-i18n-label="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   <h1>洋流</h1>
   <div class="tag fold" data-i18n="tagline">走出去，遇見你的機緣。</div>
-  <div class="modes"><button class="start" type="button"><b data-i18n="startGeo">現世修行</b><small data-i18n="startGeoSub">開啟定位，走到真實景點・蓋章、記成就</small></button>
+  <div class="modes"><button class="start" type="button"><b data-i18n="startGeo">現世修行</b><small data-i18n="startGeoSub">開啟定位，走到真實景點附近就收集・記成就</small></button>
   <button class="spirit" type="button"><b data-i18n="startSpirit">靈界走走</b><small data-i18n="startSpiritSub">在家也能玩，靈界裡走到就觸發・只能體驗</small></button></div>
   <small class="ver" data-v="__VERSION__"></small>
 </div>
