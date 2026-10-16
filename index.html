@@ -265,8 +265,8 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #itemList{list-style:none;margin:0 auto;padding:0;width:100%;max-width:30em;display:grid;grid-template-columns:1fr 1fr;gap:12px}
 #itemList .ic.item{border-radius:22px;background:radial-gradient(circle,rgba(127,232,255,.18),rgba(127,232,255,.03) 70%);border-color:rgba(127,232,255,.6)}
 #itemList .ic.item svg{width:70px;height:70px}
-:is(#achList,#itemList,#stampList) .chd .gl{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--c);color:var(--c)}
-:is(#achList,#itemList,#stampList) .chd .gl svg{width:26px;height:26px}
+:is(#achList,#itemList,#stampList,#realmList) .chd .gl{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--c);color:var(--c)}
+:is(#achList,#itemList,#stampList,#realmList) .chd .gl svg{width:26px;height:26px}
 #itemPage .body{width:min(520px,100%);margin:0 auto;display:flex;flex-direction:column;gap:18px}
 #itemPage .hero{width:min(64vw,260px);aspect-ratio:1;margin:8px auto 0;padding:28px;border-radius:36px;background:radial-gradient(circle,rgba(127,232,255,.22),rgba(127,232,255,.02) 70%);border:2px solid rgba(127,232,255,.45);box-sizing:border-box}
 #itemPage .hero svg{width:100%;height:100%;filter:drop-shadow(0 8px 14px rgba(0,0,0,.45))}
@@ -314,7 +314,7 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 .seal b{font-family:"Noto Serif TC","Songti TC",serif;font-weight:900;font-size:19px;line-height:1.05;direction:ltr}
 .seal.empty{border:2px dashed rgba(120,90,50,.45);box-shadow:none;color:rgba(120,90,50,.35);background:none;transform:none}
 /* 景點照片當圓章底：收集到的是彩色，還沒收集的蓋一層紙色遮罩 */
-:is(#achList,#itemList,#stampList) .ic.photo{background:#1a2738 var(--ph) center/cover no-repeat}
+:is(#achList,#itemList,#stampList,#realmList) .ic.photo{background:#1a2738 var(--ph) center/cover no-repeat}
 #stampList .lock .ic.photo{background:#1a2738 var(--ph) center/cover no-repeat;filter:grayscale(1) brightness(.45)}
 #stampList small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .seal.ph{position:relative;overflow:hidden;background:#d9cdb0 var(--ph) center/cover no-repeat}
@@ -331,37 +331,38 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 @keyframes stampDown{0%{transform:scale(2.6) rotate(10deg);opacity:0}80%{transform:scale(.92) rotate(-8deg);opacity:1}100%{transform:scale(1) rotate(-8deg)}}
 @keyframes stampOut{0%,85%{opacity:1}100%{opacity:0}}
 #ach{z-index:13}
-:is(#achList,#itemList,#stampList){list-style:none;margin:0 auto;padding:0;width:100%;max-width:30em;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-:is(#achList,#itemList,#stampList) button{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:#fff;font:inherit;text-align:center;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-:is(#achList,#itemList,#stampList) button.on{border-color:rgba(255,207,90,.55);background:rgba(255,207,90,.08)}
-:is(#achList,#itemList,#stampList) button:active{transform:scale(.96)}
-:is(#achList,#itemList,#stampList) b{font-size:17px;line-height:1.3}
-:is(#achList,#itemList,#stampList) small{font-size:14px;color:var(--dim);line-height:1.4}
-:is(#achList,#itemList,#stampList) .on small{color:var(--gold)}
-:is(#achList,#itemList,#stampList) .ic{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,rgba(255,207,90,.28),rgba(255,207,90,.04) 70%);border:2px solid var(--gold);overflow:hidden}
-:is(#achList,#itemList,#stampList) .ic img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 6px rgba(255,207,90,.6))}
-:is(#achList,#itemList,#stampList) .ic.n4{grid-template-columns:1fr 1fr;padding:10px;gap:0}:is(#achList,#itemList,#stampList) .ic.n4 img{width:34px;height:34px}
-:is(#achList,#itemList,#stampList) .ic.n3{grid-template-columns:1fr 1fr;padding:10px}:is(#achList,#itemList,#stampList) .ic.n3 img{width:36px;height:36px}:is(#achList,#itemList,#stampList) .ic.n3 img:first-child{grid-column:1/3;justify-self:center}
-:is(#achList,#itemList,#stampList) .ic.n1{padding:8px}
-:is(#achList,#itemList,#stampList) .ic.book svg{width:46px;height:46px;color:var(--gold)}
-#achList .ic.realm{border-color:var(--c);background:radial-gradient(circle,color-mix(in srgb,var(--c) 26%,transparent),transparent 70%)}#achList .ic.realm svg{width:50px;height:50px;color:var(--c);filter:drop-shadow(0 0 6px var(--c))}
-#achList .lock .ic.realm{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.05)}
-:is(#achList,#itemList,#stampList) .chd{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:14px;padding-bottom:10px;border-bottom:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
-:is(#achList,#itemList,#stampList) .chd:first-child{margin-top:0}
-:is(#achList,#itemList,#stampList) .chd img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--c)}
-:is(#achList,#itemList,#stampList) .chd span{flex:1;display:flex;flex-direction:column;line-height:1.25}
-:is(#achList,#itemList,#stampList) .chd small{font-size:14px;color:var(--dim)}
-:is(#achList,#itemList,#stampList) .chd b{font-size:20px;color:var(--c)}
-:is(#achList,#itemList,#stampList) .chd em{font-style:normal;font-size:15px;color:var(--c);font-variant-numeric:tabular-nums}
-:is(#achList,#itemList,#stampList) .chd.shut img{filter:grayscale(1) brightness(.6)}
-:is(#achList,#itemList,#stampList) .chd.shut b{color:#9fb0c0}:is(#achList,#itemList,#stampList) .chd.shut em{color:var(--dim)}
+:is(#achList,#itemList,#stampList,#realmList){list-style:none;margin:0 auto;padding:0;width:100%;max-width:30em;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+:is(#achList,#itemList,#stampList,#realmList) button{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:#fff;font:inherit;text-align:center;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+:is(#achList,#itemList,#stampList,#realmList) button.on{border-color:rgba(255,207,90,.55);background:rgba(255,207,90,.08)}
+:is(#achList,#itemList,#stampList,#realmList) button:active{transform:scale(.96)}
+:is(#achList,#itemList,#stampList,#realmList) b{font-size:17px;line-height:1.3}
+:is(#achList,#itemList,#stampList,#realmList) small{font-size:14px;color:var(--dim);line-height:1.4}
+:is(#achList,#itemList,#stampList,#realmList) .on small{color:var(--gold)}
+:is(#achList,#itemList,#stampList,#realmList) .ic{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,rgba(255,207,90,.28),rgba(255,207,90,.04) 70%);border:2px solid var(--gold);overflow:hidden}
+:is(#achList,#itemList,#stampList,#realmList) .ic img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 6px rgba(255,207,90,.6))}
+:is(#achList,#itemList,#stampList,#realmList) .ic.n4{grid-template-columns:1fr 1fr;padding:10px;gap:0}:is(#achList,#itemList,#stampList,#realmList) .ic.n4 img{width:34px;height:34px}
+:is(#achList,#itemList,#stampList,#realmList) .ic.n3{grid-template-columns:1fr 1fr;padding:10px}:is(#achList,#itemList,#stampList,#realmList) .ic.n3 img{width:36px;height:36px}:is(#achList,#itemList,#stampList,#realmList) .ic.n3 img:first-child{grid-column:1/3;justify-self:center}
+:is(#achList,#itemList,#stampList,#realmList) .ic.n1{padding:8px}
+:is(#achList,#itemList,#stampList,#realmList) .ic.book svg{width:46px;height:46px;color:var(--gold)}
+#realmList .ic.realm{border-color:var(--c);background:radial-gradient(circle,color-mix(in srgb,var(--c) 26%,transparent),transparent 70%)}#realmList .ic.realm svg{width:66px;height:66px;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--c) 70%,transparent))}
+#realmList .lock .ic.realm{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.05)}
+#realmList li:last-child{grid-column:1/-1}
+:is(#achList,#itemList,#stampList,#realmList) .chd{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:14px;padding-bottom:10px;border-bottom:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+:is(#achList,#itemList,#stampList,#realmList) .chd:first-child{margin-top:0}
+:is(#achList,#itemList,#stampList,#realmList) .chd img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--c)}
+:is(#achList,#itemList,#stampList,#realmList) .chd span{flex:1;display:flex;flex-direction:column;line-height:1.25}
+:is(#achList,#itemList,#stampList,#realmList) .chd small{font-size:14px;color:var(--dim)}
+:is(#achList,#itemList,#stampList,#realmList) .chd b{font-size:20px;color:var(--c)}
+:is(#achList,#itemList,#stampList,#realmList) .chd em{font-style:normal;font-size:15px;color:var(--c);font-variant-numeric:tabular-nums}
+:is(#achList,#itemList,#stampList,#realmList) .chd.shut img{filter:grayscale(1) brightness(.6)}
+:is(#achList,#itemList,#stampList,#realmList) .chd.shut b{color:#9fb0c0}:is(#achList,#itemList,#stampList,#realmList) .chd.shut em{color:var(--dim)}
 #achList .ghosts{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;justify-items:center}
 #achList .ghosts span{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.04);border:1.5px dashed rgba(255,255,255,.22);color:rgba(190,205,220,.45)}
 #achList .ghosts svg{width:28px;height:28px}
-:is(#achList,#itemList,#stampList) .lock .ic{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.05)}
-:is(#achList,#itemList,#stampList) .lock .ic img,:is(#achList,#itemList,#stampList) .lock .ic svg{filter:grayscale(1) brightness(.45);opacity:.6;color:#9aa}
-:is(#achList,#itemList,#stampList) .lock b{color:#9fb0c0}
-:is(#achList,#itemList,#stampList) .nope{animation:nope .4s}@keyframes nope{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+:is(#achList,#itemList,#stampList,#realmList) .lock .ic{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.05)}
+:is(#achList,#itemList,#stampList,#realmList) .lock .ic img,:is(#achList,#itemList,#stampList,#realmList) .lock .ic svg{filter:grayscale(1) brightness(.45);opacity:.6;color:#9aa}
+:is(#achList,#itemList,#stampList,#realmList) .lock b{color:#9fb0c0}
+:is(#achList,#itemList,#stampList,#realmList) .nope{animation:nope .4s}@keyframes nope{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 /* 成就重播淨化完成卡：不顯示戰鬥畫面 */
 #battle.replay{z-index:21;background:radial-gradient(ellipse at 50% 45%,rgba(40,30,10,.95),rgba(4,8,18,.98) 70%)}
 #battle.replay>:not(.vic){display:none}
@@ -724,7 +725,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 #ascend .badge{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px;opacity:0;transform:scale(.6)}
 #ascend.icon .badge{opacity:1;transform:none;transition:opacity .5s,transform .7s cubic-bezier(.2,1.5,.4,1)}
 #ascend .badge i{width:104px;height:104px;border-radius:50%;display:grid;place-items:center;color:var(--c);border:2px solid var(--c);background:radial-gradient(circle,color-mix(in srgb,var(--c) 30%,transparent),rgba(6,11,22,.6) 72%);box-shadow:0 0 28px color-mix(in srgb,var(--c) 60%,transparent)}
-#ascend .badge svg{width:60px;height:60px;filter:drop-shadow(0 0 6px var(--c))}
+#ascend .badge svg{width:76px;height:76px;filter:drop-shadow(0 0 8px var(--c))}
 #ascend .txt p{margin:0;font-size:22px;font-weight:900;color:#fff;letter-spacing:.1em;text-shadow:0 2px 12px rgba(0,0,0,.6)}
 #ascend .tap{z-index:1;position:absolute;left:0;right:0;bottom:calc(6% + var(--sb));text-align:center;font-size:16px;color:rgba(220,230,245,.7);opacity:0}
 #ascend.icon .tap{opacity:1;transition:opacity .5s .9s}
@@ -903,6 +904,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   <div class="xiu"><div class="xb"><i id="xbar"></i></div><p id="meXiu"></p></div>
   <div class="full"><div class="fb"><i id="fbar"></i></div><p><b id="meFull"></b><small id="meFullTip"></small></p></div>
   <ul class="grid" id="meGrid"></ul>
+  <button class="achbtn" id="realmAchBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.6"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.5 5.5a9.2 9.2 0 0 0 0 13M18.5 5.5a9.2 9.2 0 0 1 0 13"/></svg><span data-i18n="achRealms">修行境界</span><em id="realmN">0/5</em><i class="chev"></i></button>
   <button class="achbtn" id="achBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M16 5h3v2a3 3 0 0 1-3 3M8 5H5v2a3 3 0 0 0 3 3"/><path d="M12 13v4M8.5 20h7M10 17h4"/></svg><span data-i18n="achBtn">成就</span><em id="achN">0/8</em><i class="chev"></i></button>
   <button class="achbtn" id="itemsBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg><span data-i18n="itemsBtn">物品收藏</span><em id="itemsN">0/15</em><i class="chev"></i></button>
   <button class="achbtn" id="labBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8v6H8z"/><path d="M6 10h12v7H6zM9 17v4M15 17v4"/><path d="M11 6h.01M13 6h.01"/></svg><span data-i18n="labBtn">角色搭配</span><i class="chev"></i></button>
@@ -910,6 +912,8 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 </div></div>
 <div id="stampbook" class="overlay page" hidden><header class="phead"><div><b data-i18n="stampBtn">台北集章簿</b><small id="stampSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
   <ul id="stampList"></ul></div>
+<div id="realmAch" class="overlay page" hidden><header class="phead"><div><b data-i18n="achRealms">修行境界</b><small id="realmSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <ul id="realmList"></ul></div>
 <div id="ach" class="overlay page" hidden><header class="phead"><div><b data-i18n="achTitle">成就</b><small id="achSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
   <ul id="achList"></ul></div>
 <div id="charLab" class="overlay page" hidden><header class="phead"><div><b data-i18n="labBtn">角色搭配</b><small data-i18n="labSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>

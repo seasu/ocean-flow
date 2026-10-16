@@ -6,7 +6,7 @@ import { M, hex, clamp } from './math.js';
 import { drawAvatar2, LIU2, LIU2_OUTFIT } from './avatar2.js';
 import { sfx } from './audio.js';
 import { t } from './i18n.js';
-import { realmSvg, REALM_COL } from './realmicon.js';
+import { realmVox, REALM_COL } from './realmicon.js';
 
 const FOUR = ['#ffa53a', '#8fd14f', '#ff8fbf', '#a98bff'].map(hex);
 const HIT = 1.5, WORD = 2.3, ICON = 3.5;   // 第幾秒：爆光、出現「突破」、亮出境界圖示
@@ -32,7 +32,7 @@ export function ascend(i, look = {}) {
   el.querySelector('.txt small').textContent = t('ascendTop');
   el.querySelector('h2').textContent = t('ascendTitle');
   el.querySelector('.txt p').textContent = t('ascendRealm', { realm });
-  const ic = el.querySelector('.badge i'); ic.innerHTML = realmSvg(i, 1.6); ic.style.setProperty('--c', REALM_COL[i] || REALM_COL[0]);
+  const ic = el.querySelector('.badge i'); ic.innerHTML = realmVox(i); ic.style.setProperty('--c', REALM_COL[i] || REALM_COL[0]);
   el.querySelector('.tap').textContent = t('tapNext');
   const pal = look.body === 'outfit' ? LIU2_OUTFIT : LIU2;
   // 往上飄的小靈光

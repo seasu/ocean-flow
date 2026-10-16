@@ -96,10 +96,12 @@ function shade(hex, k) {
   return '#' + c.map(v => v.toString(16).padStart(2, '0')).join('');
 }
 const cache = {};
-export function itemSVG(it) {
-  if (cache[it.id]) return cache[it.id];
+export function itemSVG(it) { return voxSVG(it.v, it.id); }
+// 任何方塊組合都畫成同一種等角圖示（境界圖示也用這個）
+export function voxSVG(v, key) {
+  if (key && cache[key]) return cache[key];
   const polys = [], pts = [];
-  for (const [x, y, z, w, h, d, col, a = 1] of it.v) {
+  for (const [x, y, z, w, h, d, col, a = 1] of v) {
     const P = (i, j, k) => { const p = proj(x + i * w, y + j * h, z + k * d); pts.push(p); return p; };
     const top = [P(0, 1, 0), P(1, 1, 0), P(1, 1, 1), P(0, 1, 1)];
     const front = [P(0, 0, 1), P(1, 0, 1), P(1, 1, 1), P(0, 1, 1)];
@@ -109,5 +111,7 @@ export function itemSVG(it) {
   }
   const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]), pad = 0.5;
   const x0 = Math.min(...xs) - pad, y0 = Math.min(...ys) - pad, w = Math.max(...xs) + pad - x0, h = Math.max(...ys) + pad - y0, s = Math.max(w, h);
-  return cache[it.id] = `<svg viewBox="${(x0 - (s - w) / 2).toFixed(2)} ${(y0 - (s - h) / 2).toFixed(2)} ${s.toFixed(2)} ${s.toFixed(2)}" stroke-width="0.09" stroke-linejoin="round">${polys.join('')}</svg>`;
+  const out = `<svg viewBox="${(x0 - (s - w) / 2).toFixed(2)} ${(y0 - (s - h) / 2).toFixed(2)} ${s.toFixed(2)} ${s.toFixed(2)}" stroke-width="0.09" stroke-linejoin="round">${polys.join('')}</svg>`;
+  if (key) cache[key] = out;
+  return out;
 }
