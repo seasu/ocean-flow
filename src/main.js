@@ -309,8 +309,11 @@ function renderStamps() {
   const groups = [[t('stampCulture'), REAL.filter(x => !x.tale)], [t('stampTales'), REAL.filter(x => x.tale)]];
   const n = Object.keys(stamps).filter(k => STAMP_TXT[k]).length, m = Object.keys(STAMP_TXT).length;
   $('#stampSub').textContent = G.geo ? t('stampSub', { n, m }) : t('spiritNoRec');
-  $('#stampList').innerHTML = groups.map(([h, list]) => `<li class="sh">${h}<em>${list.filter(x => stamps[x.id]).length}/${list.length}</em></li>`
-    + list.map(x => `<li class="${stamps[x.id] ? 'on' : ''}" data-id="${x.id}">${seal(x.id, stamps[x.id] ? '' : 'empty')}<b>${x.name}</b><p>${(x.sub || '').split(/・| · /).slice(1).join('・')}</p>${stamps[x.id] ? `<small>${stamps[x.id]}</small>` : ''}</li>`).join('')).join('');
+  // 跟成就頁同一套樣式：分區標題＋兩欄卡片，圓圈裡放景點照片，還沒收集的是灰的
+  const GLY = ['<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/>', '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 18a2 2 0 0 1 2-2h11"/>'];
+  const COL = ['#ffcf5a', '#7fe8ff'];
+  $('#stampList').innerHTML = groups.map(([h, list], gi) => `<li class="chd" style="--c:${COL[gi]}"><i class="gl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${GLY[gi]}</svg></i><span><b>${h}</b></span><em>${list.filter(x => stamps[x.id]).length}/${list.length}</em></li>`
+    + list.map(x => `<li data-id="${x.id}"><button class="${stamps[x.id] ? 'on' : 'lock'}" type="button"><span class="ic photo" style="--ph:url(img/stamps/${x.id}.jpg)"></span><b>${x.name}</b><small>${stamps[x.id] || (x.sub || '').split(/・| · /).slice(1).join('・')}</small></button></li>`).join('')).join('');
 }
 $('#stampBtn').addEventListener('click', () => { renderStamps(); stampEl.hidden = false; });
 stampEl.addEventListener('click', e => {
