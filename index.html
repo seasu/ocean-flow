@@ -411,6 +411,25 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
 #spot em:empty{display:none}
 #spot em{display:block;font-style:normal;font-size:15px;font-weight:900;color:var(--gold)}
 #spot p{margin:10px 0 0;font-size:16px;line-height:1.75;white-space:pre-line;color:#dbe6f0}
+#spot .spotgo{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:12px;padding:16px;border-radius:999px;font:inherit;font-size:19px;font-weight:900;color:#fff;letter-spacing:.08em;background:linear-gradient(135deg,#2b6fb0,#1b4c80);border:1.5px solid rgba(127,232,255,.6);box-shadow:0 8px 24px rgba(20,60,110,.45);cursor:pointer}
+#spot .spotgo[hidden]{display:none}
+#spot .spotgo.lock{background:rgba(255,255,255,.08);border:1.5px dashed rgba(255,255,255,.3);box-shadow:none;color:#dbe6f0;font-size:17px;letter-spacing:.04em}
+#spot .spotgo.nope{animation:nope .4s}
+#spot .readhint{position:fixed;left:50%;top:50%;z-index:5;display:flex;flex-direction:column;align-items:center;gap:10px;width:min(78vw,300px);padding:22px 20px;border-radius:22px;text-align:center;color:#fff;background:rgba(14,30,52,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(127,232,255,.35);box-shadow:0 12px 40px rgba(0,0,0,.45);opacity:0;pointer-events:none;transform:translate(-50%,-50%) scale(.9)}
+#spot .readhint svg{width:38px;height:38px;color:var(--gold)}
+#spot .readhint b{font-size:18px;line-height:1.5;white-space:pre-line}
+#spot .readhint.show{animation:rhint 2.6s ease forwards}
+@keyframes rhint{0%{opacity:0;transform:translate(-50%,-50%) scale(.9)}12%,78%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+#spot .spotgo svg{width:24px;height:24px}
+#spot .spotgo:active{transform:scale(.97)}
+/* 開場：兩種模式 */
+#title .modes{display:flex;flex-direction:column;gap:10px;width:min(calc(100% - 40px),340px)}
+#title .modes button{display:flex;flex-direction:column;align-items:center;gap:3px;margin:0;width:100%;padding:13px 16px;border-radius:22px;letter-spacing:.08em}
+#title .modes b{font-size:21px;font-weight:900}
+#title .modes small{font-size:14px;font-weight:600;letter-spacing:0;opacity:.85}
+#title .modes .start{background:linear-gradient(135deg,#ffe08a,var(--gold));color:#2a1c00;border:0;text-shadow:none}
+#title .spirit{font:inherit;color:#fff;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.4);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);cursor:pointer}
+#title .spirit:active{transform:scale(.97)}
 #spot .readrw{display:flex;align-items:center;gap:12px;width:100%;margin-top:22px;padding:14px 16px;border-radius:18px;font:inherit;text-align:left;color:#dbe6f0;background:rgba(255,255,255,.06);border:1.5px dashed rgba(255,255,255,.25);transition:background .3s,border-color .3s}
 #spot .readrw[hidden]{display:none}
 #spot .readrw svg{flex:none;width:30px;height:30px;color:var(--dim)}
@@ -551,7 +570,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   #title.calm .fold{opacity:0;max-height:0;margin:-7px 0;pointer-events:none}
   /* 收起後：「洋流」移到上方放大、「啟程」移到下方（位移動畫在下面的 flip()） */
   #title.calm h1{position:absolute;left:0;right:0;top:calc(9% + var(--st));font-size:clamp(84px,28vw,150px);text-shadow:0 4px 28px rgba(6,12,22,.6),0 2px 0 rgba(6,12,22,.35)}
-  #title.calm .start{position:absolute;left:0;right:0;margin:0 auto;width:min(calc(100% - 40px),320px);font-size:22px;padding:17px 0;bottom:calc(44px + var(--sb))}
+  #title.calm .modes{position:absolute;left:0;right:0;margin:0 auto;bottom:calc(40px + var(--sb))}
 }
 .screen h1{margin:0;font-size:clamp(56px,18vw,120px);font-weight:900;letter-spacing:.12em;line-height:1;text-shadow:0 4px 24px rgba(111,227,255,.35)}
 .screen .en{font-size:13px;letter-spacing:.4em;color:var(--cyan);font-weight:500}
@@ -758,13 +777,12 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   <div class="hint playonly" data-i18n="hint">左邊拖曳：移動<br>右邊拖曳：轉視角</div>
 </div>
 <div id="card" role="button"><span class="pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.8-6.5-10.8a6.5 6.5 0 0 1 13 0C18.5 15.2 12 21 12 21z"/><circle cx="12" cy="10" r="2.3"/></svg></span><span class="tx"><b></b><small></small></span><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
-<div id="spot" class="page" hidden><header class="phead"><div><b></b><small></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><div class="gal"><div class="ph"></div><div class="dots"></div></div><div class="body"><em></em><p></p><div class="cr"></div><button class="readrw" type="button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg><span><b></b><small></small></span></button></div></div>
+<div id="spot" class="page" hidden><header class="phead"><div><b></b><small></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><div class="gal"><div class="ph"></div><div class="dots"></div></div><div class="body"><em></em><p></p><div class="cr"></div><button class="readrw" type="button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg><span><b></b><small></small></span></button><button class="spotgo" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"/></svg><span></span></button></div><div class="readhint" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 016.5 3H20v16H6.5A2.5 2.5 0 004 21.5z"/><path d="M4 5.5v16M9 8h7M9 12h5"/></svg><b></b></div></div>
 <div id="settings" class="overlay page" hidden><header class="phead"><div><b data-i18n="settings">設定</b></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><div class="sheet">
   <div class="row"><span class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg><span data-i18n="langLabel">語言</span></span><div class="langs"></div></div>
   <div class="row"><span class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg><span data-i18n="soundLabel">聲音</span></span><button class="switch" id="soundT" role="switch" aria-checked="true"><i></i></button></div>
   <button class="row link" id="howBtn"><span class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.3-2.5 3.9"/><path d="M12 17h.01"/></svg><span data-i18n="goTitle">洋流怎麼玩</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button><button class="row link" id="loreBtn"><span class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5C5.5 4 8.5 4 12 6c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5z"/><path d="M12 6v13.5"/></svg><span data-i18n="loreBtn">洋流世界觀</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button><button class="row link" id="castBtn"><span class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.4c1.7.6 2.8 2.2 3 4.6"/></svg><span data-i18n="castBtn">角色圖鑑</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
   <button class="row link" id="realmBtn"><span class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="9.5" stroke-dasharray="2 3"/></svg><span data-i18n="realmBtn">境界說明</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
-  <div class="row simrow"><span class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span><span data-i18n="simSet">模擬定位</span><small class="note" data-i18n="simNote">測試用：雷達清單會出現走路圖示，點了就走過去</small></span></span><button class="switch" id="simT" role="switch" aria-checked="false"><i></i></button></div>
   <div class="row"><span class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg><span data-i18n="demoLabel">Demo 階段</span></span><div class="seg" id="demoSt"></div></div>
   <div class="row ver-row"><span class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5v.01"/></svg><span data-i18n="verLabel">版本</span></span><span class="vv"><b id="verV"></b><small id="verB"></small></span></div>
 </div></div>
@@ -797,7 +815,8 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   <button class="more ico" aria-label="settings" data-i18n-label="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   <h1>洋流</h1>
   <div class="tag fold" data-i18n="tagline">走出去，遇見你的機緣。</div>
-  <button class="start" data-i18n="startGeo">啟程</button>
+  <div class="modes"><button class="start" type="button"><b data-i18n="startGeo">現世修行</b><small data-i18n="startGeoSub">開啟定位，走到真實景點・蓋章、記成就</small></button>
+  <button class="spirit" type="button"><b data-i18n="startSpirit">靈界走走</b><small data-i18n="startSpiritSub">在家也能玩，靈界裡走到就觸發・只能體驗</small></button></div>
   <small class="ver" data-v="__VERSION__"></small>
 </div>
 </div>
@@ -850,7 +869,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   // 展開時點任務卡以外的地方，就收回去
   addEventListener('pointerdown', e => { if (!quest.classList.contains('min') && !e.target.closest('#quest')) { quest.classList.add('min'); clearTimeout(qT); } }, true);
   // 片頭：手機上 3 秒後標語淡出，「洋流」邊上移邊放大、「啟程」往下；點空白處展開，再閒置 8 秒又收起
-  const title = document.getElementById('title'), keep = [title.querySelector('h1'), title.querySelector('.start')];
+  const title = document.getElementById('title'), keep = [title.querySelector('h1'), title.querySelector('.modes')];
   function flip(calm) {
     if (title.classList.contains('calm') === calm) return;
     const a = keep.map(e => e.getBoundingClientRect());
