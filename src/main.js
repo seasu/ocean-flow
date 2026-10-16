@@ -1873,13 +1873,13 @@ function frame(dt) {
 
   // 阿汐的名牌
   const tag = $('#tag'), pj = M.project(vp, XI.x, xg + 2.6, XI.z);
-  if (pj && G.state !== 'title' && pj[0] > 0 && pj[0] < 1 && pj[1] > 0 && pj[1] < 1) { tag.style.transform = `translate(${pj[0] * innerWidth}px,${pj[1] * innerHeight}px) translate(-50%,-100%)`; tag.style.opacity = 1; }
+  if (pj && G.state !== 'title' && pj[0] > 0 && pj[0] < 1 && pj[1] > 0 && pj[1] < 1) { tag.style.transform = `translate(${pj[0] * innerWidth}px,${pj[1] * canvas.clientHeight}px) translate(-50%,-100%)`; tag.style.opacity = 1; }
   else tag.style.opacity = 0;
   // 章節入口的圖示：靠近海邊才看得到，越近越清楚
   for (const c of CHAPS) {
     const d = Math.hypot(c.x - P.x, c.z - P.z), pc = G.state === 'play' && d < 110 && M.project(vp, c.x, c.y + 9.5, c.z);
     if (pc && pc[0] > 0.04 && pc[0] < 0.96 && pc[1] > -0.5 && pc[1] < 0.9) {
-      c.el.style.transform = `translate(${pc[0] * innerWidth}px,${Math.max(pc[1], 0.34) * innerHeight}px) translate(-50%,-100%) scale(${clamp(1.25 - d / 120, 0.6, 1).toFixed(2)})`;
+      c.el.style.transform = `translate(${pc[0] * innerWidth}px,${Math.max(pc[1], 0.34) * canvas.clientHeight}px) translate(-50%,-100%) scale(${clamp(1.25 - d / 120, 0.6, 1).toFixed(2)})`;
       c.el.style.opacity = clamp((110 - d) / 30, 0, 1).toFixed(2); c.el.style.pointerEvents = 'auto';
     } else { c.el.style.opacity = 0; c.el.style.pointerEvents = 'none'; }
   }
