@@ -294,6 +294,7 @@ const S = {
   achGate: ['{beast}淨化', '{beast} Purified', '{beast} 浄化'],
   achHintGate: ['打開{name}', 'Open the {name}', '{name}を開く'],
   achHintFour: ['打開四座山門', 'Open all four hill gates', '四つの山門を開く'],
+  achHintCat: ['到{name}淨化', 'Purify the guardian cat at {name}', '{name}で守り猫を浄化する'],
   achHintTales: ['淨化台北七個故事的守門街貓', 'Purify the seven guardian cats of the Taipei stories', '台北の七つの物語の守り猫を浄化する'],
   achHintFlows: ['喚醒城、海、山三流', 'Awaken the city, sea and mountain flows', '城・海・山の流れを目覚めさせる'],
   achBoss: ['濁淵淨化', 'Zhuoyuan Purified', '濁淵 浄化'],
