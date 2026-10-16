@@ -23,7 +23,7 @@ export function sigil(A, { star, ease }) {
   const box = () => { const a = A.lay.area, s = Math.min(a.w, a.h - 30); return { x: a.x + (a.w - s) / 2, y: a.y + (a.h - s) / 2, s }; };
   // 飄動以座標為相位，重複的同一點（起點＝終點）會一起動
   const pts = () => { const b = box(), T = A.time, d = LV.drift * b.s; return RUNES[S.rune].map(([u, v]) => [b.x + u * b.s + Math.sin(T * 1.3 + u * 7 + v * 11) * d, b.y + v * b.s + Math.cos(T * 1.1 + u * 13 + v * 5) * d]); };
-  const R = () => Math.max(26, box().s * 0.085);
+  const R = () => Math.max(26, box().s * 0.085) * (A.perk('brush') ? 1.35 : 1);   // 詩人的毛筆：判定變寬
 
   function reset(fail) {
     S.next = 0; S.trail = []; S.drawing = false;
@@ -45,6 +45,7 @@ export function sigil(A, { star, ease }) {
   }
 
   return {
+    revive() { S.time += 10; info(); },
     S, pts, reach,
     busy: () => S.done > 0,
     down(x, y) {

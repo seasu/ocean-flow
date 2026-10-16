@@ -9,7 +9,8 @@ import { TALES } from './stories.js';
 import { quiz } from './quiz.js';
 import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
 import { roar } from './roar.js';
-import { battle, replayVictory } from './battle.js';
+import { battle, replayVictory, MODS } from './battle.js';
+import { ITEMS, ITEM_OF, itemSVG } from './items.js';
 import { openLore, openRealms, openCast, CH } from './lore.js';
 import { VERSION } from './version.js';
 
@@ -365,6 +366,68 @@ achEl.addEventListener('click', e => {
   if (!achGot.has(a.id)) { sfx.deny(); b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); return; }   // 還沒達成：搖一下，提示就寫在格子裡
   initAudio(); a.play();
 });
+// ---------- 商圈整合：飽足與物品 ----------
+// 15 個機緣點各有一樣物品，讀完景點介紹按「領取靈光」時一起拿到；食物直接吃、衣物直接換、裝備直接生效
+// 收藏只在現世修行記錄（存在這台裝置）；靈界走走這一趟可以用，但不記錄
+const LI = lang === 'en' ? 1 : lang === 'ja' ? 2 : 0;
+const OUTFIT = { ...BLUE, jacket: hex('#1f8f86'), trim: hex('#0f5a54'), wave: hex('#ffcf5a'), ribbon: hex('#ffcf5a') };
+G.full = 70; G.cakes = 0;
+const hungry = () => G.full < 30;
+let itemsGot = new Set();
+try { itemsGot = new Set(JSON.parse(localStorage.getItem('of-items') || '[]')); } catch { }
+const itemsRun = new Set();
+const perk = id => itemsRun.has(id) || (G.geo && itemsGot.has(id));
+MODS.perk = perk; Object.defineProperty(MODS, 'hungry', { get: hungry });
+const eat = n => { G.full = Math.min(100, G.full + n); };
+// 走路慢慢消耗飽足；餓了先吃身上帶的鹹光餅
+function hunger(m) {
+  const was = hungry();
+  G.full = Math.max(0, G.full - m * 0.08);
+  if (!hungry()) return;
+  if (G.cakes > 0) { G.cakes--; eat(ITEM_OF.xinzhuang.fill); toast(t('cakeToast', { n: G.cakes })); }
+  else if (!was) toast(t('hungryToast'));
+}
+function grantItem(key) {
+  const it = ITEM_OF[key]; if (!it) return null;
+  itemsRun.add(it.id);
+  if (G.geo && !itemsGot.has(it.id)) { itemsGot.add(it.id); try { localStorage.setItem('of-items', JSON.stringify([...itemsGot])); } catch { } }
+  if (it.type === 'food') it.carry ? (G.cakes += it.carry) : eat(it.fill);
+  hudKey = '';
+  return it;
+}
+const itemOwned = it => G.geo ? itemsGot.has(it.id) : itemsRun.has(it.id);
+function syncItems() { $('#itemsN').textContent = `${ITEMS.filter(itemOwned).length}/${ITEMS.length}`; }
+const placeName = it => (REAL.find(r => r.id === it.spot) || TALES.find(r => r.id === it.spot))?.name || '';
+// 收藏頁：跟成就一樣，小 icon 排成格子，依階段分區，還沒拿到的是灰色
+const itemsEl = $('#items'), itemPg = $('#itemPage');
+const STAGE_GLYPH = ['<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/>', '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 18a2 2 0 0 1 2-2h11"/>'];
+function renderItems() {
+  const n = ITEMS.filter(itemOwned).length;
+  $('#itemsSub').textContent = G.geo ? t('itemsSub', { n, m: ITEMS.length }) : t('spiritNoRec');
+  const head = st => { const list = ITEMS.filter(x => x.stage === st); return `<li class="chd" style="--c:${st === 1 ? '#ffcf5a' : '#7fe8ff'}"><i class="gl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${STAGE_GLYPH[st - 1]}</svg></i><span><b>${t('itemStage' + st)}</b></span><em>${list.filter(itemOwned).length}/${list.length}</em></li>`; };
+  const tile = it => { const on = itemOwned(it); return `<li><button class="${on ? 'on' : 'lock'}" data-id="${it.id}"><span class="ic item">${itemSVG(it)}</span><b>${on ? it.name[LI] : '？？？'}</b><small>${on ? t('type_' + it.type) + '・' + t('itemOpen') : t('itemHint', { place: placeName(it) })}</small></button></li>`; };
+  $('#itemList').innerHTML = [1, 2].map(st => head(st) + ITEMS.filter(x => x.stage === st).map(tile).join('')).join('');
+}
+function openItem(it) {
+  itemPg.querySelector('.phead b').textContent = it.name[LI];
+  itemPg.querySelector('.phead small').textContent = `${t('type_' + it.type)}・${placeName(it)}`;
+  itemPg.querySelector('.hero').innerHTML = itemSVG(it);
+  itemPg.querySelector('.fx b').textContent = it.fx[LI];
+  itemPg.querySelector('.fx small').textContent = t('auto_' + it.type);
+  itemPg.querySelector('.story').textContent = it.story[LI];
+  itemPg.querySelector('.where b').textContent = placeName(it);
+  itemPg.hidden = false; itemPg.scrollTop = 0;
+}
+$('#itemsBtn').addEventListener('click', () => { renderItems(); itemsEl.hidden = false; });
+itemsEl.addEventListener('click', e => {
+  if (e.target.closest('.xbtn')) { itemsEl.hidden = true; return; }
+  const b = e.target.closest('button[data-id]'); if (!b) return;
+  const it = ITEMS.find(x => x.id === b.dataset.id);
+  if (!itemOwned(it)) { sfx.deny(); b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); return; }
+  sfx.pick(); openItem(it);
+});
+itemPg.addEventListener('click', e => { if (e.target.closest('.xbtn')) itemPg.hidden = true; });
+
 // 小地圖：點地圖 icon 才展開，8 秒後自動收起
 let miniT = 0;
 // 靈界地圖：點地圖 icon（或角落的小地圖）直接滿版，一次只看「我在哪裡、下一站在哪」
@@ -495,7 +558,7 @@ function guideTrail() {
   const g = guideTarget(); if (!g.pos) return;
   const dx = g.pos[0] - P.x, dz = g.pos[2] - P.z, d = Math.hypot(dx, dz);
   if (d < 3) return;
-  const ux = dx / d, uz = dz / d, ph = (G.t * 2.4) % 1.2, L = Math.min(d - 1, 12);
+  const ux = dx / d, uz = dz / d, ph = (G.t * 2.4) % 1.2, L = Math.min(d - 1, perk('phones') ? 24 : 12);   // 流光耳機：金光更長
   for (let k = 1 + ph; k < L; k += 1.2) {
     const a = Math.min(1, (k - 1) / 1.2) * Math.min(1, (L - k) / 3);
     r.box(P.x + ux * k, P.y + 0.12, P.z + uz * k, 0.5, 0.08, 0.5, [1, 0.85, 0.4], 1, a, Math.atan2(ux, uz));
@@ -520,8 +583,9 @@ G.realm = 0; G.xiu = 0; G.walked = 0;
 const xiuFull = () => G.realm < NEED.length && G.xiu >= NEED[G.realm];
 function gainXiu(m) {
   G.walked += m;
+  hunger(m);
   if (G.realm >= NEED.length || xiuFull()) return;
-  G.xiu = Math.min(NEED[G.realm], G.xiu + m);
+  G.xiu = Math.min(NEED[G.realm], G.xiu + m * (hungry() ? 0.5 : 1));   // 肚子餓：修為長得慢一半
   if (xiuFull()) { toast(t('xiuFull')); sfx.sense(); }
 }
 function breakthrough() {
@@ -580,11 +644,16 @@ const avail = () => G.collected + (G.bonus || 0) - G.spent;
 let hudKey = '';
 function hud() {
   const found = SPOTS.filter(sp => sp.found).length;
-  const key = [Math.round(G.walked), visited.size, G.wildWins, G.geo, G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, G.realm, Math.ceil(G.xiu), found].join();
+  const key = [Math.round(G.walked), Math.round(G.full), itemsRun.size, visited.size, G.wildWins, G.geo, G.collected, G.bonus, G.spent, G.awakened, G.gateOpen, G.realm, Math.ceil(G.xiu), found].join();
   if (key !== hudKey) {
     hudKey = key;
     $('#lv').textContent = REALMS[G.realm];
     $('#xbar').style.width = (G.realm >= NEED.length ? 100 : G.xiu / NEED[G.realm] * 100) + '%';
+    $('#fbar').style.width = G.full + '%'; $('#fbar').parentNode.classList.toggle('low', hungry());
+    $('#meFull').textContent = `${t('meFull')} ${Math.round(G.full)}%${G.cakes ? `・${t('type_food')} ${ITEM_OF.xinzhuang.name[LI]}×${G.cakes}` : ''}`;
+    $('#meFullTip').textContent = t(hungry() ? 'fullHungry' : 'fullOk');
+    $('#meBtn').classList.toggle('hungry', hungry());
+    syncItems();
     const steps = Math.round(G.geo ? G.walked / 0.7 : G.walked);   // 現世：用公尺換算步數（一步約 0.7 公尺）
     $('#meSteps').textContent = t('stepsN', { n: steps.toLocaleString() });
     $('#meDist').textContent = G.geo ? t('meDist', { d: fmt(G.walked) }) : '';
@@ -925,7 +994,7 @@ addEventListener('of-title-open', () => { if (G.state === 'title') sfx.reveal();
 // ---------- 玩法 ----------
 function doSense() {
   if (G.state !== 'play' || G.senseCd > 0) return;
-  G.sense = 6; G.senseCd = 9; G.pulse = [P.x, P.z, 0, 1]; sfx.sense();
+  G.sense = perk('lens') ? 10 : 6; G.senseCd = 9; G.pulse = [P.x, P.z, 0, 1]; sfx.sense();
   const target = nextGate() || { name: t('gateName'), pos: GATE };
   const [rel, n] = islandRel(target.pos);
   toast(t('senseToast', { name: target.name, rel, n }));
@@ -1077,7 +1146,7 @@ function updatePlayer(dt) {
     if (L < 2.4) G.auto = 0;
     else { mx = dx / L; mz = dz / L; mag = 1; G.auto -= (P.swim ? 3.8 : 7) * dt; }
   }
-  const speed = P.swim ? 3.8 : 7;
+  const speed = P.swim ? (perk('goggles') ? 5.2 : 3.8) : 7;   // 再春泳鏡：游得快
   const a = 1 - Math.exp(-dt * 12);
   P.vx = lerp(P.vx, mx * speed, a); P.vz = lerp(P.vz, mz * speed, a);
   if (mag > 0.1) {
@@ -1085,13 +1154,15 @@ function updatePlayer(dt) {
     P.yaw += d * Math.min(1, dt * 14);
   }
   let vx = P.vx, vz = P.vz, curS = 0;
-  if (P.swim) { const c = world.current(P.x, P.z); vx += c[0]; vz += c[1]; curS = c[2]; }
+  if (P.swim) { const c = world.current(P.x, P.z), k = perk('paddle') ? 1.7 : 1; vx += c[0] * k; vz += c[1] * k; curS = c[2]; }   // 艋舺獨木舟槳：乘黑潮更快
   G.riding = curS > 0.4;
   const step = P.swim ? 2.1 : 1.1;
   if (!blocked(P.x + vx * dt, P.z, P.y, step)) P.x += vx * dt;
   if (!blocked(P.x, P.z + vz * dt, P.y, step)) P.z += vz * dt;
 
-  const gnd = footGround(P.x, P.z), swimLv = WATER - 1.05, deep = gnd < WATER - 1.1;
+  const gnd = footGround(P.x, P.z), deep = gnd < WATER - 1.1;
+  // 再春泳鏡：游動時往水裡潛（底下夠深才潛）
+  const swimLv = WATER - 1.05 - (perk('goggles') && P.move > 0.3 ? clamp(WATER - 1.45 - gnd, 0, 0.9) : 0);
   if (P.swim) {
     if (!deep) P.swim = false;
     else {
@@ -1285,9 +1356,22 @@ const READ_GAIN = 1, readGot = new Set(), readBtn = spotEl.querySelector('.readr
 let readKey = null, readT0 = 0, readTimer = 0;
 function readState(s) {
   readBtn.className = 'readrw' + (s === 'lock' ? '' : ' ' + s); readBtn.disabled = s !== 'ready';
+  const it = ITEM_OF[readKey], item = it?.name[LI];
   readBtn.querySelector('b').textContent = t(s === 'got' ? 'readGot' : s === 'ready' ? 'readTake' : 'readLock', { n: READ_GAIN });
-  readBtn.querySelector('small').textContent = t(s === 'got' ? 'readGotSub' : s === 'ready' ? 'readTakeSub' : 'readLockSub', { n: READ_GAIN });
+  readBtn.querySelector('small').textContent = t(s === 'got' ? (it ? 'readGotItem' : 'readGotSub') : s === 'ready' ? (it ? 'readTakeItem' : 'readTakeSub') : (it ? 'readLockItem' : 'readLockSub'), { n: READ_GAIN, item });
+  readBtn.querySelector('.it').innerHTML = it ? itemSVG(it) : '';   // 這裡拿得到的物品，先讓人看到
 }
+// 領到物品：介紹頁正中間亮一下（拿到什麼、效果）；點一下或幾秒後收起
+const itemFx = spotEl.querySelector('.itemfx');
+function showItemFx(it) {
+  itemFx.querySelector('.hero').innerHTML = itemSVG(it);
+  itemFx.querySelector('b').textContent = t('itemGot', { item: it.name[LI] });
+  itemFx.querySelector('p').textContent = it.fx[LI];
+  itemFx.querySelector('small').textContent = G.geo ? '' : t('itemSpirit');
+  itemFx.classList.remove('show'); void itemFx.offsetWidth; itemFx.classList.add('show');
+  clearTimeout(showItemFx.t); showItemFx.t = setTimeout(() => itemFx.classList.remove('show'), 3600);
+}
+itemFx.addEventListener('click', () => itemFx.classList.remove('show'));
 function setupRead(key, gate = false) {
   clearTimeout(readTimer); readKey = key || null;
   readBtn.hidden = !readKey || G.state === 'title';
@@ -1310,7 +1394,10 @@ spotEl.addEventListener('scroll', checkRead, { passive: true });
 readBtn.addEventListener('click', () => {
   if (!readBtn.classList.contains('ready')) return;
   readGot.add(readKey); G.bonus += READ_GAIN; readState('got');
-  sfx.pick(); setTimeout(() => sfx.pick(), 120); pop(t('readPop', { n: READ_GAIN }), 'gold');
+  sfx.pick(); setTimeout(() => sfx.pick(), 120);
+  const it = grantItem(readKey);
+  if (it) { showItemFx(it); if (it.type === 'food' && !it.carry) setTimeout(() => toast(t('ateToast', { item: it.name[LI], n: it.fill })), 3700); }
+  else pop(t('readPop', { n: READ_GAIN }), 'gold');
 });
 spotPh.addEventListener('scroll', () => { const k = Math.round(spotPh.scrollLeft / spotPh.clientWidth); spotDots.querySelectorAll('i').forEach((el, n) => el.classList.toggle('on', n === k)); }, { passive: true });
 $('#dexList').addEventListener('click', e => {
@@ -1663,7 +1750,7 @@ function frame(dt) {
   if (s > 0.01) { const m = M.ident(); M.translate(m, 0, -(1 - smooth(0, 0.6, s)) * 50, 0); r.draw(floats, m, [1, 1, 1], 0.05); }
   for (const c of CHAPS) { const m = M.ident(); M.translate(m, c.x, c.y + Math.sin(G.t * 0.8 + c.i) * 0.3, c.z); M.rotY(m, Math.atan2(64 * S - c.x, 64 * S - c.z)); r.draw(c.mesh, m, [1, 1, 1], 0.12 + 0.08 * Math.sin(G.t * 1.6 + c.i)); }
   const pa = { phase: P.phase, move: P.move, air: !P.onGround && !P.swim, swim: P.swim, t: G.t };
-  drawAvatar(r, BLUE, P.x, P.ry - (P.swim ? 0.0 : 0), P.z, P.yaw, pa, G.state === 'ending' ? 0.3 : 0);
+  drawAvatar(r, perk('outfit') ? OUTFIT : BLUE, P.x, P.ry - (P.swim ? 0.0 : 0), P.z, P.yaw, pa, G.state === 'ending' ? 0.3 : 0);
   const xg = ground(XI.x, XI.z);
   const dn = G.t < (XI.danceEnd || 0), hop = dn ? Math.abs(Math.sin(G.t * 6)) * 0.45 : 0;
   drawAvatar(r, ORANGE, XI.x, xg + hop, XI.z, dn ? XI.yaw + Math.sin(G.t * 3) * 1.2 : XI.yaw, { phase: 0, move: 0, air: false, swim: false, t: G.t + 1.3, wave: XI.wave, dance: dn });
@@ -1691,7 +1778,7 @@ function frame(dt) {
 
   // 加亮：靈光、光柱、粒子、山門
   r.blend(2);
-  const near = 9;
+  const near = perk('lens') ? 14 : 9;   // 古蹟放大鏡：看得更遠
   for (const m of motes) {
     if (m.taken) continue;
     const d = Math.hypot(m.x - P.x, m.z - P.z);

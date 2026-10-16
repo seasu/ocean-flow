@@ -121,6 +121,7 @@ export function match3(A, { star, ease }) {
 
   let down = null;
   return {
+    revive() { B.moves += 4; info(); },
     B, runs, swapped, swap: trySwap, C, R, MURK, box,
     busy: () => B.phase !== 'idle',
     down(x, y) { if (B.phase !== 'idle') return; const i = at(x, y); if (i >= 0) down = { i, x, y, moved: false }; },
