@@ -68,8 +68,8 @@ export function offset(a, b) {
 export function dirName(a, b) { const [x, y] = offset(a, b); return DIR_NAMES[(Math.round(Math.atan2(x, y) / (Math.PI / 4)) + 8) % 8]; }
 
 // 定位：真實 GPS；只有在設定裡開了「模擬定位」才改用模擬（雷達清單點走路 icon 就走過去）
-let simPref = false;
-try { simPref = localStorage.getItem('of-sim') === '1'; } catch { }
+// 模擬定位只給開發與 Demo 現場測試用：網址加 ?sim 才會開（一般玩家改用「靈界走走」）
+const simPref = new URLSearchParams(location.search).has('sim');
 export const geo = {
   pos: { ...VENUE }, acc: null, sim: simPref, watching: false, error: '', listeners: [],
   on(f) { this.listeners.push(f); },
@@ -88,7 +88,7 @@ export const geo = {
       this.emit();
     }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 });
   },
-  setSim(on) { this.sim = on; try { localStorage.setItem('of-sim', on ? '1' : '0'); } catch { } if (!on && this.real) { this.pos = { lat: this.real.lat, lng: this.real.lng }; this.acc = this.real.acc; } this.emit(); },
+  setSim(on) { this.sim = on; if (!on && this.real) { this.pos = { lat: this.real.lat, lng: this.real.lng }; this.acc = this.real.acc; } this.emit(); },
   // 模擬模式：用 1.5 秒走到目標
   walkTo(t) {
     const from = { ...this.pos }, t0 = performance.now();

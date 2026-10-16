@@ -87,7 +87,19 @@ const NEAR_R = 300;   // 主畫面提醒附近景點的距離（公尺）   // �
 const stage1Done = () => S1.every(n => n.awake);
 // 第二階：台北城市故事（只在現世模式；島上模式直接跳過）
 for (const s of TALES) REAL.push(s);
-const talesDone = () => !G.geo || TALES.every(s => visited.has(s.id));
+const talesDone = () => TALES.every(s => visited.has(s.id));
+// 靈界走走：七個城市故事也放進靈界的台北一帶（位置依真實方位簡化），走過去就能讀故事
+{
+  const WANT = { shipai: [58, 22], cihcheng: [62, 24], baoan: [58, 28], zaichun: [60, 32], wanhua: [55, 35], xinzhuang: [50, 33], wufenpu: [71, 33] };
+  for (const s of TALES) {
+    const [wx, wz] = (WANT[s.id] || [60, 30]).map(v => Math.round(v * S)); let best = null, bd = 1e9;
+    for (let z = wz - 12; z <= wz + 12; z++) for (let x = wx - 12; x <= wx + 12; x++) {
+      const k = world.K[z * N + x]; if (k == null || k === T.SEA || k === T.BUILDING || k === T.TOWER) continue;
+      const d = Math.hypot(x - wx, z - wz); if (d < bd) { bd = d; best = [x, z]; }
+    }
+    s.ipos = [best[0] + 0.5, 0, best[1] + 0.5];
+  }
+}
 const talesStage = () => stage1Done() && !talesDone();
 const shown = s => !s.tale || stage1Done();
 const placeOf = n => REAL.find(r => r.node === n.id).name;
@@ -238,7 +250,7 @@ hold($('#btnSense'), () => doSense());
 const settings = $('#settings'), soundT = $('#soundT');
 const syncSound = () => soundT.setAttribute('aria-checked', String(!muted));
 syncSound();
-for (const b of document.querySelectorAll('#menuBtn, #title .more')) b.addEventListener('click', e => { e.stopPropagation(); syncSound(); syncSim(); settings.hidden = false; });
+for (const b of document.querySelectorAll('#menuBtn, #title .more')) b.addEventListener('click', e => { e.stopPropagation(); syncSound(); settings.hidden = false; });
 soundT.addEventListener('click', () => { setMuted(!muted); syncSound(); });
 settings.addEventListener('click', e => { if (e.target.closest('.xbtn')) settings.hidden = true; });
 $('#loreBtn').addEventListener('click', () => { settings.hidden = true; openLore(); });
@@ -294,7 +306,7 @@ const stampEl = $('#stampbook');
 function renderStamps() {
   const groups = [[t('stampCulture'), REAL.filter(x => !x.tale)], [t('stampTales'), REAL.filter(x => x.tale)]];
   const n = Object.keys(stamps).filter(k => STAMP_TXT[k]).length, m = Object.keys(STAMP_TXT).length;
-  $('#stampSub').textContent = t('stampSub', { n, m });
+  $('#stampSub').textContent = G.geo ? t('stampSub', { n, m }) : t('spiritNoRec');
   $('#stampList').innerHTML = groups.map(([h, list]) => `<li class="sh">${h}<em>${list.filter(x => stamps[x.id]).length}/${list.length}</em></li>`
     + list.map(x => `<li class="${stamps[x.id] ? 'on' : ''}" data-id="${x.id}">${seal(x.id, stamps[x.id] ? '' : 'empty')}<b>${x.name}</b><small>${stamps[x.id] || t('stampGo')}</small></li>`).join('')).join('');
 }
@@ -312,7 +324,7 @@ stampEl.addEventListener('click', e => {
 const ACH = [
   ...['elephant', 'tiger', 'leopard', 'lion'].map(id => ({ id: 'g:' + id, img: [id], live: () => NODES.find(n => n.id === id).awake, play: () => replayVictory(NODES.find(n => n.id === id)), name: () => t('achGate', { beast: t('beast_' + id) }), hint: () => t('achHintGate', { name: NODES.find(n => n.id === id).name }) })),
   { id: 'four', img: ['elephant', 'tiger', 'leopard', 'lion'], live: stage1Done, play: () => roar(t('resSub')), name: () => t('resonance'), hint: () => t('achHintFour') },
-  { id: 'tales', book: true, live: () => G.geo && stage1Done() && TALES.every(s => visited.has(s.id)), play: () => roar(t('talesAllSub'), { kind: 'tales', title: t('talesAllTitle'), book: t('taipeiBook'), lamps: TALES.map(x => x.name) }), name: () => t('talesAllTitle'), hint: () => t('achHintTales') },
+  { id: 'tales', book: true, live: () => stage1Done() && TALES.every(s => visited.has(s.id)), play: () => roar(t('talesAllSub'), { kind: 'tales', title: t('talesAllTitle'), book: t('taipeiBook'), lamps: TALES.map(x => x.name) }), name: () => t('talesAllTitle'), hint: () => t('achHintTales') },
   { id: 'flows', img: ['dragon', 'turtle', 'bear'], live: () => S2.every(n => n.awake), play: () => roar(t('flowsSub'), { kind: 'flows', title: t('flowsUnite'), beasts: S2.map(n => n.id) }), name: () => t('flowsUnite'), hint: () => t('achHintFlows') },
   { id: 'boss', img: ['boss'], live: () => G.bossDone, play: () => replayVictory({ id: 'boss', boss: true, name: t('beast_boss') }), name: () => t('achBoss'), hint: () => t('achHintBoss') },
 ];
@@ -320,7 +332,7 @@ let achGot = new Set();
 try { achGot = new Set(JSON.parse(localStorage.getItem('of-ach') || '[]')); } catch { }
 function syncAch() {
   let add = false;
-  for (const a of ACH) if (!achGot.has(a.id) && G.state !== 'title' && a.live()) { achGot.add(a.id); add = true; }
+  for (const a of ACH) if (G.geo && !achGot.has(a.id) && G.state !== 'title' && a.live()) { achGot.add(a.id); add = true; }
   if (add) try { localStorage.setItem('of-ach', JSON.stringify([...achGot])); } catch { }
   $('#achN').textContent = `${ACH.filter(a => achGot.has(a.id)).length}/${ACH.length}`;
   $('#stampN').textContent = `${Object.keys(stamps).filter(k => STAMP_TXT[k]).length}/${Object.keys(STAMP_TXT).length}`;
@@ -335,7 +347,7 @@ const CH_COL = ['#ffcf5a', '#7fe8ff', '#ffd27a', '#c9a8ff', '#9ef0a8', '#5fd3e6'
 function renderAch() {
   syncAch();
   const L = lang === 'en' ? 1 : lang === 'ja' ? 2 : 0, BIMG = { city: 'dragon', sea: 'turtle', peak: 'bear' };
-  $('#achSub').textContent = t('achSub', { n: ACH.filter(a => achGot.has(a.id)).length, m: ACH.length });
+  $('#achSub').textContent = G.geo ? t('achSub', { n: ACH.filter(a => achGot.has(a.id)).length, m: ACH.length }) : t('spiritNoRec');
   const head = (i, open) => `<li class="chd${open ? '' : ' shut'}" style="--c:${CH_COL[i]}"><img src="img/lore/ch${i}.jpg" alt=""><span><small>${CH[i].no[L]}</small><b>${CH[i].name[L]}</b></span><em>${open ? `${ACH.filter(a => achGot.has(a.id)).length}/${ACH.length}` : t('achSoon')}</em></li>`;
   const tile = (a, i) => {
     const on = achGot.has(a.id);
@@ -419,7 +431,10 @@ const FLOW_SPOTS = { city: ['101'], sea: ['turtle', 'kuroshio', 'kenting'], peak
 const spotPos = sp => [sp.pos[0] + 0.5, 0, sp.pos[1] + 0.5];
 const flowSpots = n => (FLOW_SPOTS[n.id] || []).map(id => SPOTS.find(sp => sp.id === id));
 function guideTarget() {
-  if (talesStage()) { const s = radarTarget(); if (s) return { name: s.name, real: s }; }
+  if (talesStage()) {
+    if (G.geo) { const s = radarTarget(); if (s) return { name: s.name, real: s }; }
+    else { const s = TALES.filter(x => !visited.has(x.id)).sort((a, b) => Math.hypot(a.ipos[0] - P.x, a.ipos[2] - P.z) - Math.hypot(b.ipos[0] - P.x, b.ipos[2] - P.z))[0]; if (s) return { name: s.name, pos: s.ipos }; }
+  }
   if (!G.gateOpen && stage1Done()) {
     let n;
     if (G.geo) { const s = radarTarget(); n = s && NODES.find(m => m.id === s.node && !m.awake); }
@@ -464,6 +479,17 @@ function openGuide() {
   updateGuide();
 }
 // 金光一串串從腳下往目標方向流過去，走到了就停
+// 靈界的城市故事：一根暖金色光柱＋上下浮動的方塊燈，讀完就熄
+function taleMarks() {
+  if (G.geo || !talesStage()) return;
+  for (const s of TALES) {
+    if (visited.has(s.id)) continue;
+    const [x, , z] = s.ipos, y = ground(x, z), b = Math.sin(G.t * 2 + x) * 0.25;
+    r.box(x, y + 0.3, z, 0.9, 0.6, 0.9, [0.55, 0.32, 0.18], 0, 1);
+    r.box(x, y + 1.6 + b, z, 0.6, 0.6, 0.6, [1, 0.82, 0.45], 1, 1, G.t);
+    r.box(x, y + 4, z, 0.25, 7, 0.25, [1, 0.85, 0.5], 1, 0.28);
+  }
+}
 function guideTrail() {
   if (!guideOn || G.state !== 'play') return;
   const g = guideTarget(); if (!g.pos) return;
@@ -565,10 +591,10 @@ function hud() {
     $('#meXiu').textContent = xiuLine();
     // 跟著現在的玩法：淨化了幾隻守門獸（四獸＋三流）、城市故事（只在現世）、打贏幾次濁影、手上的靈光
     const tales = TALES.filter(x => visited.has(x.id)).length;
-    $('#meGrid').innerHTML = [[t('meBeasts'), `${G.awakened}/${S1.length + S2.length}`], [t('meTales'), G.geo ? `${tales}/${TALES.length}` : `<span class="na">${t('meGeoOnly')}</span>`], [t('meWilds'), G.wildWins || 0], [t('meQi'), avail()]]
+    $('#meGrid').innerHTML = [[t('meBeasts'), `${G.awakened}/${S1.length + S2.length}`], [t('meTales'), `${tales}/${TALES.length}`], [t('meWilds'), G.wildWins || 0], [t('meQi'), avail()]]
       .map(([k, v]) => `<li><small>${k}</small><b>${v}</b></li>`).join('');
     // 圖鑑總數：靈門、城市故事（現世）與台灣地景
-    const dn = G.awakened + (G.geo ? TALES.filter(x => visited.has(x.id)).length : 0) + found, dm = S1.length + S2.length + (G.geo ? TALES.length : 0) + SPOTS.length;
+    const dn = G.awakened + TALES.filter(x => visited.has(x.id)).length + found, dm = S1.length + S2.length + TALES.length + SPOTS.length;
     $('#dexN').textContent = dn; $('#dexSub').textContent = t('dexSub', { n: dn, m: dm });
     // 已收集的項目可以點開，用景點介紹頁再看一次；有照片就放縮圖
     const ent = (k, key, title, sub, text) => { const im = spotInfo(key)?.images?.[0]?.file; return `<li class="open" data-k="${k}"><div class="t"><b>${title}</b><small>${sub}</small><p>${text}</p></div>${im ? `<img src="${im}" alt="">` : ''}<i class="chev"></i></li>`; };
@@ -577,7 +603,7 @@ function hud() {
     const gate = n => n.awake ? ent('g:' + n.id, n.id, `${bimg(n)}${n.name}${t('sep')}${n.hill}`, `${t('beast_' + n.id)}${t('sep')}${n.seal}${t('sep')}${n.virtue}`, n.info) : `<li class="lock open" data-k="xg:${n.id}"><div class="t"><b>${bimg(n)}？？？</b><small>${n.seal}</small></div><i class="chev"></i></li>`;
     const sec = (label, list, ok) => `<li class="sec">${label}<em>${list.filter(ok).length}/${list.length}</em></li>`;
     $('#dexList').innerHTML = sec(t('secMountain'), S1, n => n.awake) + S1.map(gate).join('')
-      + (stage1Done() && G.geo ? sec(t('secTales'), TALES, x => visited.has(x.id)) + TALES.map(s => visited.has(s.id) ? ent('t:' + s.id, s.id, s.name, s.sub, s.text) : `<li class="lock open" data-k="xt:${s.id}"><div class="t"><b>？？？</b><small>${s.sub.split('・')[1]}</small></div><i class="chev"></i></li>`).join('') : '')
+      + (stage1Done() ? sec(t('secTales'), TALES, x => visited.has(x.id)) + TALES.map(s => visited.has(s.id) ? ent('t:' + s.id, s.id, s.name, s.sub, s.text) : `<li class="lock open" data-k="xt:${s.id}"><div class="t"><b>？？？</b><small>${s.sub.split('・')[1]}</small></div><i class="chev"></i></li>`).join('') : '')
       + (stage1Done() && talesDone() ? sec(t('secFlows'), S2, n => n.awake) + S2.map(gate).join('') : '')
       + (REAL.some(x => !x.tale && visited.has(x.id)) ? `<li class="sec">${t('secCulture')}</li>` + REAL.filter(x => !x.tale && visited.has(x.id)).map(x => ent('r:' + x.id, x.id, x.name, x.sub, x.text)).join('') : '')
       + sec(t('beauty'), SPOTS, x => x.found)
@@ -592,8 +618,9 @@ function hud() {
       const got = TALES.filter(s => visited.has(s.id)).length, tg = radarTarget();
       head = t('talesHead'); $('#qchips').innerHTML = TALES.map(s => `<i class="${visited.has(s.id) ? 'done' : ''}"></i>`).join('');
       title = t('talesTitle', { n: got, m: TALES.length });
-      sub = tg ? tg.name + t('sep') + fmt(meters(geo.pos, tg)) : '';
-      $('#qlist').innerHTML = TALES.map(s => `<li class="${visited.has(s.id) ? 'done' : ''}"><span>${visited.has(s.id) ? '✓' : '・'}</span>${s.name}<small>${visited.has(s.id) ? t('taleFound') : s.sub.split('・')[1] + t('sep') + fmt(meters(geo.pos, s))}</small></li>`).join('')
+      const gt = !G.geo && guideTarget();
+      sub = G.geo ? (tg ? tg.name + t('sep') + fmt(meters(geo.pos, tg)) : '') : gt ? gt.name + t('sep') + t('guideSteps', { n: Math.round(Math.hypot(gt.pos[0] - P.x, gt.pos[2] - P.z)) }) : '';
+      $('#qlist').innerHTML = TALES.map(s => `<li class="${visited.has(s.id) ? 'done' : ''}"><span>${visited.has(s.id) ? '✓' : '・'}</span>${s.name}<small>${visited.has(s.id) ? t('taleFound') : s.sub.split('・')[1] + (G.geo ? t('sep') + fmt(meters(geo.pos, s)) : '')}</small></li>`).join('')
         + `<li class="note">${t('talesNote')}</li><li class="note">${xiuLine()}</li>`;
     } else if (!G.gateOpen && stage1Done()) {
       const left = S2.filter(n => !n.awake);
@@ -798,7 +825,7 @@ addEventListener('pointerdown', e => {
 function start(mode) {
   initAudio();
   $('#title').classList.add('hide');
-  G.state = 'intro'; G.geo = mode === 'geo'; $('#hud').classList.add('on');
+  G.state = 'intro'; G.geo = mode === 'geo'; $('#hud').classList.add('on'); document.body.classList.toggle('spiritmode', !G.geo);
   // 手機上操作說明 10 秒後收起，讓畫面留給地圖
   if (innerWidth < 600) setTimeout(() => { $('.hint').style.display = 'none'; }, 10000);
   cam.yaw = 0; cam.tx = P.x; cam.ty = P.y + 1.5; cam.tz = P.z;
@@ -812,6 +839,7 @@ function start(mode) {
   try { if (matchMedia('(pointer: coarse)').matches && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => { }); } catch { }
 }
 $('#title .start').addEventListener('click', () => start('geo'));
+$('#title .spirit').addEventListener('click', () => start('island'));
 // 版本號：頁面和程式各自的版本，不一致時兩個都列出來，方便判斷是不是快取到舊檔
 {
   const el = $('#title .ver'), hv = el.dataset.v.startsWith('__') ? 'dev' : el.dataset.v, jv = new URL(import.meta.url).searchParams.get('v') || 'dev';
@@ -1008,7 +1036,7 @@ function awaken(n) {
 function resonance() {
   for (const n of S1) { n.flash = 1; burst(n.pos[0], n.pos[1] + 2, n.pos[2], [1, 0.85, 0.45], 50, 9); }
   // 全畫面：四隻守門獸一起登場怒吼，收起後才告訴你第二階開了
-  roar(t('resSub')).then(() => setTimeout(() => toast(G.geo ? t('talesOpen') : t('stage2Open', { realm: REALMS[REQ] })), 400));
+  roar(t('resSub')).then(() => setTimeout(() => toast(G.geo ? t('talesOpen') : t('talesOpenIsland')), 400));
 }
 // 三流歸一：城、海、山三道光一起升起，台北靈門隨後開啟
 function unite() {
@@ -1110,7 +1138,12 @@ function updateGame(dt) {
       // 現世模式：要先在現世走到這一處觸發過一次，靈界的門才會回應（模擬定位走過去也算）
       const spot = G.geo && REAL.find(r => r.node === n.id);
       if (spot && !visited.has(spot.id)) act = { key: 'real:' + n.id, text: t('gateReal', { name: n.name, place: spot.name }), btn: t('navBtn'), fn: () => openNav(spot) };
-      else if (avail() >= COST) act = { key: n.id, text: t('gateHere', { icon: n.icon, name: n.name }), btn: t('gateGo'), fn: () => fight(n, () => awaken(n)) };
+      else if (avail() >= COST) {
+        // 靈界走走：碰到靈門就是觸發機緣，一樣先看這一處的景點介紹，再「開始挑戰」
+        const rs = !G.geo && REAL.find(r => r.node === n.id), go = () => fight(n, () => awaken(n));
+        act = rs ? { key: n.id, text: t('gateHere', { icon: n.icon, name: n.name }), btn: t('enter'), fn: () => showCard(rs.name, t('chanceSub', { sub: rs.sub }), rs.text, t('challengeEm', { name: n.name }), rs.id, true, { label: t('startFight'), fn: go }) }
+          : { key: n.id, text: t('gateHere', { icon: n.icon, name: n.name }), btn: t('gateGo'), fn: go };
+      }
       else if (G.t - G.warnT > 4) { G.warnT = G.t; sfx.deny(); toast(t('notEnough', { cost: COST, n: avail() })); }
     } else n.charge = Math.max(0, n.charge - dt);
   }
@@ -1123,6 +1156,11 @@ function updateGame(dt) {
     if (Math.abs(P.x - GATE[0]) < 2.6 && Math.abs(P.z - GATE[2]) < 2.2) act = G.bossDone ? { key: 'gate', text: t('finalHere'), btn: t('finalGo'), fn: ending } : { key: 'boss', text: t('bossHere'), btn: t('bossGo'), fn: bossFight };
   }
   for (const c of CHAPS) if (Math.hypot(c.x - P.x, c.z - P.z) < 8 && Math.abs(P.y - c.y) < 12) act = { key: 'ch' + c.i, text: t('chapLocked', { no: c.no, name: c.name }), btn: t('chapRead'), fn: () => openLore(c.i) };
+  // 靈界走走：走到靈界台北的故事光柱，就能讀故事
+  if (!G.geo && !act && talesStage()) {
+    const s = TALES.find(x => !visited.has(x.id) && Math.hypot(x.ipos[0] - P.x, x.ipos[2] - P.z) < 2.8);
+    if (s) act = { key: 'tale:' + s.id, text: t('taleHere', { name: s.name }), btn: t('taleRead'), fn: () => taleFound(s) };
+  }
   // 現世：走進機緣範圍時，主畫面直接出現進入按鈕（不用先打開雷達）
   if (G.geo && !act) { const s = inRange(); if (s && s.id !== 'venue') act = { key: 'enc:' + s.id, text: t('encSensed', { name: s.name }), btn: t('enter'), fn: () => encounter(s) }; }
   // 現世：300 公尺內有還沒去過的景點，主畫面主動提醒，附導航（不用打開雷達找）
@@ -1173,7 +1211,7 @@ function nearHint(sp, d) {
 function discover(sp) {
   breakthrough();
   sp.found = true; G.bonus = (G.bonus || 0) + 1; sfx.pick(); setTimeout(() => sfx.pick(), 120);
-  showCard(sp.name, sp.area, sp.text, t('discovered', { n: SPOTS.filter(s => s.found).length, m: SPOTS.length }), sp.id);
+  showCard(sp.name, sp.area, sp.text, t('discovered', { n: SPOTS.filter(s => s.found).length, m: SPOTS.length }), sp.id, true);
 }
 // 臺北旅遊網 Open API 的介紹與照片（由 tools/fetch-taipei-travel.mjs 產生；沒有檔案時就只用遊戲內文字）
 let TT = null, CM = null;
@@ -1183,15 +1221,17 @@ fetch('data/commons.json').then(r => r.ok ? r.json() : null).then(j => { CM = j;
 const spotInfo = k => TT?.spots?.[k]?.images?.length ? TT.spots[k] : CM?.spots?.[k] || TT?.spots?.[k];
 const clip = (t, n) => t.length > n ? t.slice(0, n).replace(/\s+$/, '') + '…' : t;
 let spotData = null;
-function showCard(title, sub, text, em, key) {
+function showCard(title, sub, text, em, key, open = false, action = null) {
   // 地標標籤：一行名字＋地區，點了才開滿版介紹；沒點就自己淡出
   const c = $('#card'), d = key && spotInfo(key);
-  spotData = { title, sub, text, em, d, key };
+  spotData = { title, sub, text, em, d, key, action };
+  // 觸發機緣與景點時直接打開完整介紹（讀到底還能領靈光），讓人真的認識這個地方
+  if (open && G.state === 'play') { openSpot(); return; }
   c.querySelector('b').textContent = title; c.querySelector('small').textContent = sub;
   c.classList.add('show');
   clearTimeout(showCard.t); showCard.t = setTimeout(() => c.classList.remove('show'), 12000);
 }
-const spotEl = $('#spot'), spotPh = spotEl.querySelector('.ph'), spotDots = spotEl.querySelector('.dots');
+const spotEl = $('#spot'), spotPh = spotEl.querySelector('.ph'), spotDots = spotEl.querySelector('.dots'), spotGo = spotEl.querySelector('.spotgo');
 function openSpot() {
   if (!spotData) return;
   const { title, sub, text, em, d } = spotData;
@@ -1216,8 +1256,29 @@ function openSpot() {
     const a = document.createElement('a'); a.href = dl.url || d.url || TT.sourceUrl; a.target = '_blank'; a.rel = 'noopener';
     a.textContent = t('creditLink', { name: dl.name || d.name }); cr.append(t('creditPre'), a, t('creditPost'));
   }
+  // 介紹頁最下面：有挑戰（靈門、城市故事）就放「開始挑戰」，看完直接開打
+  // 要讀完才解鎖；一打開正中間先提示一次
+  const act = spotData.action; spotGo.hidden = !act;
+  if (act) {
+    goAct = act; goState(readGot.has(spotData.key));
+    spotGo.onclick = () => {
+      if (spotGo.classList.contains('lock')) { spotGo.classList.remove('nope'); void spotGo.offsetWidth; spotGo.classList.add('nope'); sfx.deny(); hintRead(); return; }
+      spotEl.hidden = true; spotData.action = null; goAct = null; act.fn();
+    };
+  } else goAct = null;
   spotEl.hidden = false; spotEl.scrollTop = 0;
-  setupRead(spotData.key);
+  setupRead(spotData.key, !!act);
+  if (act && spotGo.classList.contains('lock')) hintRead();
+}
+let goAct = null;
+const readHint = spotEl.querySelector('.readhint');
+function goState(open) {
+  spotGo.classList.toggle('lock', !open);
+  spotGo.querySelector('span').textContent = open ? goAct.label : t('readFirst');
+}
+function hintRead() {
+  readHint.querySelector('b').textContent = t('readFirstHint');
+  readHint.classList.remove('show'); void readHint.offsetWidth; readHint.classList.add('show');
 }
 // 讀完有獎：滑到介紹最下面（而且至少看了幾秒）就能領靈光，每個地點一次
 const READ_GAIN = 1, readGot = new Set(), readBtn = spotEl.querySelector('.readrw');
@@ -1227,17 +1288,22 @@ function readState(s) {
   readBtn.querySelector('b').textContent = t(s === 'got' ? 'readGot' : s === 'ready' ? 'readTake' : 'readLock', { n: READ_GAIN });
   readBtn.querySelector('small').textContent = t(s === 'got' ? 'readGotSub' : s === 'ready' ? 'readTakeSub' : 'readLockSub', { n: READ_GAIN });
 }
-function setupRead(key) {
+function setupRead(key, gate = false) {
   clearTimeout(readTimer); readKey = key || null;
   readBtn.hidden = !readKey || G.state === 'title';
-  if (readBtn.hidden) return;
+  if (readBtn.hidden) { if (gate && goAct) goState(true); return; }
   readT0 = performance.now(); readState(readGot.has(readKey) ? 'got' : 'lock');
   readTimer = setTimeout(checkRead, 3200);   // 內容很短、不用滑也能看完的，看幾秒後也算讀完
 }
 function checkRead() {
-  if (!readKey || readGot.has(readKey) || readBtn.classList.contains('ready') || spotEl.hidden) return;
+  if (!readKey || spotEl.hidden) return;
+  const locked = goAct && spotGo.classList.contains('lock');
+  if (!locked && (readGot.has(readKey) || readBtn.classList.contains('ready'))) return;
   const r = readBtn.getBoundingClientRect(), seen = r.bottom <= innerHeight + 4;
-  if (seen && performance.now() - readT0 > 3000) { readState('ready'); sfx.sense(); }
+  if (seen && performance.now() - readT0 > 3000) {
+    if (!readGot.has(readKey)) { readState('ready'); sfx.sense(); }
+    if (locked) { goState(true); readHint.classList.remove('show'); }
+  }
   else if (seen) { clearTimeout(readTimer); readTimer = setTimeout(checkRead, 3000 - (performance.now() - readT0) + 50); }
 }
 spotEl.addEventListener('scroll', checkRead, { passive: true });
@@ -1314,8 +1380,6 @@ function openRadar() { if (G.state !== 'play' && G.state !== 'ending') return; r
 function closeRadar() { radarOpen = false; radar.classList.remove('show'); }
 $('#radarBtn').addEventListener('click', e => { e.stopPropagation(); openRadar(); });
 $('#rClose').addEventListener('click', closeRadar);
-const simT = $('#simT'), syncSim = () => simT.setAttribute('aria-checked', String(geo.sim));
-simT.addEventListener('click', () => { geo.setSim(!geo.sim); syncSim(); renderList.html = ''; if (radarOpen) renderList(); });
 $('#enc button').addEventListener('click', () => encSpot && encounter(encSpot));
 function inRange() {
   return REAL.filter(shown).map(s => ({ s, d: meters(geo.pos, s) })).filter(o => o.d <= o.s.r && (!visited.has(o.s.id) || o.s.id === 'venue')).sort((a, b) => a.d - b.d)[0]?.s || null;
@@ -1471,24 +1535,24 @@ function encounter(s) {
     G.state = 'talk';
     const nx = nextGate();
     if (!node.awake && node.stage === 2 && stage1Done() && G.realm < REQ) {
-      say([t('shadow', { icon: node.icon, name: node.name }), t('needRealm', { name: node.name, realm: REALMS[REQ], now: REALMS[G.realm] })], () => { G.state = 'play'; setTimeout(() => showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('needRealmShort', { realm: REALMS[REQ], now: REALMS[G.realm] }), s.id), 400); });
+      say([t('shadow', { icon: node.icon, name: node.name }), t('needRealm', { name: node.name, realm: REALMS[REQ], now: REALMS[G.realm] })], () => { G.state = 'play'; setTimeout(() => showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('needRealmShort', { realm: REALMS[REQ], now: REALMS[G.realm] }), s.id, true), 400); });
       return;
     }
     if (!node.awake && !canOpen(node)) {
       G.bonus += 1;
-      say([t('shadow', { icon: node.icon, name: node.name }), (nx ? t('goFirst', { next: nx.name, place: placeOf(nx) }) : t('talesNote'))], () => { G.state = 'play'; setTimeout(() => showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('sealWait', { seal: node.seal }), s.id), 400); });
+      say([t('shadow', { icon: node.icon, name: node.name }), (nx ? t('goFirst', { next: nx.name, place: placeOf(nx) }) : t('talesNote'))], () => { G.state = 'play'; setTimeout(() => showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('sealWait', { seal: node.seal }), s.id, true), 400); });
       return;
     }
+    // 觸發機緣 → 看景點介紹 → 最下面「領靈光」＋「開始挑戰」
     say(s.story, () => {
       G.state = 'play';
-      const card = () => setTimeout(() => showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('boundWith', { name: node.name }), s.id), 900);
-      if (!node.awake) fight(node, () => { G.bonus += COST; awaken(node); card(); });
-      else { G.bonus += 1; card(); }
+      if (node.awake) { G.bonus += 1; showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('boundWith', { name: node.name }), s.id, true); return; }
+      showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('challengeEm', { name: node.name }), s.id, true, { label: t('startFight'), fn: () => fight(node, () => { G.bonus += COST; awaken(node); }) });
     });
   } else {
     G.bonus += 2; sfx.pick(); setTimeout(() => sfx.pick(), 150);
     burst(P.x, P.y + 1.5, P.z, [1, 0.9, 0.5], 40, 5);
-    showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('chanceBonus', { n: visited.size }), s.id);
+    showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('chanceBonus', { n: visited.size }), s.id, true);
   }
 }
 $('#card').addEventListener('click', e => { e.stopPropagation(); openSpot(); });
@@ -1500,8 +1564,8 @@ const QUIZ_REWARD = 3;
 function taleFound(s) {
   sfx.pick(); setTimeout(() => sfx.pick(), 150);
   burst(P.x, P.y + 1.5, P.z, [1, 0.75, 0.6], 40, 5);
-  G.state = 'talk';
-  say(s.lines, () => quiz(s, QUIZ_REWARD).then(ok => {
+  // 先看故事（景點介紹），最下面「開始挑戰」＝答題，全對才收進圖鑑
+  showCard(s.name, s.sub, s.text, s.lines.join('\n'), s.id, true, { label: t('startQuiz'), fn: () => quiz(s, QUIZ_REWARD).then(ok => {
     G.state = 'play';
     if (!ok) { toast(t('quizLeft', { name: s.name })); return; }
     visited.add(s.id); G.bonus += QUIZ_REWARD;
@@ -1511,7 +1575,7 @@ function taleFound(s) {
     setTimeout(() => roar(t('talesAllSub'), { kind: 'tales', title: t('talesAllTitle'), book: t('taipeiBook'), lamps: TALES.map(x => x.name) }).then(() => {
       card(); setTimeout(() => toast(t('stage2Open', { realm: REALMS[REQ] })), 800);
     }), 600);
-  }));
+  }) });
 }
 
 function ending() {
@@ -1656,7 +1720,7 @@ function frame(dt) {
   }
   if (world.lamp) r.box(world.lamp[0], world.lamp[1], world.lamp[2], 30, 0.35, 0.7, [1, 0.95, 0.7], 1, 0.12 + s * 0.25, G.t * 0.9);
   for (const p of G.particles) r.box(p.x, p.y, p.z, 0.18, 0.18, 0.18, p.col, 1, Math.min(1, p.life), p.life * 4);
-  guideTrail();
+  guideTrail(); taleMarks();
   if (G.riding && P.swim) for (let i = 0; i < 3; i++) r.box(P.x + Math.sin(G.t * 7 + i * 2) * 0.6, WATER + 0.05, P.z + 0.6 + i * 0.7, 0.25, 0.05, 0.6, [0.8, 0.95, 1], 1, 0.5 - i * 0.12);
   r.blend(0);
 
