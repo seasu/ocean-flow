@@ -579,7 +579,7 @@ const spotPos = sp => [sp.pos[0] + 0.5, 0, sp.pos[1] + 0.5];
 const flowSpots = n => (FLOW_SPOTS[n.id] || []).map(id => SPOTS.find(sp => sp.id === id));
 function guideTarget() {
   if (talesStage()) {
-    if (G.geo) { const s = radarTarget(); if (s) return { name: s.name, real: s }; }
+    if (G.geo) { const s = radarTarget(); if (s) return { name: s.name, real: s, pos: s.ipos }; }   // 現世：金光帶到靈界的故事光柱，字寫真實距離
     else { const s = TALES.filter(x => !visited.has(x.id)).sort((a, b) => Math.hypot(a.ipos[0] - P.x, a.ipos[2] - P.z) - Math.hypot(b.ipos[0] - P.x, b.ipos[2] - P.z))[0]; if (s) return { name: s.name, pos: s.ipos }; }
   }
   if (!G.gateOpen && stage1Done()) {
@@ -604,7 +604,11 @@ function updateGuide() {
   if (!guideOn) return;
   const g = guideTarget();
   let deg = 0, text;
-  if (g.real) {
+  if (g.real && g.pos) {
+    // 現世的城市故事：跟四道門一樣，箭頭和金光指向靈界裡的故事光柱；字寫現世的真實距離
+    const d = meters(geo.pos, g.real); deg = islandRel(g.pos)[2]; guideEl.classList.remove('nodir');
+    text = d <= (g.real.r || 60) ? t('guideArrived') : fmt(d);
+  } else if (g.real) {
     // 城市故事只在現世：箭頭指真實方向（有指南針或走出方向時），字寫距離
     // 有指南針就照手機朝向；沒有就照靈界地圖的方位（北＝地圖上方），箭頭和地上的金光都指得出去
     const h = heading ?? course, [x, y] = offset(geo.pos, g.real), d = meters(geo.pos, g.real);
@@ -630,7 +634,7 @@ function openGuide() {
 // 金光一串串從腳下往目標方向流過去，走到了就停
 // 靈界的城市故事：一根暖金色光柱＋上下浮動的方塊燈，讀完就熄
 function taleMarks() {
-  if (G.geo || !talesStage()) return;
+  if (!talesStage()) return;   // 現世修行和靈界走走都立光柱（跟四道門一致）
   for (const s of TALES) {
     if (visited.has(s.id)) continue;
     const [x, , z] = s.ipos, y = ground(x, z), b = Math.sin(G.t * 2 + x) * 0.25;
@@ -1323,6 +1327,11 @@ function updateGame(dt) {
   }
   // 現世：走進機緣範圍時，主畫面直接出現進入按鈕（不用先打開雷達）
   if (G.geo && !act) { const s = inRange(); if (s && s.id !== 'venue') act = { key: 'enc:' + s.id, text: t('encSensed', { name: s.name }), btn: t('enter'), fn: () => encounter(s) }; }
+  // 現世修行：靈界的故事光柱只提示，要真的走到現場才會觸發（跟四道門一樣）
+  if (G.geo && !act && talesStage()) {
+    const s = TALES.find(x => !visited.has(x.id) && Math.hypot(x.ipos[0] - P.x, x.ipos[2] - P.z) < 2.8);
+    if (s) act = { key: 'taleReal:' + s.id, text: t('taleReal', { name: s.name }), btn: t('navBtn'), fn: () => openNav(s) };
+  }
   // 現世：300 公尺內有還沒去過的景點，主畫面主動提醒，附導航（不用打開雷達找）
   if (G.geo && !act) {
     const o = REAL.filter(x => shown(x) && x.id !== 'venue' && !visited.has(x.id)).map(x => ({ x, d: meters(geo.pos, x) })).filter(o => o.d <= NEAR_R).sort((a, b) => a.d - b.d)[0];
