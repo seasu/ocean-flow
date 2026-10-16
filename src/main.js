@@ -6,7 +6,6 @@ import { drawAvatar2, liuPal, XI2 } from './avatar2.js';
 import { initAudio, unlockAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
 import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
 import { TALES } from './stories.js';
-import { quiz } from './quiz.js';
 import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
 import { roar } from './roar.js';
 import { ascend } from './ascend.js';
@@ -1726,23 +1725,30 @@ $('#card').addEventListener('click', e => { e.stopPropagation(); openSpot(); });
 $('#dexBtn').addEventListener('click', e => { e.stopPropagation(); $('#card').classList.remove('show'); $('#dex').classList.toggle('show'); });
 $('#dexClose').addEventListener('click', () => $('#dex').classList.remove('show'));
 
-// 第二階：走到台北城市故事的地點，阿汐說故事；讀完故事答 3 題，全對才收進圖鑑；七個都通關就開第三階
-const QUIZ_REWARD = 3;
+// 第二階：走到台北城市故事的地點，先讀故事（景點介紹），再跟守門的街貓打一場小遊戲；淨化了才收進圖鑑；七隻都淨化就開第三階
+const TALE_REWARD = 3;
+const TALE_STAR = { wufenpu: 1, cihcheng: 2, xinzhuang: 1, wanhua: 2, baoan: 2, zaichun: 2, shipai: 3 };
 function taleFound(s) {
   sfx.pick(); setTimeout(() => sfx.pick(), 150);
   burst(P.x, P.y + 1.5, P.z, [1, 0.75, 0.6], 40, 5);
-  // 先看故事（景點介紹），最下面「開始挑戰」＝答題，全對才收進圖鑑
-  showCard(s.name, s.sub, s.text, s.lines.join('\n'), s.id, true, { label: t('startQuiz'), fn: () => quiz(s, QUIZ_REWARD).then(ok => {
-    G.state = 'play';
-    if (!ok) { toast(t('quizLeft', { name: s.name })); return; }
-    visited.add(s.id); G.bonus += QUIZ_REWARD;
-    const card = () => showCard(s.name, s.sub, s.text, s.fact, s.id);
-    if (!talesDone()) { setTimeout(card, 400); return; }
-    // 七個故事都回來了：全畫面七個故事化成金球、匯成一本《台北誌》，收起後才看最後一則故事卡、告訴你下一階開了
-    setTimeout(() => roar(t('talesAllSub'), { kind: 'tales', title: t('talesAllTitle'), book: t('taipeiBook'), lamps: TALES.map(x => x.name) }).then(() => {
-      card(); setTimeout(() => toast(t('stage2Open', { realm: REALMS[REQ] })), 800);
-    }), 600);
-  }) });
+  const photo = spotInfo(s.id)?.images?.[0]?.file;   // 滑塊拼圖用景點照片
+  const node = { id: s.id, name: s.name, star: TALE_STAR[s.id] || 1, tale: true, photo };
+  showCard(s.name, s.sub, s.text, s.lines.join('\n'), s.id, true, { label: t('startQuiz'), fn: () => {
+    G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show'); sfx.battle(true);
+    const rw = [t('rwLight', { n: TALE_REWARD }), t('rwTale', { name: s.name })];
+    battle(node, G.realm, REALMS[G.realm], rw).then(ok => {
+      sfx.battle(false); G.state = 'play'; $('#hud').classList.add('play', 'on');
+      if (!ok) { toast(t('taleRetry', { name: s.name })); return; }
+      xiDance();
+      visited.add(s.id); G.bonus += TALE_REWARD;
+      const card = () => showCard(s.name, s.sub, s.text, s.fact, s.id);
+      if (!talesDone()) { setTimeout(card, 400); return; }
+      // 七個故事都回來了：全畫面七個故事化成金球、匯成一本《台北誌》，收起後才看最後一則故事卡、告訴你下一階開了
+      setTimeout(() => roar(t('talesAllSub'), { kind: 'tales', title: t('talesAllTitle'), book: t('taipeiBook'), lamps: TALES.map(x => x.name) }).then(() => {
+        card(); setTimeout(() => toast(t('stage2Open', { realm: REALMS[REQ] })), 800);
+      }), 600);
+    });
+  } });
 }
 
 function ending() {
@@ -1955,4 +1961,4 @@ if (params.has('play') || params.has('at') || params.has('awake') || params.has(
     setTimeout(() => { pop(t('demoSet', { stage: t('demoStage')[cur - 1] }), 'gold'); setTimeout(() => toast(cur === 3 ? t('stage2Open', { realm: REALMS[REQ] }) : t('talesOpen')), 2200); }, 600);
   }
 }
-window.__game = { resonance, ending, GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter, bossFight, ascend: (i = 1) => ascend(i, lookNow()) };
+window.__game = { resonance, ending, GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter, bossFight, ascend: (i = 1) => ascend(i, lookNow()), taleFound: id => taleFound(TALES.find(s => s.id === id)) };
