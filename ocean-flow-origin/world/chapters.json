@@ -1,0 +1,126 @@
+{
+  "source": "docs/world-chapters.md",
+  "chapters": [
+    {
+      "id": "01-origin",
+      "order": 0,
+      "label": "序章",
+      "title": "洋流：起源",
+      "subtitle": "覺醒台灣",
+      "epigraph": "這裡，是一切開始被看見的地方。",
+      "body": [
+        "我們一直以為，世界只有眼睛看見的樣子。",
+        "直到有一天，有人在山中聽見不存在的鐘聲，有人在海邊看見逆光流動的痕跡。",
+        "山有脈，海有流，人亦有自己的道。",
+        "台灣，成為人類第一個重新啟流的地方。"
+      ],
+      "image": "ocean-flow-origin/world/chapters/01-origin.jpg",
+      "current": true
+    },
+    {
+      "id": "02-domain",
+      "order": 1,
+      "label": "第一章",
+      "title": "洋流：流域",
+      "subtitle": "擴展亞洲",
+      "epigraph": "原來，流從來不只在一座島上。",
+      "body": [
+        "黑潮北上，季風南來。台灣的流被完整觀測之後，人們才發現，海的另一端早已有相似的訊號甦醒。",
+        "火山的熱，古寺的鐘，季風吹過的群島。",
+        "每一個文明，都曾用自己的語言，描述同一種現象。"
+      ],
+      "image": "ocean-flow-origin/world/chapters/02-domain.jpg",
+      "current": false
+    },
+    {
+      "id": "03-linkage",
+      "order": 2,
+      "label": "第二章",
+      "title": "洋流：連界",
+      "subtitle": "連結世界",
+      "epigraph": "當每一道流找到彼此，世界第一次完整。",
+      "body": [
+        "峽谷、冰原、荒漠、古城、石陣。不同的流派、宗門與文化開始交會。",
+        "人們不再問誰的修行才是對的，",
+        "而是開始問：我們看見的，會不會是同一個世界？"
+      ],
+      "image": "ocean-flow-origin/world/chapters/03-linkage.jpg",
+      "current": false
+    },
+    {
+      "id": "04-voyage",
+      "order": 3,
+      "label": "第三章",
+      "title": "洋流：星航",
+      "subtitle": "穿越多元宇宙",
+      "epigraph": "流沒有在海平線停下，也沒有在天空的盡頭停下。",
+      "body": [
+        "當人類學會乘著流前進，夜空不再只是遠方。",
+        "每一顆星都有自己的潮汐，每一個宇宙都有自己的道。",
+        "我們第一次，以修行者的身份，航向未知。"
+      ],
+      "image": "ocean-flow-origin/world/chapters/04-voyage.jpg",
+      "current": false
+    },
+    {
+      "id": "05-myriad",
+      "order": 4,
+      "label": "第四章",
+      "title": "洋流：萬象",
+      "subtitle": "共創新文明",
+      "epigraph": "萬流交會的地方，長出了一棵樹。",
+      "body": [
+        "科技與修行不再對立，量測與感知終於開始對話。",
+        "每個人的流，都成為文明的一條根。",
+        "新的文明不是被誰建立的，而是所有人一起長出來的。"
+      ],
+      "image": "ocean-flow-origin/world/chapters/05-myriad.jpg",
+      "current": false
+    },
+    {
+      "id": "06-return",
+      "order": 5,
+      "label": "第五章",
+      "title": "洋流：歸源",
+      "subtitle": "回到更大的自己",
+      "epigraph": "走得越遠，越接近最初的地方。",
+      "body": [
+        "越過山海、世界與星空，修行者終於回頭。",
+        "原來一路尋找的流，一直都在自己之內。",
+        "歸源不是回到過去，而是回到一個更大的自己。"
+      ],
+      "image": "ocean-flow-origin/world/chapters/06-return.jpg",
+      "current": false
+    },
+    {
+      "id": "07-rebirth",
+      "order": 6,
+      "label": "第六章",
+      "title": "洋流：新生",
+      "subtitle": "融合與超越",
+      "epigraph": "山與人，光與海，在同一次呼吸裡相遇。",
+      "body": [
+        "現世與靈界不再是兩種感知，而是同一種生命。",
+        "人與世界的邊界慢慢消融。",
+        "舊的自己沒有消失，而是成為新生的一部分。"
+      ],
+      "image": "ocean-flow-origin/world/chapters/07-rebirth.jpg",
+      "current": false
+    },
+    {
+      "id": "08-boundless",
+      "order": 7,
+      "label": "終章",
+      "title": "洋流：無界",
+      "subtitle": "未來，仍在展開",
+      "epigraph": "這本書，沒有最後一頁。",
+      "body": [
+        "每一位走出去的修行者，都在為它寫下新的一行。",
+        "世界才剛開始。",
+        "走出去，遇見你的機緣。"
+      ],
+      "image": "ocean-flow-origin/world/chapters/08-boundless.jpg",
+      "current": false
+    }
+  ]
+}
