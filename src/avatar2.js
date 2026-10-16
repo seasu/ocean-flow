@@ -8,7 +8,12 @@ export const LIU2 = pal({
   jacket: '#f3f5f8', jacketSh: '#dce3ec', navy: '#1e2b52', navyDk: '#121a33', inner: '#17191f',
   wave: '#4f9fe0', waveLt: '#a9d9f6', waveDk: '#2c66ad', white: '#ffffff', silver: '#c9d2dd',
   pants: '#1b2648', sole: '#eef1f5', eye: '#2d6cc0', strap: '#8fcaf0',
+  // 穿戴物品用的顏色
+  brick: '#b5452f', mortar: '#e9d9c4', wood: '#9b6a3c', woodLt: '#c58a4a', red: '#d6453a', barrel: '#a8662f', band: '#6d7480',
+  gog: '#2f6fb0', gogLens: '#9fe6ff', cyan: '#7fe8ff',
 });
+// 五分埔新衣：青綠外套配金色浪花
+export const LIU2_OUTFIT = { ...LIU2, ...pal({ jacket: '#1f8f86', jacketSh: '#17706a', wave: '#ffcf5a', waveLt: '#ffe9a8', strap: '#ffd27a' }) };
 
 // [cx, cy, cz, w, h, d, 顏色鍵, 自發光]；sym() 會補上左右對稱的另一半
 const sym = list => list.flatMap(p => p[0] ? [p, [-p[0], ...p.slice(1)]] : [p]);
@@ -93,6 +98,21 @@ const HEAD = sym([
   [0, 0.735, 0.02, 0.74, 0.07, 0.12, 'navy'],
 ]);
 
+// ---------- 穿戴：用拿到的物品搭配外觀 ----------
+const GOGGLES = sym([
+  [0.335, 0.5, 0, 0.02, 0.07, 0.6, 'gog'],
+  [0.13, 0.52, 0.335, 0.2, 0.14, 0.05, 'gog'],
+  [0.13, 0.52, 0.36, 0.15, 0.09, 0.01, 'gogLens', 0.5],
+]).concat([[0, 0.53, 0.335, 0.08, 0.05, 0.04, 'gog']]);
+const PHONES = sym([
+  [0.435, 0.485, 0.02, 0.02, 0.025, 0.3, 'cyan', 1], [0.435, 0.175, 0.02, 0.02, 0.025, 0.3, 'cyan', 1],
+  [0.435, 0.33, 0.175, 0.02, 0.3, 0.025, 'cyan', 1], [0.435, 0.33, -0.135, 0.02, 0.3, 0.025, 'cyan', 1],
+  [0.35, 0.6, 0.085, 0.052, 0.24, 0.02, 'cyan', 0.8],
+]);
+const BRACER = [[0, -0.6, 0, 0.5, 0.12, 0.5, 'brick'], [0, -0.6, 0.251, 0.5, 0.015, 0.01, 'mortar'], [0.1, -0.63, 0.252, 0.015, 0.06, 0.01, 'mortar'], [-0.12, -0.57, 0.252, 0.015, 0.06, 0.01, 'mortar']];
+const BARREL = [[0, 0, 0, 0.62, 0.72, 0.14, 'barrel'], [0, -0.2, -0.005, 0.64, 0.06, 0.15, 'band'], [0, 0.2, -0.005, 0.64, 0.06, 0.15, 'band'], [0, 0, -0.08, 0.06, 0.6, 0.02, 'woodLt']];
+const PADDLE = [[0, 0.15, 0, 0.07, 1.5, 0.07, 'wood'], [0, -0.75, 0, 0.24, 0.5, 0.05, 'woodLt'], [0, -0.62, 0.003, 0.24, 0.06, 0.05, 'red'], [0, 0.92, 0, 0.16, 0.06, 0.1, 'wood']];
+
 function parts(r, base, list, c, glow) {
   for (const [x, y, z, w, h, d, k, e = 0] of list) {
     const m = M.copy(base); M.translate(m, x, y, z); M.scale(m, w, h, d);
@@ -101,7 +121,8 @@ function parts(r, base, list, c, glow) {
 }
 
 // a：{ phase, move(0..1), air, swim, t, wave }，和舊版 drawAvatar 一樣，之後可以直接替換
-export function drawAvatar2(r, c, x, y, z, yaw, a, glow = 0) {
+// look：{ head: 'goggles'|'phones', wrist: 'bracer', back: 'paddle'|'barrel' }（衣服用調色盤 c 換）
+export function drawAvatar2(r, c, x, y, z, yaw, a, glow = 0, look = {}) {
   const root = M.ident(); M.translate(root, x, y, z); M.rotY(root, yaw);
   if (a.dance) M.rotZ(root, Math.sin(a.t * 6) * 0.14);
   const sw = a.swim ? 0 : Math.sin(a.phase) * 0.8 * a.move;
@@ -116,6 +137,10 @@ export function drawAvatar2(r, c, x, y, z, yaw, a, glow = 0) {
   const body = M.copy(root); M.translate(body, 0, breathe + bob, 0);
   if (a.move > 0.6 && !a.air) M.rotX(body, 0.08 * a.move);   // 跑起來身體往前傾
   parts(r, body, TORSO, c, glow);
+  if (look.back) {
+    const m = M.copy(body); M.translate(m, 0, 1.22, -0.31);
+    if (look.back === 'paddle') { M.rotZ(m, 0.55); parts(r, m, PADDLE, c, glow); } else parts(r, m, BARREL, c, glow);
+  }
   for (const s of [-1, 1]) {
     const m = M.copy(body); M.translate(m, s * 0.69, 1.62, 0);
     if (a.dance) M.rotZ(m, s * (2.5 + Math.sin(a.t * 12 + (s > 0 ? 0 : Math.PI)) * 0.45));
@@ -124,9 +149,12 @@ export function drawAvatar2(r, c, x, y, z, yaw, a, glow = 0) {
     else if (a.swim) M.rotX(m, a.t * 5 + (s > 0 ? Math.PI : 0));
     else { M.rotX(m, -s * sw * 1.1); M.rotZ(m, s * 0.04); }
     parts(r, m, ARM, c, glow);
+    if (look.wrist === 'bracer') parts(r, m, BRACER, c, glow);
   }
   const h = M.copy(body); M.translate(h, 0, 1.65, 0); M.rotY(h, Math.sin(a.t * 0.7) * 0.08);
   parts(r, h, HEAD, c, glow);
+  if (look.head === 'goggles') parts(r, h, GOGGLES, c, glow);
+  if (look.head === 'phones') parts(r, h, PHONES, c, glow);
   // 腰間兩條淺藍飄帶：兩段，越跑越往後飄
   for (const s of [-1, 1]) {
     const m = M.copy(body); M.translate(m, s * 0.4, 0.86, -0.1);

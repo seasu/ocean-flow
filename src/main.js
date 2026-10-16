@@ -2,7 +2,8 @@
 import { M, clamp, lerp, rng, hex, mixColor, smooth } from './math.js';
 import { Renderer, Builder } from './gl.js';
 import { makeWorld, terrainMesh, waterData, floatMesh, gateMesh, nodeMesh, portalMesh, bellMesh, beastMesh, bossMesh, N, S, WATER, T, PLACES, CURRENT, curX } from './world.js';
-import { drawAvatar, BLUE, ORANGE } from './avatar.js';
+import { drawAvatar, ORANGE } from './avatar.js';
+import { drawAvatar2, LIU2, LIU2_OUTFIT } from './avatar2.js';
 import { initAudio, unlockAudio, sfx, setMuted, muted, setSpirit } from './audio.js';
 import { REAL, geo, meters, offset, dirName, saveSpot } from './geo.js';
 import { TALES } from './stories.js';
@@ -371,7 +372,6 @@ achEl.addEventListener('click', e => {
 // 15 個機緣點各有一樣物品，讀完景點介紹按「領取靈光」時一起拿到；食物直接吃、衣物直接換、裝備直接生效
 // 收藏只在現世修行記錄（存在這台裝置）；靈界走走這一趟可以用，但不記錄
 const LI = lang === 'en' ? 1 : lang === 'ja' ? 2 : 0;
-const OUTFIT = { ...BLUE, jacket: hex('#1f8f86'), trim: hex('#0f5a54'), wave: hex('#ffcf5a'), ribbon: hex('#ffcf5a') };
 G.full = 70; G.cakes = 0;
 const hungry = () => G.full < 30;
 let itemsGot = new Set();
@@ -380,6 +380,12 @@ const itemsRun = new Set();
 const perk = id => itemsRun.has(id) || (G.geo && itemsGot.has(id));
 MODS.perk = perk; Object.defineProperty(MODS, 'hungry', { get: hungry });
 const eat = n => { G.full = Math.min(100, G.full + n); };
+// 角色搭配：衣服、頭部、手腕、背後各放一樣拿到的物品（只換外觀，效果拿到就生效）；記在這台裝置
+const LOOK_SLOTS = { body: ['outfit'], head: ['goggles', 'phones'], wrist: ['bracer'], back: ['paddle', 'barrel'] };
+let look = {};
+try { look = JSON.parse(localStorage.getItem('of-look') || '{}'); } catch { }
+const setLook = (slot, id) => { look[slot] = id || ''; try { localStorage.setItem('of-look', JSON.stringify(look)); } catch { } };
+const lookNow = () => Object.fromEntries(Object.entries(look).filter(([, v]) => v && perk(v)));
 // 走路慢慢消耗飽足；餓了先吃身上帶的鹹光餅
 function hunger(m) {
   const was = hungry();
@@ -393,6 +399,9 @@ function grantItem(key) {
   itemsRun.add(it.id);
   if (G.geo && !itemsGot.has(it.id)) { itemsGot.add(it.id); try { localStorage.setItem('of-items', JSON.stringify([...itemsGot])); } catch { } }
   if (it.type === 'food') it.carry ? (G.cakes += it.carry) : eat(it.fill);
+  // 拿到能穿戴的就直接換上（那一格原本空著才換）
+  const slot = Object.keys(LOOK_SLOTS).find(k => LOOK_SLOTS[k].includes(it.id));
+  if (slot && (!look[slot] || !perk(look[slot]) || slot === 'body')) setLook(slot, it.id);
   hudKey = '';
   return it;
 }
@@ -469,7 +478,7 @@ redeemUse.addEventListener('click', () => {
   openItem(TOKEN); renderItems();
 });
 $('#itemsBtn').addEventListener('click', () => { renderItems(); itemsEl.hidden = false; });
-$('#labBtn').addEventListener('click', () => { sfx.pick(); openCharLab(); });
+$('#labBtn').addEventListener('click', () => { sfx.pick(); openCharLab({ slots: LOOK_SLOTS, owned: perk, look: () => look, setLook, deny: () => sfx.deny(), pick: () => sfx.pick() }); });
 itemsEl.addEventListener('click', e => {
   if (e.target.closest('.xbtn')) { itemsEl.hidden = true; return; }
   const b = e.target.closest('button[data-id]'); if (!b) return;
@@ -1801,7 +1810,8 @@ function frame(dt) {
   if (s > 0.01) { const m = M.ident(); M.translate(m, 0, -(1 - smooth(0, 0.6, s)) * 50, 0); r.draw(floats, m, [1, 1, 1], 0.05); }
   for (const c of CHAPS) { const m = M.ident(); M.translate(m, c.x, c.y + Math.sin(G.t * 0.8 + c.i) * 0.3, c.z); M.rotY(m, Math.atan2(64 * S - c.x, 64 * S - c.z)); r.draw(c.mesh, m, [1, 1, 1], 0.12 + 0.08 * Math.sin(G.t * 1.6 + c.i)); }
   const pa = { phase: P.phase, move: P.move, air: !P.onGround && !P.swim, swim: P.swim, t: G.t };
-  drawAvatar(r, perk('outfit') ? OUTFIT : BLUE, P.x, P.ry - (P.swim ? 0.0 : 0), P.z, P.yaw, pa, G.state === 'ending' ? 0.3 : 0);
+  const lk = lookNow();
+  drawAvatar2(r, lk.body === 'outfit' ? LIU2_OUTFIT : LIU2, P.x, P.ry, P.z, P.yaw, pa, G.state === 'ending' ? 0.3 : 0, lk);
   const xg = ground(XI.x, XI.z);
   const dn = G.t < (XI.danceEnd || 0), hop = dn ? Math.abs(Math.sin(G.t * 6)) * 0.45 : 0;
   drawAvatar(r, ORANGE, XI.x, xg + hop, XI.z, dn ? XI.yaw + Math.sin(G.t * 3) * 1.2 : XI.yaw, { phase: 0, move: 0, air: false, swim: false, t: G.t + 1.3, wave: XI.wave, dance: dn });

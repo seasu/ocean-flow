@@ -1,13 +1,15 @@
-// 角色預覽：個人資訊裡打開，看優化版阿流走路、跑步、跳、揮手、游泳；可以切換「目前版本」對照
-// 用自己的 WebGL 畫布，只有打開時才跑；遊戲裡的角色不受影響
+// 角色搭配：個人資訊裡打開，用拿到的可穿戴物品搭配阿流的外觀，並看走路、跑步、跳、揮手、游泳
+// 用自己的 WebGL 畫布，只有打開時才跑；選好的外觀存起來，遊戲裡的阿流跟著換
 import { Renderer } from './gl.js';
 import { M, hex, lerp } from './math.js';
-import { drawAvatar, BLUE } from './avatar.js';
-import { drawAvatar2, LIU2 } from './avatar2.js';
+import { drawAvatar2, LIU2, LIU2_OUTFIT } from './avatar2.js';
+import { ITEMS, itemSVG } from './items.js';
+import { t, lang } from './i18n.js';
 
 const el = document.querySelector('#charLab'), cv = el.querySelector('canvas');
-let r = null, raf = 0, last = 0;
-const S = { t: 0, phase: 0, move: 0, act: 'walk', hd: true, yaw: 0.55, drag: null, scroll: 0, jumpT: 0 };
+let r = null, raf = 0, last = 0, api = null;
+const LI = lang === 'en' ? 1 : lang === 'ja' ? 2 : 0;
+const S = { t: 0, phase: 0, move: 0, act: 'walk', yaw: 0.55, drag: null, scroll: 0, jumpT: 0 };
 const SPEED = { idle: 0, walk: 0.55, run: 1, jump: 0, wave: 0, swim: 0 };
 const TILE = [hex('#2a5b8f'), hex('#3a78b0'), hex('#e9f1f8')];
 
@@ -43,7 +45,8 @@ function frame(now) {
     r.box(i, -0.25 - (swim ? 1.5 : 0), z, 0.98, 0.5, 0.98, rim ? TILE[2] : TILE[k]);
   }
   const a = { phase: S.phase, move: swim ? 0.3 : S.move, air, swim, t: S.t, wave: S.act === 'wave' };
-  if (S.hd) drawAvatar2(r, LIU2, 0, y, 0, 0, a); else drawAvatar(r, BLUE, 0, y, 0, 0, a);
+  const lk = curLook();
+  drawAvatar2(r, lk.body === 'outfit' ? LIU2_OUTFIT : LIU2, 0, y, 0, 0, a, 0, lk);
   if (swim) { r.blend(1); r.box(0, 0.05, 0, 9, 1.8, 9, hex('#3a8fd0'), 0.15, 0.42); r.blend(0); }
   raf = requestAnimationFrame(frame);
 }
@@ -52,14 +55,26 @@ function setAct(k) {
   S.act = k; S.jumpT = 0;
   el.querySelectorAll('.acts button').forEach(b => b.classList.toggle('on', b.dataset.act === k));
 }
-function setHd(on) {
-  S.hd = on;
-  el.querySelectorAll('.vsw button').forEach(b => b.classList.toggle('on', (b.dataset.v === 'hd') === on));
+// 只算已經拿到的物品
+const curLook = () => { if (!api) return {}; const l = api.look(); return Object.fromEntries(Object.entries(l).filter(([, v]) => v && api.owned(v))); };
+const BASE_IC = '<svg viewBox="0 0 24 24"><path d="M8 4l-4 3 2 4 2-1v10h8V10l2 1 2-4-4-3c-1 1.5-2.4 2-4 2s-3-.5-4-2z"/></svg>';
+const NONE_IC = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><path d="M6.7 17.3L17.3 6.7"/></svg>';
+function renderWard() {
+  const lk = curLook(), w = el.querySelector('.ward');
+  w.innerHTML = Object.entries(api.slots).map(([slot, ids]) => {
+    const cur = lk[slot] || '';
+    const none = `<button type="button" class="${cur ? '' : 'on'}" data-slot="${slot}" data-id=""><span class="ic">${slot === 'body' ? BASE_IC : NONE_IC}</span><b>${t(slot === 'body' ? 'lookBase' : 'lookNone')}</b></button>`;
+    const chips = ids.map(id => {
+      const it = ITEMS.find(x => x.id === id), own = api.owned(id);
+      return `<button type="button" class="${own ? (cur === id ? 'on' : '') : 'lock'}" data-slot="${slot}" data-id="${id}"><span class="ic item">${itemSVG(it)}</span><b>${own ? it.name[LI] : t('lookLocked')}</b></button>`;
+    }).join('');
+    return `<section><h4>${t('slot_' + slot)}</h4><div class="chips">${none}${chips}</div></section>`;
+  }).join('') + `<p class="wnote">${t('wardHint')}</p>`;
 }
 
-export function openCharLab() {
+export function openCharLab(a) {
   if (!r) { try { r = new Renderer(cv); } catch { return; } }
-  el.hidden = false; setAct('walk'); setHd(true);
+  api = a; el.hidden = false; setAct('walk'); renderWard(); el.scrollTop = 0;
   last = performance.now(); cancelAnimationFrame(raf); raf = requestAnimationFrame(frame);
 }
 function close() { el.hidden = true; cancelAnimationFrame(raf); }
@@ -67,7 +82,10 @@ function close() { el.hidden = true; cancelAnimationFrame(raf); }
 el.addEventListener('click', e => {
   if (e.target.closest('.xbtn')) return close();
   const b = e.target.closest('.acts button'); if (b) return setAct(b.dataset.act);
-  const v = e.target.closest('.vsw button'); if (v) return setHd(v.dataset.v === 'hd');
+  const c = e.target.closest('.ward button'); if (!c || !api) return;
+  if (c.classList.contains('lock')) { c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); api.deny(); return; }
+  api.setLook(c.dataset.slot, c.dataset.id); api.pick(); renderWard();
+  if (c.dataset.id && S.act !== 'wave') setAct('wave');
 });
 // 左右拖曳轉角色
 cv.addEventListener('pointerdown', e => { S.drag = { x: e.clientX, yaw: S.yaw }; cv.setPointerCapture(e.pointerId); });
