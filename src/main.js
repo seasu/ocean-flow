@@ -11,6 +11,7 @@ import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
 import { roar } from './roar.js';
 import { battle, replayVictory, MODS } from './battle.js';
 import { ITEMS, ITEM_OF, itemSVG } from './items.js';
+import { openCharLab } from './charlab.js';
 import { openLore, openRealms, openCast, CH } from './lore.js';
 import { VERSION } from './version.js';
 
@@ -468,6 +469,7 @@ redeemUse.addEventListener('click', () => {
   openItem(TOKEN); renderItems();
 });
 $('#itemsBtn').addEventListener('click', () => { renderItems(); itemsEl.hidden = false; });
+$('#labBtn').addEventListener('click', () => { sfx.pick(); openCharLab(); });
 itemsEl.addEventListener('click', e => {
   if (e.target.closest('.xbtn')) { itemsEl.hidden = true; return; }
   const b = e.target.closest('button[data-id]'); if (!b) return;

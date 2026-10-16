@@ -227,7 +227,16 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #me .full p b{font-size:17px}#me .full p small{font-size:15px;color:var(--dim)}
 #meBtn.hungry{border-color:#ff9a5a;animation:hungryPulse 1.8s ease-in-out infinite}
 @keyframes hungryPulse{50%{box-shadow:0 0 0 5px rgba(255,140,80,.35)}}
-#items,#itemPage{z-index:13}#itemPage{z-index:14}
+#items,#itemPage{z-index:13}
+#charLab{z-index:13}#charLab>*{flex:none}
+#charLab .stage{position:relative;width:min(520px,100%);margin:0 auto;height:56dvh;border-radius:24px;overflow:hidden;border:1px solid rgba(127,232,255,.3);background:#0d1a2e}
+#charLab canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+#charLab .stage p{position:absolute;left:0;right:0;bottom:10px;margin:0;text-align:center;font-size:15px;color:rgba(220,235,250,.75);pointer-events:none;text-shadow:0 1px 4px #000}
+#charLab .acts{width:min(520px,100%);margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+#charLab .acts button,#charLab .vsw button{padding:13px 8px;border-radius:999px;font:inherit;font-size:17px;font-weight:800;color:#dbe6f0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);cursor:pointer}
+#charLab .acts button.on{color:#2a1c00;background:linear-gradient(135deg,#ffe08a,var(--gold));border-color:var(--gold)}
+#charLab .vsw{width:min(520px,100%);margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:0;padding:4px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.14)}
+#charLab .vsw button{border:none;background:none}#charLab .vsw button.on{background:rgba(127,232,255,.18);color:#fff;box-shadow:inset 0 0 0 1.5px rgba(127,232,255,.6)}#itemPage{z-index:14}
 #itemList{list-style:none;margin:0 auto;padding:0;width:100%;max-width:30em;display:grid;grid-template-columns:1fr 1fr;gap:12px}
 #itemList .ic.item{border-radius:22px;background:radial-gradient(circle,rgba(127,232,255,.18),rgba(127,232,255,.03) 70%);border-color:rgba(127,232,255,.6)}
 #itemList .ic.item svg{width:70px;height:70px}
@@ -845,12 +854,17 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
   <ul class="grid" id="meGrid"></ul>
   <button class="achbtn" id="achBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M16 5h3v2a3 3 0 0 1-3 3M8 5H5v2a3 3 0 0 0 3 3"/><path d="M12 13v4M8.5 20h7M10 17h4"/></svg><span data-i18n="achBtn">成就</span><em id="achN">0/8</em><i class="chev"></i></button>
   <button class="achbtn" id="itemsBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg><span data-i18n="itemsBtn">物品收藏</span><em id="itemsN">0/15</em><i class="chev"></i></button>
+  <button class="achbtn" id="labBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8v6H8z"/><path d="M6 10h12v7H6zM9 17v4M15 17v4"/><path d="M11 6h.01M13 6h.01"/></svg><span data-i18n="labBtn">角色預覽</span><em data-i18n="verHd">優化版</em><i class="chev"></i></button>
   <button class="achbtn" id="stampBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v5l2 3H7l2-3z"/><path d="M5 14h14v3H5z"/><path d="M7 20h10"/></svg><span data-i18n="stampBtn">台北集章簿</span><em id="stampN">0/15</em><i class="chev"></i></button>
 </div></div>
 <div id="stampbook" class="overlay page" hidden><header class="phead"><div><b data-i18n="stampBtn">台北集章簿</b><small id="stampSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
   <ul id="stampList"></ul></div>
 <div id="ach" class="overlay page" hidden><header class="phead"><div><b data-i18n="achTitle">成就</b><small id="achSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
   <ul id="achList"></ul></div>
+<div id="charLab" class="overlay page" hidden><header class="phead"><div><b data-i18n="labBtn">角色預覽</b><small data-i18n="labSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <div class="stage"><canvas></canvas><p data-i18n="labHint">左右拖曳可以轉角色</p></div>
+  <div class="acts"><button type="button" data-act="idle" data-i18n="act_idle"></button><button type="button" data-act="walk" data-i18n="act_walk"></button><button type="button" data-act="run" data-i18n="act_run"></button><button type="button" data-act="jump" data-i18n="act_jump"></button><button type="button" data-act="wave" data-i18n="act_wave"></button><button type="button" data-act="swim" data-i18n="act_swim"></button></div>
+  <div class="vsw"><button type="button" data-v="hd" data-i18n="verHd"></button><button type="button" data-v="old" data-i18n="verOld"></button></div></div>
 <div id="items" class="overlay page" hidden><header class="phead"><div><b data-i18n="itemsBtn">物品收藏</b><small id="itemsSub"></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
   <ul id="itemList"></ul></div>
 <div id="itemPage" class="overlay page" hidden><header class="phead"><div><b></b><small></small></div><button class="xbtn" aria-label="close" data-i18n-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
