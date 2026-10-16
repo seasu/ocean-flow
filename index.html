@@ -705,6 +705,9 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 #battle .msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,calc(100vw - 32px));background:rgba(14,24,40,.8);border:1px solid rgba(255,255,255,.16);border-radius:22px;
   padding:24px 20px;text-align:center;display:none;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 12px 40px rgba(0,0,0,.35)}
 #battle .msg.show{display:block}
+/* 說明框出現時，後面的戰鬥畫面模糊壓暗，只看說明 */
+#battle:has(.msg.show)::before{content:"";position:absolute;inset:0;z-index:50;background:rgba(6,12,22,.5);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+#battle .msg{z-index:51}
 /* 說明框不超出畫面：太長就在框裡捲；橫向放寬，行數少一點 */
 #battle .msg{max-height:calc(100dvh - 24px - var(--st) - var(--sb));overflow-y:auto;overscroll-behavior:contain}
 @media (orientation:landscape) and (max-height:600px){#battle .msg{width:min(560px,calc(100vw - 32px));padding-top:16px;padding-bottom:16px}#battle .msg h3{margin-bottom:8px}#battle .msg p{margin-bottom:14px;line-height:1.6}}
