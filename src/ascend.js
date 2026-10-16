@@ -1,17 +1,19 @@
-// 突破境界的全畫面動畫：阿流盤腿打坐、靈光往上飄 → 背後忽然爆出四色宏光（橘、綠、粉、紫）→ 出現「突破・踏入某境」
+// 突破境界的全畫面動畫：阿流盤腿打坐、靈光往上飄 → 背後忽然爆出四色宏光（橘、綠、粉、紫）→ 出現「突破」→ 亮出新境界的圖示與名稱
+// 每一段都有音效（audio.js sfx.ascend）
 // 用自己的 WebGL 畫布，只在播放時跑；點一下或約 7 秒後收起
 import { Renderer } from './gl.js';
 import { M, hex, clamp } from './math.js';
 import { drawAvatar2, LIU2, LIU2_OUTFIT } from './avatar2.js';
 import { sfx } from './audio.js';
 import { t } from './i18n.js';
+import { realmSvg, REALM_COL } from './realmicon.js';
 
 const FOUR = ['#ffa53a', '#8fd14f', '#ff8fbf', '#a98bff'].map(hex);
-const HIT = 1.5;   // 第幾秒爆光
+const HIT = 1.5, WORD = 2.3, ICON = 3.5;   // 第幾秒：爆光、出現「突破」、亮出境界圖示
 
 const el = document.createElement('div');
 el.id = 'ascend'; el.hidden = true;
-el.innerHTML = `<canvas></canvas><div class="flash"></div><div class="txt"><small></small><h2></h2><p></p></div><small class="tap"></small>`;
+el.innerHTML = `<canvas></canvas><div class="flash"></div><div class="txt"><small></small><h2></h2><div class="badge"><i></i><p></p></div></div><small class="tap"></small>`;
 document.body.appendChild(el);
 const cv = el.querySelector('canvas');
 let r = null, raf = 0;
@@ -23,35 +25,39 @@ function env(time) {
 }
 const ease = k => 1 - Math.pow(1 - clamp(k, 0, 1), 3);
 
-// look：目前的穿搭（和遊戲裡一樣）
-export function ascend(realm, look = {}) {
+// i：突破後的境界；look：目前的穿搭（和遊戲裡一樣）
+export function ascend(i, look = {}) {
+  const realm = t('realms')[i];
   if (!r) { try { r = new Renderer(cv); } catch { return Promise.resolve(); } }
   el.querySelector('.txt small').textContent = t('ascendTop');
   el.querySelector('h2').textContent = t('ascendTitle');
   el.querySelector('.txt p').textContent = t('ascendRealm', { realm });
+  const ic = el.querySelector('.badge i'); ic.innerHTML = realmSvg(i, 1.6); ic.style.setProperty('--c', REALM_COL[i] || REALM_COL[0]);
   el.querySelector('.tap').textContent = t('tapNext');
   const pal = look.body === 'outfit' ? LIU2_OUTFIT : LIU2;
   // 往上飄的小靈光
   const motes = Array.from({ length: 40 }, (_, i) => ({ a: Math.random() * 6.28, r: 0.8 + Math.random() * 2.2, s: 0.4 + Math.random() * 0.8, o: Math.random() * 4, c: FOUR[i % 4] }));
   return new Promise(res => {
-    el.hidden = false; el.classList.remove('hit', 'out'); void el.offsetWidth;
+    el.hidden = false; el.classList.remove('hit', 'word', 'icon', 'out'); void el.offsetWidth;
     const t0 = performance.now(); let hit = false, done = false;
-    const timers = [setTimeout(() => sfx.sense(), 200)];
+    const timers = [setTimeout(() => sfx.ascend('sit'), 100),
+      setTimeout(() => { el.classList.add('word'); sfx.ascend('word'); }, WORD * 1000),
+      setTimeout(() => { el.classList.add('icon'); sfx.ascend('icon'); try { navigator.vibrate && navigator.vibrate(30); } catch { } }, ICON * 1000)];
     const finish = () => {
       if (done) return; done = true; timers.forEach(clearTimeout);
       el.classList.add('out');
       setTimeout(() => { el.hidden = true; cancelAnimationFrame(raf); res(); }, 450);
     };
-    el.onclick = () => { if ((performance.now() - t0) / 1000 > HIT + 1) finish(); };
-    timers.push(setTimeout(finish, 7500));
+    el.onclick = () => { if ((performance.now() - t0) / 1000 > ICON + 0.8) finish(); };
+    timers.push(setTimeout(finish, 9000));
     const frame = now => {
       const T = (now - t0) / 1000, k = ease((T - HIT) / 0.8);
       if (!hit && T >= HIT) {
         hit = true; el.classList.add('hit');
-        sfx.purify(); sfx.bell(146.8);
+        sfx.ascend('burst');
         try { navigator.vibrate && navigator.vibrate([40, 30, 120]); } catch { }
       }
-      const asp = r.resize(), tgt = [0, asp < 0.8 ? 0.35 : 0.8, 0], yaw = Math.sin(T * 0.4) * 0.18, dist = (asp < 0.8 ? 14 : 9) - Math.min(T, HIT) * 0.8, pitch = 0.16;
+      const asp = r.resize(), tgt = [0, asp < 0.8 ? -0.5 : 0.8, 0], yaw = Math.sin(T * 0.4) * 0.18, dist = (asp < 0.8 ? 14 : 9) - Math.min(T, HIT) * 0.8, pitch = 0.16;
       const eye = [Math.sin(yaw) * Math.cos(pitch) * dist, tgt[1] + Math.sin(pitch) * dist, Math.cos(yaw) * Math.cos(pitch) * dist];
       const vp = M.mul(M.persp(0.62, asp, 0.1, 100), M.lookAt(eye, tgt, [0, 1, 0]));
       r.begin(vp, eye, env(T)); r.blend(0);

@@ -298,6 +298,7 @@ const S = {
   achSub: ['已達成 {n}/{m}・點一下重播', '{n}/{m} unlocked · tap to replay', '{n}/{m} 達成・タップで再生'],
   achSoon: ['尚未開放', 'Coming soon', '近日公開'],
   achReplay: ['點一下重播', 'Tap to replay', 'タップで再生'],
+  achRealms: ['修行境界', 'Cultivation Realms', '修行の境地'],
   achGate: ['{beast}淨化', '{beast} Purified', '{beast} 浄化'],
   achHintGate: ['打開{name}', 'Open the {name}', '{name}を開く'],
   achHintFour: ['打開四座山門', 'Open all four hill gates', '四つの山門を開く'],

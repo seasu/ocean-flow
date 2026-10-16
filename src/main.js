@@ -15,6 +15,7 @@ import { ITEMS, ITEM_OF, itemSVG } from './items.js';
 import { openCharLab } from './charlab.js';
 import { openLore, openRealms, openCast, CH } from './lore.js';
 import { VERSION } from './version.js';
+import { realmSvg, REALM_COL } from './realmicon.js';
 
 applyStatic();
 
@@ -339,6 +340,8 @@ try { achGot = new Set(JSON.parse(localStorage.getItem('of-ach') || '[]')); } ca
 function syncAch() {
   let add = false;
   for (const a of ACH) if (G.geo && !achGot.has(a.id) && G.state !== 'title' && a.live()) { achGot.add(a.id); add = true; }
+  // 修行境界：到過的境界都記下來（只在現世修行）
+  if (G.geo && G.state !== 'title') for (let i = 0; i <= G.realm; i++) if (!achGot.has('realm:' + i)) { achGot.add('realm:' + i); add = true; }
   if (add) try { localStorage.setItem('of-ach', JSON.stringify([...achGot])); } catch { }
   $('#achN').textContent = `${ACH.filter(a => achGot.has(a.id)).length}/${ACH.length}`;
   $('#stampN').textContent = `${Object.keys(stamps).filter(k => STAMP_TXT[k]).length}/${Object.keys(STAMP_TXT).length}`;
@@ -361,11 +364,17 @@ function renderAch() {
     return `<li><button class="${on ? 'on' : 'lock'}" data-i="${i}">${icon}<b>${a.name()}</b><small>${on ? t('achReplay') : a.hint()}</small></button></li>`;
   };
   const ghost = i => `<li class="ghosts">${[0, 1, 2, 3].map(() => `<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${CH_GLYPH[i]}</svg></span>`).join('')}</li>`;
-  $('#achList').innerHTML = head(0, true) + ACH.map(tile).join('') + [1, 2, 3, 4, 5, 6, 7].map(i => head(i, false) + ghost(i)).join('');
+  // 修行境界：每個境界一個圖示，到過就亮起來，點一下重播突破動畫
+  const RN = REALMS.filter((_, i) => achGot.has('realm:' + i)).length;
+  const realms = `<li class="chd" style="--c:${REALM_COL[2]}"><i class="gl">${realmSvg(2)}</i><span><b>${t('achRealms')}</b></span><em>${RN}/${REALMS.length}</em></li>`
+    + REALMS.map((name, i) => { const on = achGot.has('realm:' + i); return `<li><button class="${on ? 'on' : 'lock'}" data-r="${i}"><span class="ic realm" style="--c:${REALM_COL[i]}">${realmSvg(i, 1.6)}</span><b>${name}</b><small>${on ? t('achReplay') : t('realmNeedGeo', { n: NEED[i - 1] })}</small></button></li>`; }).join('');
+  $('#achList').innerHTML = head(0, true) + ACH.map(tile).join('') + realms + [1, 2, 3, 4, 5, 6, 7].map(i => head(i, false) + ghost(i)).join('');
 }
 $('#achBtn').addEventListener('click', () => { renderAch(); achEl.hidden = false; });
 achEl.addEventListener('click', e => {
   if (e.target.closest('.xbtn')) { achEl.hidden = true; return; }
+  const rb = e.target.closest('button[data-r]');
+  if (rb) { const i = +rb.dataset.r; if (!achGot.has('realm:' + i)) { sfx.deny(); rb.classList.remove('nope'); void rb.offsetWidth; rb.classList.add('nope'); return; } initAudio(); ascend(i, lookNow()); return; }
   const b = e.target.closest('button[data-i]'); if (!b) return;
   const a = ACH[+b.dataset.i];
   if (!achGot.has(a.id)) { sfx.deny(); b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); return; }   // 還沒達成：搖一下，提示就寫在格子裡
@@ -655,7 +664,7 @@ function breakthrough() {
   if (!xiuFull()) return;
   G.realm++; G.xiu = 0;
   // 全畫面突破動畫：阿流打坐、背後爆出四色宏光，收起後在世界裡再爆一次光
-  setTimeout(() => ascend(REALMS[G.realm], lookNow()).then(() => burst(P.x, P.y + 1.2, P.z, [1, 0.9, 0.5], 60, 7)), 300);
+  setTimeout(() => ascend(G.realm, lookNow()).then(() => burst(P.x, P.y + 1.2, P.z, [1, 0.9, 0.5], 60, 7)), 300);
 }
 function xiuLine() {
   if (G.realm >= NEED.length) return t('xiuMax', { realm: REALMS[G.realm] });
@@ -1935,4 +1944,4 @@ if (params.has('play') || params.has('at') || params.has('awake') || params.has(
     setTimeout(() => { pop(t('demoSet', { stage: t('demoStage')[cur - 1] }), 'gold'); setTimeout(() => toast(cur === 3 ? t('stage2Open', { realm: REALMS[REQ] }) : t('talesOpen')), 2200); }, 600);
   }
 }
-window.__game = { resonance, ending, GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter, bossFight, ascend: () => ascend(REALMS[1], lookNow()) };
+window.__game = { resonance, ending, GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter, bossFight, ascend: (i = 1) => ascend(i, lookNow()) };

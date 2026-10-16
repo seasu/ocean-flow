@@ -150,6 +150,29 @@ export const sfx = {
     if (!ctx) return; const t = ctx.currentTime, s = loop(sea.white, t), lp = ctx.createBiquadFilter(), g = ctx.createGain();
     lp.type = 'lowpass'; lp.frequency.value = 500; env(g, t, 0.01, 0.15, 0.3); s.connect(lp); lp.connect(g); g.connect(fx); s.stop(t + 0.4);
   },
+  // 突破動畫四段：打坐（低沉弦樂＋氣聲慢慢往上）→ 爆光（低頻重擊＋鋼片琴往上灑）→「突破」（大鐘）→ 境界圖示（明亮和弦）
+  ascend(step) {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    if (step === 'sit') {
+      strings([73.4, 110, 146.8], 2.2, 0.05);
+      const n = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
+      n.buffer = noiseBuffer(2, false); bp.type = 'bandpass'; bp.Q.value = 1.2;
+      bp.frequency.setValueAtTime(200, t); bp.frequency.exponentialRampToValueAtTime(2400, t + 1.5);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.07, t + 1.3); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.7);
+      n.connect(bp); bp.connect(g); g.connect(fx); n.start(t); n.stop(t + 1.8);
+    } else if (step === 'burst') {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(40, t + 0.6);
+      g.gain.setValueAtTime(0.35, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.8); o.connect(g); g.connect(fx); o.start(t); o.stop(t + 0.9);
+      this.purify(); strings([146.8, 220, 293.7, 370, 440], 3.5, 0.045);
+    } else if (step === 'word') {
+      this.bell(146.8);
+    } else if (step === 'icon') {
+      [587.3, 740, 880, 1174.7].forEach((f, i) => harp(f, 0.12, i * 0.04));
+      [1174.7, 1480, 1760].forEach((f, i) => celesta(f, 0.08, 0.12 + i * 0.1));
+    }
+  },
   purify() { [587.3, 740, 880, 1174.7, 1480].forEach((f, i) => celesta(f, 0.09, i * 0.07)); strings([293.7, 440, 587.3], 2.5, 0.04, 0.1); },
   // 片頭展開：氣聲往上掃開、弦樂和弦慢慢打開、豎琴往上刮奏，最後鋼片琴點亮——豁然開朗
   reveal() {

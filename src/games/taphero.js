@@ -10,7 +10,9 @@ export function taphero(A, { star, ease }) {
   const shielded = () => LV.shield && (A.time % 5) > 3.5;
   const info = () => A.info(A.t('secondsLeft', { n: Math.max(0, Math.ceil(S.time)) }));
   info();
-  const btn = () => { const a = A.lay.area, r = Math.min(56, a.w * 0.16); return { x: a.x + a.w / 2, y: a.y + a.h * 0.42, r }; };
+  // 點擊區跟畫符一樣是置中的方框，上方守門獸留出一樣的高度
+  const zone = () => { const a = A.lay.area, s = Math.min(a.w, a.h - 30) + 20; return { x: a.x + (a.w - s) / 2, y: a.y + (a.h - s) / 2, w: s, h: s }; };
+  const btn = () => { const a = zone(), r = Math.min(56, a.w * 0.16); return { x: a.x + a.w / 2, y: a.y + a.h * 0.42, r }; };
 
   function hit(x, y) {
     if (shielded()) { S.blockT = 0.4; S.nums.push({ x, y, t: 0, s: A.t('blocked'), crit: false }); S.combo = 0; A.sfx.dispel(); return; }
@@ -26,7 +28,7 @@ export function taphero(A, { star, ease }) {
   function claw() {
     if (shielded()) { S.blockT = 0.4; A.sfx.deny(); return; }
     S.power = 0; S.claw = 0.6; A.add(CLAW); A.shake(0.4);
-    const a = A.lay.area;
+    const a = zone();
     for (let i = 0; i < 3; i++) A.shoot(a.x + a.w * (0.3 + i * 0.2), a.y + a.h * 0.4, '#ffb35c');
     A.burst(btn().x, btn().y, '#ffb35c', 40, 300); A.sfx.purify(); A.buzz(60);
   }
@@ -35,7 +37,7 @@ export function taphero(A, { star, ease }) {
     revive() { S.time += 6; info(); },
     S, hit, claw, btn,
     down(x, y) {
-      const a = A.lay.area; if (y < a.y - 20) return;
+      const a = zone(); if (y < a.y - 20) return;
       const b = btn();
       if (S.power >= 1 && Math.hypot(x - b.x, y - b.y) < b.r + 10) return claw();
       hit(x, y);
@@ -52,10 +54,10 @@ export function taphero(A, { star, ease }) {
       if (S.time <= 0 && A.pur < 99.99) A.lose();
     },
     draw() {
-      const g = A.g, a = A.lay.area, b = btn(), T = A.time;
+      const g = A.g, a = zone(), b = btn(), T = A.time;
       g.textAlign = 'center'; g.textBaseline = 'middle';
       // 點擊區
-      g.fillStyle = 'rgba(8,14,26,.35)'; A.rr(a.x, a.y, a.w, a.h, 16); g.fill();
+      g.fillStyle = 'rgba(8,14,26,.5)'; A.rr(a.x, a.y, a.w, a.h, 18); g.fill();
       g.strokeStyle = 'rgba(255,179,92,.25)'; g.lineWidth = 2; g.setLineDash([6, 8]); g.stroke(); g.setLineDash([]);
       // 爆發條
       const bw = a.w * 0.7, bx = a.x + (a.w - bw) / 2, by = a.y + a.h - 28;

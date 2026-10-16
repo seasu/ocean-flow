@@ -265,8 +265,8 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #itemList{list-style:none;margin:0 auto;padding:0;width:100%;max-width:30em;display:grid;grid-template-columns:1fr 1fr;gap:12px}
 #itemList .ic.item{border-radius:22px;background:radial-gradient(circle,rgba(127,232,255,.18),rgba(127,232,255,.03) 70%);border-color:rgba(127,232,255,.6)}
 #itemList .ic.item svg{width:70px;height:70px}
-:is(#itemList,#stampList) .chd .gl{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--c);color:var(--c)}
-:is(#itemList,#stampList) .chd .gl svg{width:26px;height:26px}
+:is(#achList,#itemList,#stampList) .chd .gl{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--c);color:var(--c)}
+:is(#achList,#itemList,#stampList) .chd .gl svg{width:26px;height:26px}
 #itemPage .body{width:min(520px,100%);margin:0 auto;display:flex;flex-direction:column;gap:18px}
 #itemPage .hero{width:min(64vw,260px);aspect-ratio:1;margin:8px auto 0;padding:28px;border-radius:36px;background:radial-gradient(circle,rgba(127,232,255,.22),rgba(127,232,255,.02) 70%);border:2px solid rgba(127,232,255,.45);box-sizing:border-box}
 #itemPage .hero svg{width:100%;height:100%;filter:drop-shadow(0 8px 14px rgba(0,0,0,.45))}
@@ -344,6 +344,8 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 :is(#achList,#itemList,#stampList) .ic.n3{grid-template-columns:1fr 1fr;padding:10px}:is(#achList,#itemList,#stampList) .ic.n3 img{width:36px;height:36px}:is(#achList,#itemList,#stampList) .ic.n3 img:first-child{grid-column:1/3;justify-self:center}
 :is(#achList,#itemList,#stampList) .ic.n1{padding:8px}
 :is(#achList,#itemList,#stampList) .ic.book svg{width:46px;height:46px;color:var(--gold)}
+#achList .ic.realm{border-color:var(--c);background:radial-gradient(circle,color-mix(in srgb,var(--c) 26%,transparent),transparent 70%)}#achList .ic.realm svg{width:50px;height:50px;color:var(--c);filter:drop-shadow(0 0 6px var(--c))}
+#achList .lock .ic.realm{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.05)}
 :is(#achList,#itemList,#stampList) .chd{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:14px;padding-bottom:10px;border-bottom:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
 :is(#achList,#itemList,#stampList) .chd:first-child{margin-top:0}
 :is(#achList,#itemList,#stampList) .chd img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--c)}
@@ -711,14 +713,21 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 #ascend .flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,#fff,rgba(255,236,190,.6) 40%,transparent 75%);opacity:0;pointer-events:none}
 #ascend.hit .flash{animation:ascFlash 1s ease-out}
 @keyframes ascFlash{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
-#ascend .txt{position:absolute;left:0;right:0;bottom:calc(17% + var(--sb));text-align:center;opacity:0;transform:translateY(16px);pointer-events:none}
-#ascend.hit .txt{opacity:1;transform:none;transition:opacity .7s .5s,transform .7s .5s}
+#ascend::after{content:'';position:absolute;left:0;right:0;bottom:0;height:52%;background:linear-gradient(transparent,rgba(6,11,22,.88) 45%);opacity:0;pointer-events:none;transition:opacity .8s}#ascend.word::after{opacity:1}
+#ascend .txt{z-index:1;position:absolute;left:0;right:0;bottom:calc(11% + var(--sb));text-align:center;pointer-events:none}
+#ascend .txt>:is(small,h2){opacity:0;transform:translateY(16px)}
+#ascend.word .txt>:is(small,h2){opacity:1;transform:none;transition:opacity .6s,transform .6s cubic-bezier(.2,1.4,.4,1)}
 #ascend .txt small{display:block;font-size:16px;letter-spacing:.3em;color:#ffe9b0;font-weight:700}
 #ascend .txt h2{margin:6px 0 8px;font-size:clamp(64px,20vw,110px);font-weight:900;letter-spacing:.14em;line-height:1;color:#fff;
   background:linear-gradient(90deg,#ffa53a,#8fd14f,#ff8fbf,#a98bff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 4px 22px rgba(255,220,150,.45))}
+/* 境界圖示：「突破」之後才亮出來，圓框＋線條圖示，下面是境界名 */
+#ascend .badge{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px;opacity:0;transform:scale(.6)}
+#ascend.icon .badge{opacity:1;transform:none;transition:opacity .5s,transform .7s cubic-bezier(.2,1.5,.4,1)}
+#ascend .badge i{width:104px;height:104px;border-radius:50%;display:grid;place-items:center;color:var(--c);border:2px solid var(--c);background:radial-gradient(circle,color-mix(in srgb,var(--c) 30%,transparent),rgba(6,11,22,.6) 72%);box-shadow:0 0 28px color-mix(in srgb,var(--c) 60%,transparent)}
+#ascend .badge svg{width:60px;height:60px;filter:drop-shadow(0 0 6px var(--c))}
 #ascend .txt p{margin:0;font-size:22px;font-weight:900;color:#fff;letter-spacing:.1em;text-shadow:0 2px 12px rgba(0,0,0,.6)}
-#ascend .tap{position:absolute;left:0;right:0;bottom:calc(6% + var(--sb));text-align:center;font-size:16px;color:rgba(220,230,245,.7);opacity:0}
-#ascend.hit .tap{opacity:1;transition:opacity .5s 1.6s}
+#ascend .tap{z-index:1;position:absolute;left:0;right:0;bottom:calc(6% + var(--sb));text-align:center;font-size:16px;color:rgba(220,230,245,.7);opacity:0}
+#ascend.icon .tap{opacity:1;transition:opacity .5s .9s}
 /* 說明框出現時，後面的戰鬥畫面模糊壓暗，只看說明 */
 #battle:has(.msg.show)::before{content:"";position:absolute;inset:0;z-index:50;background:rgba(6,12,22,.5);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 #battle .msg{z-index:51}
