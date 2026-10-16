@@ -131,7 +131,7 @@ function parts(r, base, list, c, glow) {
   }
 }
 
-// a：{ phase, move(0..1), air, swim, t, wave }，和舊版 drawAvatar 一樣，之後可以直接替換
+// a：{ phase, move(0..1), air, swim, t, wave, dance, sit }，和舊版 drawAvatar 一樣，之後可以直接替換
 // look：{ head: 'goggles'|'phones', wrist: 'bracer', back: 'paddle'|'barrel' }（衣服用調色盤 c 換）
 export function drawAvatar2(r, c, x, y, z, yaw, a, glow = 0, look = {}) {
   const root = M.ident(); M.translate(root, x, y, z); M.rotY(root, yaw);
@@ -141,7 +141,8 @@ export function drawAvatar2(r, c, x, y, z, yaw, a, glow = 0, look = {}) {
   const breathe = Math.sin(a.t * 2) * 0.012;
   for (const s of [-1, 1]) {
     const m = M.copy(root); M.translate(m, s * 0.235, 0.86 + bob, 0);
-    if (a.dance) M.rotX(m, s * Math.sin(a.t * 12) * 0.35);
+    if (a.sit) { M.rotY(m, s * 0.45); M.rotX(m, -1.5); }   // 打坐：腿往前盤
+    else if (a.dance) M.rotX(m, s * Math.sin(a.t * 12) * 0.35);
     else M.rotX(m, a.air ? (s * 0.3 - 0.25) : a.swim ? Math.sin(a.t * 6 + s * 1.5) * 0.4 + 0.3 : s * sw);
     parts(r, m, LEG, c, glow);
   }
@@ -154,7 +155,8 @@ export function drawAvatar2(r, c, x, y, z, yaw, a, glow = 0, look = {}) {
   }
   for (const s of [-1, 1]) {
     const m = M.copy(body); M.translate(m, s * 0.69, 1.62, 0);
-    if (a.dance) M.rotZ(m, s * (2.5 + Math.sin(a.t * 12 + (s > 0 ? 0 : Math.PI)) * 0.45));
+    if (a.sit) { M.rotX(m, -0.55); M.rotZ(m, -s * 0.22); }   // 打坐：雙手放在膝上
+    else if (a.dance) M.rotZ(m, s * (2.5 + Math.sin(a.t * 12 + (s > 0 ? 0 : Math.PI)) * 0.45));
     else if (a.wave && s === 1) { M.rotZ(m, 2.6 + Math.sin(a.t * 8) * 0.3); }
     else if (a.air) { M.rotZ(m, s * 1.7); M.rotX(m, -0.3); }
     else if (a.swim) M.rotX(m, a.t * 5 + (s > 0 ? Math.PI : 0));

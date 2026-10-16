@@ -9,6 +9,7 @@ import { TALES } from './stories.js';
 import { quiz } from './quiz.js';
 import { t, lang, localize, applyStatic, DIRS } from './i18n.js';
 import { roar } from './roar.js';
+import { ascend } from './ascend.js';
 import { battle, replayVictory, MODS } from './battle.js';
 import { ITEMS, ITEM_OF, itemSVG } from './items.js';
 import { openCharLab } from './charlab.js';
@@ -653,11 +654,8 @@ function gainXiu(m) {
 function breakthrough() {
   if (!xiuFull()) return;
   G.realm++; G.xiu = 0;
-  setTimeout(() => {
-    pop(t('breakthrough', { realm: REALMS[G.realm] }), 'gold'); sfx.purify();
-    burst(P.x, P.y + 1.2, P.z, [1, 0.9, 0.5], 60, 7);
-    try { navigator.vibrate && navigator.vibrate([30, 40, 30, 40, 90]); } catch { }
-  }, 300);
+  // 全畫面突破動畫：阿流打坐、背後爆出四色宏光，收起後在世界裡再爆一次光
+  setTimeout(() => ascend(REALMS[G.realm], lookNow()).then(() => burst(P.x, P.y + 1.2, P.z, [1, 0.9, 0.5], 60, 7)), 300);
 }
 function xiuLine() {
   if (G.realm >= NEED.length) return t('xiuMax', { realm: REALMS[G.realm] });
@@ -1937,4 +1935,4 @@ if (params.has('play') || params.has('at') || params.has('awake') || params.has(
     setTimeout(() => { pop(t('demoSet', { stage: t('demoStage')[cur - 1] }), 'gold'); setTimeout(() => toast(cur === 3 ? t('stage2Open', { realm: REALMS[REQ] }) : t('talesOpen')), 2200); }, 600);
   }
 }
-window.__game = { resonance, ending, GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter, bossFight };
+window.__game = { resonance, ending, GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter, bossFight, ascend: () => ascend(REALMS[1], lookNow()) };
