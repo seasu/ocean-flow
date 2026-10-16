@@ -238,8 +238,8 @@ function draw(L) {
   const { w, h } = L, p = S.node.boss ? Math.min(1, (S.ph + S.pur / 100) / BOSS_PHASES.length) : Math.min(1, S.pur / 100), win = S.win ? Math.min(1, S.win / 1.2) : 0, T = S.t;
   g.clearRect(0, 0, w, h);
   const bg = g.createRadialGradient(L.ex, L.ey, 10, w / 2, h * 0.45, Math.max(w, h) * 0.8);
-  bg.addColorStop(0, `rgba(${lerp(40, 38, p)},${lerp(30, 82, p)},${lerp(70, 118, p)},.94)`);
-  bg.addColorStop(1, 'rgba(5,10,22,.97)');
+  bg.addColorStop(0, `rgba(${lerp(40, 38, p)},${lerp(30, 82, p)},${lerp(70, 118, p)},1)`);
+  bg.addColorStop(1, 'rgba(5,10,22,1)');
   g.fillStyle = bg; g.fillRect(0, 0, w, h);
   g.save();
   if (S.shake) g.translate((Math.random() - 0.5) * 12 * S.shake, (Math.random() - 0.5) * 12 * S.shake);
@@ -360,8 +360,18 @@ function drawBeast(L, spr, p, win, T) {
   if (tint.width !== px) { tint.width = tint.height = px; }
   tg.globalCompositeOperation = 'source-over'; tg.clearRect(0, 0, px, px); tg.drawImage(spr, 0, 0, px, px);
   tg.globalCompositeOperation = 'source-atop';
-  const murk = (1 - p) * 0.62 * (1 - win);
-  if (murk > 0.01) { tg.fillStyle = `rgba(34,18,58,${murk})`; tg.fillRect(0, 0, px, px); }
+  // 濁氣只纏在身上：一團團飄動的暗紫煙（只畫在角色的形狀內），淨化越多越少越淡，不再整片罩色
+  const murk = (1 - p) * (1 - win);
+  if (murk > 0.01) {
+    tg.fillStyle = `rgba(34,18,58,${murk * 0.18})`; tg.fillRect(0, 0, px, px);
+    const n = Math.ceil(9 * murk);
+    for (let i = 0; i < n; i++) {
+      const x = px * (0.5 + 0.32 * Math.sin(T * 0.5 + i * 2.1)), y = px * (0.2 + 0.08 * i + 0.05 * Math.sin(T * 0.8 + i)), r = px * (0.13 + 0.04 * Math.sin(T + i * 1.7));
+      const sm = tg.createRadialGradient(x, y, 0, x, y, r);
+      sm.addColorStop(0, `rgba(30,12,52,${0.75 * murk})`); sm.addColorStop(1, 'rgba(30,12,52,0)');
+      tg.fillStyle = sm; tg.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+  }
   if (S.hitT > 0.05) { tg.fillStyle = `rgba(255,255,255,${Math.min(0.5, S.hitT * 2)})`; tg.fillRect(0, 0, px, px); }
   if (win) { tg.fillStyle = `rgba(255,220,140,${0.35 * Math.sin(win * 3.14)})`; tg.fillRect(0, 0, px, px); }
   g.save(); g.translate(cx, cy + sz * 0.5); g.scale(1 + wob * 0.12, 1 - wob * 0.12); g.drawImage(tint, -sz / 2, -sz, sz, sz); g.restore();
