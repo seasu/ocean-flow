@@ -120,6 +120,7 @@ body:has(#quest:not(.min):not(.fold)) #card{opacity:0!important;pointer-events:n
 #act p{margin:0;font-size:16px;font-weight:700;color:#fff;line-height:1.35}
 #act button{flex:none;height:44px;padding:0 18px;border-radius:999px;font-size:16px;font-weight:800;color:#2a1a00;background:var(--gold);border:0}
 #act.show~#near{opacity:0}
+#hud:has(#guide.show) #near{opacity:0;pointer-events:none}
 #hud:has(#act.show) #guide{bottom:calc(244px + var(--sb))}
 #near .arrow{flex:none;width:32px;height:32px;border-radius:50%;background:rgba(255,207,90,.2);border:1.5px solid var(--gold);display:grid;place-items:center}
 #near .arrow i{width:12px;height:15px;background:var(--gold);clip-path:polygon(50% 0,100% 100%,50% 76%,0 100%);transition:transform .15s linear}
