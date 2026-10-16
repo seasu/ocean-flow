@@ -374,7 +374,7 @@ function renderRealms() {
   syncAch();
   const n = REALMS.filter((_, i) => achGot.has('realm:' + i)).length;
   $('#realmSub').textContent = G.geo ? t('achSub', { n, m: REALMS.length }) : t('spiritNoRec');
-  $('#realmList').innerHTML = REALMS.map((name, i) => { const on = achGot.has('realm:' + i); return `<li><button class="${on ? 'on' : 'lock'}" data-r="${i}"><span class="ic realm" style="--c:${REALM_COL[i]}">${realmVox(i)}</span><b>${name}</b><small>${on ? t('achReplay') : t('realmNeedGeo', { n: NEED[i - 1] })}</small></button></li>`; }).join('');
+  $('#realmList').innerHTML = REALMS.map((name, i) => { const on = achGot.has('realm:' + i); return `<li><button class="${on ? 'on' : 'lock'}" data-r="${i}"><span class="ic realm" style="--c:${REALM_COL[i]}">${realmVox(i)}</span><b>${name}</b><small>${on ? t('achReplay') : i ? t('realmNeedGeo', { n: NEED[i - 1] }) : t('realmStartHint')}</small></button></li>`; }).join('');
 }
 $('#realmAchBtn').addEventListener('click', () => { renderRealms(); realmEl.hidden = false; });
 realmEl.addEventListener('click', e => {
