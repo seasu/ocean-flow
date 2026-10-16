@@ -330,6 +330,8 @@ stampEl.addEventListener('click', e => {
 const ACH = [
   ...['elephant', 'tiger', 'leopard', 'lion'].map(id => ({ id: 'g:' + id, img: [id], live: () => NODES.find(n => n.id === id).awake, play: () => replayVictory(NODES.find(n => n.id === id)), name: () => t('achGate', { beast: t('beast_' + id) }), hint: () => t('achHintGate', { name: NODES.find(n => n.id === id).name }) })),
   { id: 'four', img: ['elephant', 'tiger', 'leopard', 'lion'], live: stage1Done, play: () => roar(t('resSub')), name: () => t('resonance'), hint: () => t('achHintFour') },
+  // 第二階：七隻守門街貓，各自淨化就各算一個成就
+  ...TALES.map(s => ({ id: 't:' + s.id, img: ['cat-' + s.id], live: () => visited.has(s.id), play: () => replayVictory({ id: s.id, name: s.name }), name: () => t('achGate', { beast: t('beast_' + s.id) }), hint: () => t('achHintCat', { name: s.name }) })),
   { id: 'tales', book: true, live: () => stage1Done() && TALES.every(s => visited.has(s.id)), play: () => roar(t('talesAllSub'), { kind: 'tales', title: t('talesAllTitle'), book: t('taipeiBook'), lamps: TALES.map(x => x.name) }), name: () => t('talesAllTitle'), hint: () => t('achHintTales') },
   { id: 'flows', img: ['dragon', 'turtle', 'bear'], live: () => S2.every(n => n.awake), play: () => roar(t('flowsSub'), { kind: 'flows', title: t('flowsUnite'), beasts: S2.map(n => n.id) }), name: () => t('flowsUnite'), hint: () => t('achHintFlows') },
   { id: 'boss', img: ['boss'], live: () => G.bossDone, play: () => replayVictory({ id: 'boss', boss: true, name: t('beast_boss') }), name: () => t('achBoss'), hint: () => t('achHintBoss') },
@@ -1961,4 +1963,4 @@ if (params.has('play') || params.has('at') || params.has('awake') || params.has(
     setTimeout(() => { pop(t('demoSet', { stage: t('demoStage')[cur - 1] }), 'gold'); setTimeout(() => toast(cur === 3 ? t('stage2Open', { realm: REALMS[REQ] }) : t('talesOpen')), 2200); }, 600);
   }
 }
-window.__game = { resonance, ending, GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter, bossFight, ascend: (i = 1) => ascend(i, lookNow()), taleFound: id => taleFound(TALES.find(s => s.id === id)) };
+window.__game = { resonance, ending, GATE, wilds, showCard, openGuide, cam, fight, gainXiu, G, P, cam, NODES, motes, input, awaken, doSense, SPOTS, geo, REAL, openRadar, encounter, bossFight, ascend: (i = 1) => ascend(i, lookNow()), visited, taleFound: id => taleFound(TALES.find(s => s.id === id)) };
