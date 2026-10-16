@@ -76,7 +76,7 @@ const S = {
   langLabel: ['語言', 'Language', '言語'],
   soundLabel: ['聲音', 'Sound', 'サウンド'],
   radarNudge: ['點這裡，打開現世雷達', 'Tap to open the real-world radar', 'ここをタップして現世レーダーへ'],
-  taleReal: ['{name}的故事在現世，走到現場就會開始', 'The story of {name} lives in the real world. Walk there to begin', '{name}の物語は現世に。現地へ行くと始まる'],
+  taleReal: ['守門的{cat}在現世的{name}，先去那裡觸發一次，之後在靈界也能挑戰', 'The guardian {cat} waits at {name} in the real world. Trigger it there once, then you can challenge it here too', '守り猫{cat}は現世の{name}に。一度そこで触れれば、霊界でも挑戦できる'],
   gateReal: ['{name}在現世的{place}，先去那裡觸發一次，之後在靈界也能開', '{name} awakens at {place} in the real world. Trigger it there once, then it opens here too', '{name}は現世の{place}に。一度そこで触れれば、霊界でも開く'],
   gateHere: ['{name}就在眼前', '{name} is right here', '{name}が目の前に'],
   gateGo: ['開啟靈門', 'Open the gate', '霊門を開く'],

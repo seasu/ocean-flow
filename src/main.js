@@ -1323,14 +1323,15 @@ function updateGame(dt) {
   // 靈界走走：走到靈界台北的故事光柱，就能讀故事
   if (!G.geo && !act && talesStage()) {
     const s = TALES.find(x => !visited.has(x.id) && Math.hypot(x.ipos[0] - P.x, x.ipos[2] - P.z) < 2.8);
-    if (s) act = { key: 'tale:' + s.id, text: t('taleHere', { name: s.name }), btn: t('taleRead'), fn: () => taleFound(s) };
+    if (s) act = { key: 'tale:' + s.id, text: t('gateHere', { name: t('beast_' + s.id) }), btn: t('enter'), fn: () => taleFound(s) };
   }
   // 現世：走進機緣範圍時，主畫面直接出現進入按鈕（不用先打開雷達）
   if (G.geo && !act) { const s = inRange(); if (s && s.id !== 'venue') act = { key: 'enc:' + s.id, text: t('encSensed', { name: s.name }), btn: t('enter'), fn: () => encounter(s) }; }
   // 現世修行：靈界的故事光柱只提示，要真的走到現場才會觸發（跟四道門一樣）
   if (G.geo && !act && talesStage()) {
     const s = TALES.find(x => !visited.has(x.id) && Math.hypot(x.ipos[0] - P.x, x.ipos[2] - P.z) < 2.8);
-    if (s) act = { key: 'taleReal:' + s.id, text: t('taleReal', { name: s.name }), btn: t('navBtn'), fn: () => openNav(s) };
+    if (s) act = taleMet.has(s.id) ? { key: 'tale:' + s.id, text: t('gateHere', { name: t('beast_' + s.id) }), btn: t('startFight'), fn: () => taleFight(s) }
+      : { key: 'taleReal:' + s.id, text: t('taleReal', { name: s.name, cat: t('beast_' + s.id) }), btn: t('navBtn'), fn: () => openNav(s) };
   }
   // 現世：300 公尺內有還沒去過的景點，主畫面主動提醒，附導航（不用打開雷達找）
   if (G.geo && !act) {
@@ -1747,27 +1748,36 @@ $('#dexClose').addEventListener('click', () => $('#dex').classList.remove('show'
 // 第二階：走到台北城市故事的地點，先讀故事（景點介紹），再跟守門的街貓打一場小遊戲；淨化了才收進圖鑑；七隻都淨化就開第三階
 const TALE_REWARD = 3;
 const TALE_STAR = { wufenpu: 1, cihcheng: 2, xinzhuang: 1, wanhua: 2, baoan: 2, zaichun: 2, shipai: 3 };
+// 跟四道門一樣：現世走到現場＝觸發機緣（瞬移到靈界的故事光柱、阿汐說故事、看景點介紹、開始挑戰）；
+// 現世觸發過一次之後，在靈界走到光柱也能直接挑戰；靈界走走則是碰到光柱就觸發
+const taleMet = new Set();
+const taleNode = s => ({ id: s.id, name: s.name, star: TALE_STAR[s.id] || 1, tale: true, photo: spotInfo(s.id)?.images?.[0]?.file });
 function taleFound(s) {
   sfx.pick(); setTimeout(() => sfx.pick(), 150);
+  if (G.geo) {
+    taleMet.add(s.id);
+    P.x = s.ipos[0]; P.z = s.ipos[2] + 4; P.y = P.ry = footGround(P.x, P.z) + 0.2; P.vy = 0; P.swim = false;
+    cam.yaw = Math.PI; cam.tx = P.x; cam.tz = P.z; cam.ty = P.y + 1.6;
+  }
   burst(P.x, P.y + 1.5, P.z, [1, 0.75, 0.6], 40, 5);
-  const photo = spotInfo(s.id)?.images?.[0]?.file;
-  const node = { id: s.id, name: s.name, star: TALE_STAR[s.id] || 1, tale: true, photo };
-  showCard(s.name, s.sub, s.text, s.lines.join('\n'), s.id, true, { label: t('startQuiz'), fn: () => {
-    G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show'); sfx.battle(true);
-    const rw = [t('rwLight', { n: TALE_REWARD }), t('rwTale', { name: s.name })];
-    battle(node, G.realm, REALMS[G.realm], rw).then(ok => {
-      sfx.battle(false); G.state = 'play'; $('#hud').classList.add('play', 'on');
-      if (!ok) { toast(t('taleRetry', { name: s.name })); return; }
-      xiDance();
-      visited.add(s.id); G.bonus += TALE_REWARD;
-      const card = () => showCard(s.name, s.sub, s.text, s.fact, s.id);
-      if (!talesDone()) { setTimeout(card, 400); return; }
-      // 七個故事都回來了：全畫面七個故事化成金球、匯成一本《台北誌》，收起後才看最後一則故事卡、告訴你下一階開了
-      setTimeout(() => roar(t('talesAllSub'), { kind: 'tales', title: t('talesAllTitle'), book: t('taipeiBook'), lamps: TALES.map(x => x.name) }).then(() => {
-        card(); setTimeout(() => toast(t('stage2Open', { realm: REALMS[REQ] })), 800);
-      }), 600);
-    });
-  } });
+  const card = () => showCard(s.name, t('chanceSub', { sub: s.sub }), s.text, t('challengeEm', { name: t('beast_' + s.id) }), s.id, true, { label: t('startFight'), fn: () => taleFight(s) });
+  if (G.geo) { G.state = 'talk'; say(s.lines, () => { G.state = 'play'; card(); }); } else card();
+}
+function taleFight(s) {
+  G.state = 'battle'; $('#hud').classList.remove('play', 'on'); $('#card').classList.remove('show'); sfx.battle(true);
+  const rw = [t('rwLight', { n: TALE_REWARD }), t('rwTale', { name: s.name })];
+  battle(taleNode(s), G.realm, REALMS[G.realm], rw).then(ok => {
+    sfx.battle(false); G.state = 'play'; $('#hud').classList.add('play', 'on');
+    if (!ok) { toast(t('taleRetry', { name: s.name })); return; }
+    xiDance();
+    visited.add(s.id); G.bonus += TALE_REWARD;
+    const card = () => showCard(s.name, s.sub, s.text, s.fact, s.id);
+    if (!talesDone()) { setTimeout(card, 400); return; }
+    // 七個故事都回來了：全畫面七個故事化成金球、匯成一本《台北誌》，收起後才看最後一則故事卡、告訴你下一階開了
+    setTimeout(() => roar(t('talesAllSub'), { kind: 'tales', title: t('talesAllTitle'), book: t('taipeiBook'), lamps: TALES.map(x => x.name) }).then(() => {
+      card(); setTimeout(() => toast(t('stage2Open', { realm: REALMS[REQ] })), 800);
+    }), 600);
+  });
 }
 
 function ending() {
