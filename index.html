@@ -404,6 +404,7 @@ html:not([lang^=zh]) #lore blockquote{font-size:17px;line-height:1.4}
 #spot .ph{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:18px;scrollbar-width:none;background:rgba(255,255,255,.06)}
 #spot .ph::-webkit-scrollbar{display:none}
 #spot .ph img{flex:none;width:100%;aspect-ratio:4/3;object-fit:cover;scroll-snap-align:center;max-width:none}
+@media (orientation:portrait){#spot .ph img{aspect-ratio:auto;height:50dvh}}
 #spot .ph:empty{aspect-ratio:16/7;background:radial-gradient(circle at 50% 40%,rgba(255,207,90,.25),rgba(255,255,255,.04) 60%)}
 #spot .dots{display:flex;justify-content:center;gap:6px;margin-top:10px;min-height:8px}
 #spot .dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);transition:transform .2s}
