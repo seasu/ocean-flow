@@ -1,7 +1,7 @@
 // 洋流世界觀：八個章節，像一本書一頁一頁翻開（設定 → 洋流世界觀）
 // 圖來自 docs/lore/eight-stages.png，切成 img/lore/ch0–7.jpg；中文文案來自專案的 world-chapters.md
 import { lang, t } from './i18n.js';
-import { realmSvg, REALM_COL } from './realmicon.js';
+import { realmVox } from './realmicon.js';
 
 export const CH = [
   { no: ['序章', 'Prologue', '序章'], name: ['起源', 'Origin', '起源'], sub: ['覺醒台灣', 'Awakening in Taiwan', '台湾の目覚め'],
@@ -88,7 +88,7 @@ const RQ = [
 const emblem = (k, now) => `<svg class="emblem${now ? ' now' : ''}" viewBox="0 0 200 200">${[...Array(5)].map((_, r) => {
   const on = r <= k, rad = 26 + r * 16;
   return `<circle cx="100" cy="100" r="${rad}" fill="none" stroke="${on ? (r === k ? '#ffcf5a' : '#7fe8ff') : 'rgba(255,255,255,.12)'}" stroke-width="${r === k ? 3.5 : 2}" ${on ? '' : 'stroke-dasharray="3 7"'} opacity="${on ? 1 - (k - r) * 0.12 : 1}"/>`;
-}).join('')}<g color="${REALM_COL[k]}">${realmSvg(k, 1.7, 'x="74" y="74" width="52" height="52" ')}</g></svg>`;
+}).join('')}${realmVox(k).replace('<svg ', '<svg x="68" y="68" width="64" height="64" ')}</svg>`;
 export function openRealms({ realms, need, now, geo }) {
   openBook(cover(t('realmKicker'), t('realmTitle'), t('realmIntro'), t('realmSwipe'))
     + realms.map((name, i) => `<section class="ch realm">${emblem(i, i === now)}

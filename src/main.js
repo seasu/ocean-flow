@@ -15,7 +15,7 @@ import { ITEMS, ITEM_OF, itemSVG } from './items.js';
 import { openCharLab } from './charlab.js';
 import { openLore, openRealms, openCast, CH } from './lore.js';
 import { VERSION } from './version.js';
-import { realmSvg, REALM_COL } from './realmicon.js';
+import { realmVox, REALM_COL } from './realmicon.js';
 
 applyStatic();
 
@@ -343,6 +343,7 @@ function syncAch() {
   // 修行境界：到過的境界都記下來（只在現世修行）
   if (G.geo && G.state !== 'title') for (let i = 0; i <= G.realm; i++) if (!achGot.has('realm:' + i)) { achGot.add('realm:' + i); add = true; }
   if (add) try { localStorage.setItem('of-ach', JSON.stringify([...achGot])); } catch { }
+  $('#realmN').textContent = `${REALMS.filter((_, i) => achGot.has('realm:' + i)).length}/${REALMS.length}`;
   $('#achN').textContent = `${ACH.filter(a => achGot.has(a.id)).length}/${ACH.length}`;
   $('#stampN').textContent = `${Object.keys(stamps).filter(k => STAMP_TXT[k]).length}/${Object.keys(STAMP_TXT).length}`;
 }
@@ -364,17 +365,27 @@ function renderAch() {
     return `<li><button class="${on ? 'on' : 'lock'}" data-i="${i}">${icon}<b>${a.name()}</b><small>${on ? t('achReplay') : a.hint()}</small></button></li>`;
   };
   const ghost = i => `<li class="ghosts">${[0, 1, 2, 3].map(() => `<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${CH_GLYPH[i]}</svg></span>`).join('')}</li>`;
-  // 修行境界：每個境界一個圖示，到過就亮起來，點一下重播突破動畫
-  const RN = REALMS.filter((_, i) => achGot.has('realm:' + i)).length;
-  const realms = `<li class="chd" style="--c:${REALM_COL[2]}"><i class="gl">${realmSvg(2)}</i><span><b>${t('achRealms')}</b></span><em>${RN}/${REALMS.length}</em></li>`
-    + REALMS.map((name, i) => { const on = achGot.has('realm:' + i); return `<li><button class="${on ? 'on' : 'lock'}" data-r="${i}"><span class="ic realm" style="--c:${REALM_COL[i]}">${realmSvg(i, 1.6)}</span><b>${name}</b><small>${on ? t('achReplay') : t('realmNeedGeo', { n: NEED[i - 1] })}</small></button></li>`; }).join('');
-  $('#achList').innerHTML = head(0, true) + ACH.map(tile).join('') + realms + [1, 2, 3, 4, 5, 6, 7].map(i => head(i, false) + ghost(i)).join('');
+  $('#achList').innerHTML = head(0, true) + ACH.map(tile).join('') + [1, 2, 3, 4, 5, 6, 7].map(i => head(i, false) + ghost(i)).join('');
 }
 $('#achBtn').addEventListener('click', () => { renderAch(); achEl.hidden = false; });
+// 修行境界：自己一頁，五個境界的圖示，到過就亮起來，點一下重播突破動畫；最後的歸流境佔整行
+const realmEl = $('#realmAch');
+function renderRealms() {
+  syncAch();
+  const n = REALMS.filter((_, i) => achGot.has('realm:' + i)).length;
+  $('#realmSub').textContent = G.geo ? t('achSub', { n, m: REALMS.length }) : t('spiritNoRec');
+  $('#realmList').innerHTML = REALMS.map((name, i) => { const on = achGot.has('realm:' + i); return `<li><button class="${on ? 'on' : 'lock'}" data-r="${i}"><span class="ic realm" style="--c:${REALM_COL[i]}">${realmVox(i)}</span><b>${name}</b><small>${on ? t('achReplay') : t('realmNeedGeo', { n: NEED[i - 1] })}</small></button></li>`; }).join('');
+}
+$('#realmAchBtn').addEventListener('click', () => { renderRealms(); realmEl.hidden = false; });
+realmEl.addEventListener('click', e => {
+  if (e.target.closest('.xbtn')) { realmEl.hidden = true; return; }
+  const b = e.target.closest('button[data-r]'); if (!b) return;
+  const i = +b.dataset.r;
+  if (!achGot.has('realm:' + i)) { sfx.deny(); b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); return; }
+  initAudio(); ascend(i, lookNow());
+});
 achEl.addEventListener('click', e => {
   if (e.target.closest('.xbtn')) { achEl.hidden = true; return; }
-  const rb = e.target.closest('button[data-r]');
-  if (rb) { const i = +rb.dataset.r; if (!achGot.has('realm:' + i)) { sfx.deny(); rb.classList.remove('nope'); void rb.offsetWidth; rb.classList.add('nope'); return; } initAudio(); ascend(i, lookNow()); return; }
   const b = e.target.closest('button[data-i]'); if (!b) return;
   const a = ACH[+b.dataset.i];
   if (!achGot.has(a.id)) { sfx.deny(); b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); return; }   // 還沒達成：搖一下，提示就寫在格子裡
@@ -804,6 +815,22 @@ const LAND = { x0: N, z0: N, x1: 0, z1: 0 };   // 陸地範圍，滿版地圖用
   for (let i = 0; i < N * N; i++) if (world.K[i] !== T.SEA) { const x = i % N, z = i / N | 0; LAND.x0 = Math.min(LAND.x0, x); LAND.x1 = Math.max(LAND.x1, x + 1); LAND.z0 = Math.min(LAND.z0, z); LAND.z1 = Math.max(LAND.z1, z + 1); }
   for (const kk of ['x0', 'z0']) LAND[kk] = Math.max(0, LAND[kk] - 4);
   for (const kk of ['x1', 'z1']) LAND[kk] = Math.min(N, LAND[kk] + 4);
+}
+// 境界光環：境界越高，阿流身邊的光越多層，每層是那個境界的顏色
+// 聚流：腰間繞圈的綠光；化流：腳下往上飄的橘色火苗；御流：斜斜轉的紫色光環；歸流：頭後金色光輪
+const AURA = ['#7fe8ff', '#7ee05a', '#ff9326', '#9a78ff', '#ffc22e'].map(c => [1, 3, 5].map(k => parseInt(c.slice(k, k + 2), 16) / 255));
+// glow=false：實心發光的小方塊（白天也看得出顏色）；glow=true：加亮那一輪，只畫歸流腳下的光圈
+function realmAura(glow) {
+  const k = G.realm || 0; if (k < 1 || G.state === 'title') return;
+  const T = G.t, x = P.x, y = P.ry, z = P.z;
+  if (glow) { if (k >= 4) r.box(x, y + 0.04, z, 2.2, 0.02, 2.2, AURA[4], 1, 0.18 + 0.06 * Math.sin(T * 2), T * 0.3); return; }
+  for (let i = 0; i < 6; i++) { const a = T * 1.6 + i * 1.047; r.box(x + Math.cos(a) * 0.95, y + 1.2 + Math.sin(T * 2 + i) * 0.15, z + Math.sin(a) * 0.95, 0.2, 0.2, 0.2, AURA[1], 0.55, 1, a); }
+  if (k >= 2) for (let i = 0; i < 9; i++) { const ph = (T * 0.55 + i / 9) % 1, a = i * 2.4 + T * 0.4, q = Math.sin(ph * Math.PI); r.box(x + Math.cos(a) * 0.6, y + ph * 2.6, z + Math.sin(a) * 0.6, 0.18 * q, 0.3 * q, 0.18 * q, AURA[2], 0.55, 1, a); }
+  if (k >= 3) for (let i = 0; i < 14; i++) { const a = -T * 2.2 + i * 0.449, cx = Math.cos(a) * 1.25, cz = Math.sin(a) * 1.25; r.box(x + cx, y + 1.3 + cz * 0.35, z + cz, 0.15, 0.15, 0.15, AURA[3], 0.55, 1, a); }
+  if (k >= 4) {
+    const fx = Math.sin(P.yaw), fz = Math.cos(P.yaw);
+    for (let i = 0; i < 16; i++) { const a = i * 0.3927 + T * 0.6, u = Math.cos(a) * 0.62; r.box(x - fx * 0.45 + fz * u, y + 2.55 + Math.sin(a) * 0.62, z - fz * 0.45 - fx * u, 0.14, 0.14, 0.14, AURA[4], 0.55, 1, a); }
+  }
 }
 function drawMini() {
   drawMap(mini, mg, false);
@@ -1821,6 +1848,7 @@ function frame(dt) {
   const pa = { phase: P.phase, move: P.move, air: !P.onGround && !P.swim, swim: P.swim, t: G.t };
   const lk = lookNow();
   drawAvatar2(r, lk.body === 'outfit' ? LIU2_OUTFIT : LIU2, P.x, P.ry, P.z, P.yaw, pa, G.state === 'ending' ? 0.3 : 0, lk);
+  realmAura(false);
   const xg = ground(XI.x, XI.z);
   const dn = G.t < (XI.danceEnd || 0), hop = dn ? Math.abs(Math.sin(G.t * 6)) * 0.45 : 0;
   drawAvatar2(r, XI2, XI.x, xg + hop, XI.z, dn ? XI.yaw + Math.sin(G.t * 3) * 1.2 : XI.yaw, { phase: 0, move: 0, air: false, swim: false, t: G.t + 1.3, wave: XI.wave, dance: dn });
@@ -1877,6 +1905,7 @@ function frame(dt) {
   }
   if (world.lamp) r.box(world.lamp[0], world.lamp[1], world.lamp[2], 30, 0.35, 0.7, [1, 0.95, 0.7], 1, 0.12 + s * 0.25, G.t * 0.9);
   for (const p of G.particles) r.box(p.x, p.y, p.z, 0.18, 0.18, 0.18, p.col, 1, Math.min(1, p.life), p.life * 4);
+  realmAura(true);
   guideTrail(); taleMarks();
   if (G.riding && P.swim) for (let i = 0; i < 3; i++) r.box(P.x + Math.sin(G.t * 7 + i * 2) * 0.6, WATER + 0.05, P.z + 0.6 + i * 0.7, 0.25, 0.05, 0.6, [0.8, 0.95, 1], 1, 0.5 - i * 0.12);
   r.blend(0);
