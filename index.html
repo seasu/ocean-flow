@@ -947,7 +947,7 @@ body:has(#dialog.show) #hud>*{opacity:0!important;pointer-events:none!important;
 </div>
 <script>
   // 開 app 第一個畫面就是影片入口：在主程式載入前就蓋上，避免先閃出主畫面
-  (() => { const q = new URLSearchParams(location.search); const app = matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches || navigator.standalone === true; const ua = navigator.userAgent, mobile = /iPhone|iPad|iPod|Android/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); if (!app && mobile && !['play', 'geo', 'nofilm', 'demo'].some(k => q.has(k))) document.getElementById('launch').classList.add('show'); })();
+  (() => { const q = new URLSearchParams(location.search); const app = matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches || navigator.standalone === true || !!window.Capacitor?.isNativePlatform?.(); const ua = navigator.userAgent, mobile = /iPhone|iPad|iPod|Android/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); if (!app && mobile && !['play', 'geo', 'nofilm', 'demo'].some(k => q.has(k))) document.getElementById('launch').classList.add('show'); })();
 </script>
 <script>
   // 手機上看不到主控台：程式出錯時在畫面底部顯示一行，方便回報

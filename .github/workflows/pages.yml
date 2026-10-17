@@ -23,6 +23,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # iOS／Android App 的熱更新包：App 啟動時讀 app-update/version.json，有新版就下載 zip
+      # 要在 stamp 之前做，App 內不需要網頁版的快取版本號
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build app update bundle
+        run: |
+          npm install --prefix app --omit=dev --no-audit --no-fund
+          node app/scripts/build-www.mjs "$RUNNER_TEMP/www"
+          node app/scripts/make-update.mjs "$RUNNER_TEMP/www" app-update "https://seasu.github.io/ocean-flow/app-update/"
+          rm -rf app/node_modules
       - name: Stamp module versions
         run: python3 tools/stamp-version.py
       - uses: actions/upload-pages-artifact@v3
