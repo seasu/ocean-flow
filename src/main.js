@@ -1049,7 +1049,8 @@ const wantFilm = !params.has('play') && !params.has('geo') && !params.has('nofil
 // ---------- 開場：點一下開始 ----------
 // 瀏覽器不讓影片自己有聲播放，要先有一次點擊；趁這一頁提示「加到主畫面」
 const launch = $('#launch'), A2HS_KEY = 'oceanflow.a2hsShown';
-const standalone = matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches || navigator.standalone === true;
+// iOS／Android App（Capacitor）也當成已安裝：不提示加到主畫面
+const standalone = matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches || navigator.standalone === true || !!window.Capacitor?.isNativePlatform?.();
 const ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const mobile = ios || /Android/.test(ua);
 let a2hsShown = false, installEvt = null;

@@ -1,0 +1,18 @@
+{
+  "appId": "io.github.seasu.oceanflow",
+  "appName": "洋流：起源",
+  "webDir": "www",
+  "backgroundColor": "#0a1018",
+  "ios": { "contentInset": "never", "backgroundColor": "#0a1018" },
+  "android": { "backgroundColor": "#0a1018" },
+  "plugins": {
+    "CapacitorUpdater": {
+      "autoUpdate": false,
+      "appReadyTimeout": 20000,
+      "autoDeleteFailed": true,
+      "autoDeletePrevious": true,
+      "resetWhenUpdate": true,
+      "statsUrl": ""
+    }
+  }
+}

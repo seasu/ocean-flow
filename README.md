@@ -250,7 +250,7 @@ v1.31 新增兩種小遊戲：記憶配對（五分埔先看一眼再翻牌；�
 
 | 項目 | 現在的 MVP | 未來要做的 |
 |---|---|---|
-| 定位與走路 | 手機網頁的 GPS，畫面關掉或切到背景就會停，走路距離容易漏算 | 開發成原生 App（iOS／Android），用背景定位和手機內建計步器（Apple 健康、Google Fit）精準記錄步數與距離 |
+| 定位與走路 | 手機網頁的 GPS，畫面關掉或切到背景就會停，走路距離容易漏算 | iOS／Android App 開發中（見 [docs/app.md](docs/app.md)），已改用背景定位；之後再加手機內建計步器（Apple 健康、Google Fit）精準記錄步數 |
 | 假定位 | 只用速度擋掉搭車、騎車 | 偵測模擬定位和越獄／root 的手機；交叉比對 GPS、步數、加速度；重要地點加上現場驗證，例如 QR Code 立牌、藍牙 beacon，或由店家掃碼 |
 | 使用者帳號 | 沒有帳號，紀錄存在這支手機的瀏覽器裡，換手機或清除資料就不見 | 建立帳號並雲端同步（可考慮串接市府「台北通」），一人一帳號，避免多開帳號刷信物 |
 | 紀錄防竄改 | 靈光、成就都存在瀏覽器，懂技術的人改得到 | 由伺服器驗證並保存開門、通關、取得物品等紀錄 |
@@ -303,6 +303,8 @@ npx http-server -p 8080 .
 
 合併到 `main` 後，`.github/workflows/pages.yml` 會發佈到 https://seasu.github.io/ocean-flow/ 。第一次使用前，要到 repo 的 Settings → Pages 把 Source 設為「GitHub Actions」。
 
+iOS／Android App 用 Capacitor 包同一份遊戲，由 `.github/workflows/app.yml` 在 GitHub Actions 建置、簽章並送 TestFlight／Google Play 內部測試；網頁部署時也會產生 App 的熱更新包，改遊戲內容不用重新上架。設定步驟見 [docs/app.md](docs/app.md)。
+
 ## 檔案
 
 - `index.html`：版面、HUD、片頭片尾
@@ -320,6 +322,8 @@ npx http-server -p 8080 .
 - `src/i18n.js`：繁中／英文／日文文案
 - `src/audio.js`：合成音效
 - `src/version.js`：版本號
+- `src/native.js`、`src/native-geo.js`：App 版入口（背景定位、熱更新），網頁版不會載入
+- `app/`：Capacitor App 的設定與建置腳本（說明見 `docs/app.md`）
 
 ## 概念片製作檔案
 
