@@ -320,6 +320,9 @@ npx http-server -p 8080 .
 - `src/i18n.js`：繁中／英文／日文文案
 - `src/audio.js`：合成音效
 - `src/version.js`：版本號
+- `CLAUDE.md`、`.claude/agents/`：AI 協作規則與 Developer／QA Agent
+- `docs/decisions/`：已確認的產品與技術決策
+- `docs/sprints/`：Roadmap 與每個 Sprint 的進度
 
 ## 概念片製作檔案
 
