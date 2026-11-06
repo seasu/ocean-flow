@@ -2,7 +2,7 @@
 
 - 目標：讓任何新的 session 只讀 repo 就能接手，並建立 Developer／QA 分工。不改遊戲程式。
 - 分支：`claude/project-thread-hq2oow`
-- PR：（開 PR 後填）
+- PR：https://github.com/seasu/ocean-flow/pull/128
 - 狀態：待驗收
 - 計畫文件：https://claude.ai/artifact/RV4DkrdrsK9iZkLx54bhiC
 
